@@ -12,6 +12,7 @@ isn't enough.
 
 import numpy as np
 
+from app.grading import feedback
 from app.grading.embedder import embed
 from app.grading.features import extract as extract_features
 from app.grading.model_store import load_model
@@ -31,9 +32,16 @@ def build_matrix(texts):
 
 
 def grade_text_submission(content, criteria):
-    """criteria: RubricCriterion rows. Returns {criterion_id: predicted_score}.
+    """criteria: RubricCriterion rows. Scores the text and writes the matching
+    commentary in one pass, so a stored score can never end up without feedback.
+
+    Returns {"scores": {criterion_id: score},
+             "feedback": {criterion_id: text},
+             "summary": str}
+
     The submission is featurised once and reused across every criterion's
-    model, since it's the same text being scored against each rubric line."""
+    model, since it's the same text being scored against each rubric line.
+    """
     missing = [c.name for c in criteria if load_model(c.id) is None]
     if missing:
         raise GradingError(f"No trained model for: {', '.join(missing)}")
@@ -47,4 +55,9 @@ def grade_text_submission(content, criteria):
         # Ridge predicts a continuous value; clamp it into the criterion's range
         # and round to whole points, which is how rubric scores are expressed.
         scores[criterion.id] = float(np.clip(round(raw), 0, payload["max_points"]))
-    return scores
+
+    return {
+        "scores": scores,
+        "feedback": {c.id: feedback.for_criterion(c, scores[c.id]) for c in criteria},
+        "summary": feedback.summary(criteria, scores),
+    }

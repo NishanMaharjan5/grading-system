@@ -4,6 +4,7 @@ from flask import Blueprint, current_app, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
+from app.grading import feedback as feedback_templates
 from app.grading.engine import GradingError, grade_text_submission
 from app.models import Grade, Rubric, Submission
 from app.security import login_required, require_role
@@ -18,7 +19,7 @@ def _auto_grade(submission, rubric):
     success it becomes 'ai_graded' with a Grade row per criterion; on any
     failure it becomes 'grading_failed' so a teacher can grade it by hand."""
     try:
-        scores = grade_text_submission(submission.content, rubric.criteria)
+        result = grade_text_submission(submission.content, rubric.criteria)
     except GradingError as e:
         current_app.logger.info("Auto-grade skipped for submission %s: %s", submission.id, e)
         submission.status = "grading_failed"
@@ -32,7 +33,13 @@ def _auto_grade(submission, rubric):
         return
 
     for criterion in rubric.criteria:
-        db.session.add(Grade(submission_id=submission.id, criterion_id=criterion.id, ai_score=scores[criterion.id]))
+        db.session.add(Grade(
+            submission_id=submission.id,
+            criterion_id=criterion.id,
+            ai_score=result["scores"][criterion.id],
+            ai_feedback=result["feedback"][criterion.id],
+        ))
+    submission.ai_summary = result["summary"]
     submission.status = "ai_graded"
     db.session.commit()
 
@@ -61,10 +68,12 @@ def _submission_to_dict(sub, *, for_teacher):
         "status": sub.status,
         "created_at": sub.created_at.isoformat() if sub.created_at else None,
         "final_total": float(sub.final_total) if sub.final_total is not None else None,
+        "final_summary": sub.final_summary,
         "grades": [_grade_to_dict(gr, include_ai=for_teacher) for gr in sub.grades],
     }
     if for_teacher:
         base["ai_total"] = float(sub.ai_total) if sub.ai_total is not None else None
+        base["ai_summary"] = sub.ai_summary
     return base
 
 
@@ -219,33 +228,52 @@ def review_submission(submission_id):
         if ungraded:
             return jsonify(detail=(f"No AI score to approve for: {', '.join(ungraded)}. "
                                    "Supply criterion_scores to grade by hand.")), 422
-        decisions = {c.id: (float(grades_by_criterion[c.id].ai_score), None, True) for c in criteria}
+        # Scores are unchanged, so the AI's wording still matches them exactly.
+        decisions = {
+            c.id: (float(grades_by_criterion[c.id].ai_score), grades_by_criterion[c.id].ai_feedback, True)
+            for c in criteria
+        }
+        summary = submission.ai_summary
     else:
         parsed, error = _parse_review_scores(raw_scores, criteria)
         if error:
             return jsonify(detail=error), 422
 
+        criteria_by_id = {c.id: c for c in criteria}
         decisions = {}
-        for criterion_id, (score, feedback) in parsed.items():
+        for criterion_id, (score, teacher_feedback) in parsed.items():
             existing = grades_by_criterion.get(criterion_id)
             ai_score = float(existing.ai_score) if existing is not None and existing.ai_score is not None else None
             accepted = None if ai_score is None else (score == ai_score)
-            decisions[criterion_id] = (score, feedback, accepted)
+            # Fall back to freshly generated wording rather than copying the AI's:
+            # if the teacher moved the score, the AI's sentence now describes a
+            # number that isn't on the page. Where the score is unchanged this
+            # regenerates the identical text anyway.
+            text = teacher_feedback if teacher_feedback is not None else \
+                feedback_templates.for_criterion(criteria_by_id[criterion_id], score)
+            decisions[criterion_id] = (score, text, accepted)
+
+        teacher_summary = body.get("summary")
+        if teacher_summary is not None and not isinstance(teacher_summary, str):
+            return jsonify(detail="summary must be a string"), 422
+        summary = teacher_summary if teacher_summary is not None else \
+            feedback_templates.summary(criteria, {cid: score for cid, (score, _) in parsed.items()})
 
     approved_at = datetime.now(timezone.utc)
     for criterion in criteria:
-        score, feedback, accepted = decisions[criterion.id]
+        score, text, accepted = decisions[criterion.id]
         grade = grades_by_criterion.get(criterion.id)
         if grade is None:
             # A grading_failed submission never got Grade rows -- create them now.
             grade = Grade(submission_id=submission.id, criterion_id=criterion.id)
             db.session.add(grade)
         grade.final_score = score
-        grade.final_feedback = feedback if feedback is not None else grade.ai_feedback
+        grade.final_feedback = text
         grade.ai_accepted = accepted
         grade.approved_by = teacher_id
         grade.approved_at = approved_at
 
+    submission.final_summary = summary
     submission.status = "approved"
     db.session.commit()
     return jsonify(_submission_to_dict(submission, for_teacher=True)), 200

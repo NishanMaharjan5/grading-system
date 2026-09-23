@@ -15,6 +15,12 @@ class Submission(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     content = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), nullable=False, default="submitted")
+
+    # Whole-submission commentary. Split the same way as ai_score/final_score on
+    # Grade: ai_summary is the engine's draft and is teacher-only, final_summary
+    # is what the teacher released and is the only one a student ever sees.
+    ai_summary = db.Column(db.Text, nullable=True)
+    final_summary = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
