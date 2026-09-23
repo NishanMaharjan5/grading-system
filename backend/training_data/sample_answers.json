@@ -1,0 +1,26 @@
+[
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "This essay argues that remote work increases employee productivity because it removes commute-related fatigue, gives workers control over their environment, and reduces office distractions, and each of these points is developed in the sections that follow.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Remote work is a thing that happens now and there are many opinions about it that people have.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "A 2023 Stanford study of 16,000 workers found a 13% productivity gain among remote employees, and a separate Gallup survey reported a 24% drop in reported burnout, both of which directly support the claim that remote work improves output.",
+    "score": 9
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Everyone knows remote work is better because people say so all the time and it just makes sense if you think about it.",
+    "score": 2
+  }
+]

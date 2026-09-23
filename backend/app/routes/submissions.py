@@ -1,13 +1,38 @@
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, current_app, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Rubric, Submission
+from app.grading.engine import GradingError, grade_text_submission
+from app.models import Grade, Rubric, Submission
 from app.security import login_required, require_role
 
 submissions_bp = Blueprint("submissions", __name__)
 
 MAX_CONTENT_LENGTH = 50_000
+
+
+def _auto_grade(submission, rubric):
+    """Best-effort: the submission itself is already committed either way. On
+    success it becomes 'ai_graded' with a Grade row per criterion; on any
+    failure it becomes 'grading_failed' so a teacher can grade it by hand."""
+    try:
+        scores = grade_text_submission(submission.content, rubric.criteria)
+    except GradingError as e:
+        current_app.logger.info("Auto-grade skipped for submission %s: %s", submission.id, e)
+        submission.status = "grading_failed"
+        db.session.commit()
+        return
+    except Exception:
+        current_app.logger.exception("Auto-grade failed for submission %s", submission.id)
+        db.session.rollback()
+        submission.status = "grading_failed"
+        db.session.commit()
+        return
+
+    for criterion in rubric.criteria:
+        db.session.add(Grade(submission_id=submission.id, criterion_id=criterion.id, ai_score=scores[criterion.id]))
+    submission.status = "ai_graded"
+    db.session.commit()
 
 
 def _grade_to_dict(grade, include_ai):
@@ -70,6 +95,10 @@ def create_submission():
     except IntegrityError:
         db.session.rollback()
         return jsonify(detail="You have already submitted for this rubric"), 409
+
+    # Code submissions are graded by a separate sandboxed test runner, not built yet
+    if rubric.type == "text":
+        _auto_grade(submission, rubric)
 
     return jsonify(_submission_to_dict(submission, for_teacher=False)), 201
 
