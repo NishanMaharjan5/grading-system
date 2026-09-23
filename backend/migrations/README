@@ -1,0 +1,52 @@
+Database migrations (Alembic via Flask-Migrate)
+===============================================
+
+The schema is owned by the migrations in versions/ -- NOT by db.create_all().
+Adding a column to a model does nothing to a real database until a migration
+exists and has been applied.
+
+All commands run from backend/ with FLASK_APP set:
+
+    export FLASK_APP=run.py
+
+First-time setup, or after pulling changes that touch app/models/:
+
+    ./venv/bin/flask db upgrade
+
+After changing a model (new column, new table, changed constraint):
+
+    ./venv/bin/flask db migrate -m "what changed"   # writes versions/<hash>_*.py
+    # READ the generated file before applying it -- autogenerate misses some
+    # things (notably CHECK constraint edits and column renames, which it
+    # records as a drop plus an add, losing the data in that column).
+    ./venv/bin/flask db upgrade
+
+Useful checks:
+
+    ./venv/bin/flask db current      # which revision this database is on
+    ./venv/bin/flask db history      # all revisions
+    ./venv/bin/flask db downgrade    # step back one revision
+    ./venv/bin/flask db migrate -m x # if it says "No changes in schema
+                                     # detected", the database matches the
+                                     # models -- a handy drift check
+
+Adopting an existing database
+-----------------------------
+A database that already has the tables (built with create_all() before
+migrations existed) must be marked as current rather than upgraded, or
+Alembic will try to CREATE tables that are already there:
+
+    ./venv/bin/flask db stamp head
+
+That is exactly how grading_system_dev was brought under Alembic: its schema
+was verified column-for-column, constraint-for-constraint against a database
+built from the baseline migration, then stamped.
+
+Note on the test database
+-------------------------
+The test scripts still build their schema with db.create_all() for speed, so
+they bypass migrations entirely. Those two paths are in sync as of the
+baseline revision (verified by diffing information_schema), but they can drift:
+if a migration is hand-edited so it no longer matches the models, the tests
+will not catch it. Running `flask db upgrade` against a scratch database and
+diffing is the way to confirm.
