@@ -21,6 +21,15 @@ class Grade(db.Model):
     final_score = db.Column(db.Numeric(6, 2), nullable=True)
     final_feedback = db.Column(db.Text, nullable=True)
 
+    # Did the teacher take the AI's number, or did they change it?
+    #   True  -> approved the AI's score unchanged
+    #   False -> teacher supplied a different score
+    #   None  -> there was no AI score to judge (grading_failed; graded by hand)
+    # Stored rather than derived from final_score == ai_score, because that
+    # comparison can't tell "agreed with the AI" apart from "there was no AI
+    # suggestion at all". This is the measure of whether the grader is useful.
+    ai_accepted = db.Column(db.Boolean, nullable=True)
+
     approved_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     approved_at = db.Column(db.DateTime(timezone=True), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
