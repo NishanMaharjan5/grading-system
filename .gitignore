@@ -1,0 +1,18 @@
+# Python / Flask backend
+backend/venv/
+__pycache__/
+*.pyc
+backend/instance/
+.pytest_cache/
+
+# Env files -- real secrets and DB URLs never get committed; .env.example does
+.env
+.env.*.local
+
+# Node / React frontend
+node_modules/
+dist/
+
+# OS / editor cruft
+.DS_Store
+*.log
