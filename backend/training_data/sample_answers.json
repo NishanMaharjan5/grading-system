@@ -22,5 +22,191 @@
     "criterion": "Evidence",
     "text": "Everyone knows remote work is better because people say so all the time and it just makes sense if you think about it.",
     "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Governments should regulate social media platforms because unchecked algorithmic amplification of harmful content poses a measurable risk to public health and democratic discourse.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "While free expression matters, social media companies' size and influence over public opinion now rival that of traditional media, and they should face comparable regulatory oversight.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Government regulation of social media is necessary specifically to address data privacy violations, even though content moderation should remain largely self-governed by platforms.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media should be regulated because it can be harmful to society.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "There are many pros and cons to government regulation of social media, but overall it seems like a good idea.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media companies have too much power and something needs to change.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media is a big part of modern life and governments have been discussing what to do about it.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "This essay will discuss social media regulation and look at different viewpoints.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media started in the early 2000s with platforms like Myspace and Friendster.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "There are many different social media platforms that people use every day for different purposes.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media should be regulated to prevent misinformation, though the exact methods are unclear.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "The government should step in because platforms have shown they can't moderate themselves effectively.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Some form of regulation is probably necessary, mainly to protect children from harmful content online.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Because social media companies profit from engagement-driven algorithms that spread misinformation, governments should regulate how those algorithms operate.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Data privacy abuses by social media platforms are widespread enough that stronger government regulation is justified.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Governments should regulate social media to curb the spread of harmful content aimed at minors.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "A 2021 Facebook whistleblower report revealed the company's own research showed Instagram worsened body image issues in 32% of teen girls surveyed, and the platform continued running the algorithm anyway.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Studies from the Pew Research Center found that 64% of extremist recruitment contacts documented by researchers originated on unmoderated social platforms, directly linking lax oversight to real-world radicalization.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "The EU's Digital Services Act, enacted in 2022, cut documented instances of illegal content on major platforms by a measurable margin within its first year, showing regulation can work in practice.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Research has shown that unregulated algorithmic feeds increase user engagement with divisive content, citing internal studies from major platforms themselves.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Several documented cases exist of foreign governments using social media ads to interfere in elections, which regulation could help prevent.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "A study found that teens who spend more than three hours a day on social media report higher rates of anxiety and depression.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Studies show that social media can be harmful to mental health.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Many experts agree that regulation would help reduce the spread of misinformation online.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Research has found a connection between social media use and various social problems.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Everyone knows social media causes problems in society today.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "It's obvious that these platforms need more oversight given everything that's happened.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "People have been talking about this issue for a long time now.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Social media is used by billions of people around the world every single day.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "I think social media regulation is an interesting topic to write about.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Twitter was founded in 2006 and has changed a lot each year.",
+    "score": 0
   }
 ]
