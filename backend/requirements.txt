@@ -20,6 +20,7 @@ httpcore==1.0.9
 httpx==0.28.1
 huggingface_hub==1.32.0
 idna==3.20
+iniconfig==2.3.0
 itsdangerous==2.2.0
 Jinja2==3.1.6
 joblib==1.6.0
@@ -34,9 +35,11 @@ numpy==2.4.6
 packaging==26.3
 pandas==3.0.6
 passlib==1.7.4
+pluggy==1.6.0
 psycopg2-binary==2.9.13
 pyasn1==0.6.4
 Pygments==2.21.0
+pytest==9.1.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.3
 python-jose==3.5.0
