@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Rubric, RubricCriterion, Submission
+from app.models import Rubric, RubricCriterion, Submission, TestCase
 from app.security import login_required, require_role
 
 rubrics_bp = Blueprint("rubrics", __name__)
@@ -11,14 +11,26 @@ rubrics_bp = Blueprint("rubrics", __name__)
 VALID_TYPES = {"text", "code"}
 
 
-def _criterion_to_dict(c):
-    return {
+def _test_case_to_dict(t):
+    return {"id": t.id, "stdin": t.stdin, "expected_output": t.expected_output, "position": t.position}
+
+
+def _criterion_to_dict(c, for_owner=True):
+    """Test cases are the answer key, so only the rubric's author sees them.
+    A student gets the criterion and its points, and learns which tests failed
+    from the feedback after grading."""
+    payload = {
         "id": c.id,
         "name": c.name,
         "description": c.description,
         "max_points": float(c.max_points),
         "position": c.position,
     }
+    if for_owner:
+        payload["test_cases"] = [_test_case_to_dict(t) for t in sorted(c.test_cases, key=lambda t: t.position)]
+    else:
+        payload["test_case_count"] = len(c.test_cases)
+    return payload
 
 
 def _rubric_to_dict(r, submission_count=None, for_owner=True):
@@ -47,11 +59,35 @@ def _rubric_to_dict(r, submission_count=None, for_owner=True):
         "created_by": r.created_by,
         "created_at": r.created_at.isoformat() if r.created_at else None,
         "total_points": float(r.total_points),
-        "criteria": [_criterion_to_dict(c) for c in sorted(r.criteria, key=lambda c: c.position)],
+        "criteria": [_criterion_to_dict(c, for_owner) for c in sorted(r.criteria, key=lambda c: c.position)],
     }
 
 
-def _parse_criteria(raw):
+def _parse_test_cases(raw, index, rubric_type):
+    """Returns (list_of_TestCase_kwargs, error_message)."""
+    if rubric_type != "code":
+        if raw:
+            return None, f"criteria[{index}].test_cases only apply to a rubric of type 'code'"
+        return [], None
+
+    if not isinstance(raw, list) or not raw:
+        return None, f"criteria[{index}].test_cases must list at least one test for a code rubric"
+
+    parsed = []
+    for j, case in enumerate(raw):
+        if not isinstance(case, dict):
+            return None, f"criteria[{index}].test_cases[{j}] must be an object"
+        expected = case.get("expected_output")
+        if not isinstance(expected, str):
+            return None, f"criteria[{index}].test_cases[{j}].expected_output is required"
+        stdin = case.get("stdin", "")
+        if not isinstance(stdin, str):
+            return None, f"criteria[{index}].test_cases[{j}].stdin must be text"
+        parsed.append({"stdin": stdin, "expected_output": expected, "position": j})
+    return parsed, None
+
+
+def _parse_criteria(raw, rubric_type="text"):
     """Validate the incoming criteria list. Returns (criteria_kwargs_list, error_message)."""
     if not isinstance(raw, list) or not raw:
         return None, "criteria must be a non-empty list"
@@ -73,13 +109,26 @@ def _parse_criteria(raw):
             return None, f"criteria[{i}].max_points must be a number"
         if max_points <= 0:
             return None, f"criteria[{i}].max_points must be greater than 0"
+        cases, case_error = _parse_test_cases(item.get("test_cases"), i, rubric_type)
+        if case_error:
+            return None, case_error
+
         parsed.append({
             "name": name,
             "description": (item.get("description") or "").strip(),
             "max_points": max_points,
             "position": i,
+            "test_cases": cases,
         })
     return parsed, None
+
+
+def _build_criterion(spec):
+    """spec comes from _parse_criteria; test_cases become child rows."""
+    cases = spec.pop("test_cases", [])
+    criterion = RubricCriterion(**spec)
+    criterion.test_cases = [TestCase(**case) for case in cases]
+    return criterion
 
 
 @rubrics_bp.post("")
@@ -96,7 +145,7 @@ def create_rubric():
     if rtype not in VALID_TYPES:
         return jsonify(detail="type must be 'text' or 'code'"), 422
 
-    criteria, err = _parse_criteria(body.get("criteria"))
+    criteria, err = _parse_criteria(body.get("criteria"), rtype)
     if err:
         return jsonify(detail=err), 422
 
@@ -104,7 +153,7 @@ def create_rubric():
         title=title, description=description, type=rtype,
         due_date=due_date, created_by=int(g.current_user["sub"]),
     )
-    rubric.criteria = [RubricCriterion(**c) for c in criteria]
+    rubric.criteria = [_build_criterion(c) for c in criteria]
 
     db.session.add(rubric)
     db.session.commit()
@@ -170,7 +219,7 @@ def update_rubric(rubric_id):
             return jsonify(detail="type must be 'text' or 'code'"), 422
         rubric.type = body["type"]
     if "criteria" in body:
-        criteria, err = _parse_criteria(body.get("criteria"))
+        criteria, err = _parse_criteria(body.get("criteria"), body.get("type", rubric.type))
         if err:
             return jsonify(detail=err), 422
         # Clear and flush before adding: assigning straight over the list makes
@@ -179,7 +228,7 @@ def update_rubric(rubric_id):
         # kept -- which is most edits (retitling, changing points).
         rubric.criteria.clear()
         db.session.flush()
-        rubric.criteria = [RubricCriterion(**c) for c in criteria]
+        rubric.criteria = [_build_criterion(c) for c in criteria]
 
     try:
         db.session.commit()

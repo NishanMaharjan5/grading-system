@@ -77,3 +77,35 @@ def summary(criteria, scores):
                          " -- focus your revision there first.")
 
     return " ".join(parts)
+
+
+# Enough of each output to see what went wrong, without pasting a whole file
+# into a grade.
+OUTPUT_EXCERPT = 200
+
+
+def _excerpt(text):
+    text = (text or "").strip()
+    if not text:
+        return "(nothing)"
+    if len(text) > OUTPUT_EXCERPT:
+        text = f"{text[:OUTPUT_EXCERPT]}…"
+    return repr(text) if "\n" not in text else f"\n      {text.replace(chr(10), chr(10) + '      ')}"
+
+
+def for_code_criterion(criterion, results):
+    """Which of this criterion's tests passed, and what went wrong with the
+    rest. Wrong answers show expected against actual; a crash or a timeout
+    says so instead, because there is no meaningful output to compare."""
+    passed = sum(1 for result in results if result["passed"])
+    total = len(results)
+
+    lines = [f"{criterion.name}: passed {passed} of {total} test{'' if total == 1 else 's'}."]
+    for number, result in enumerate(results, start=1):
+        if result["passed"]:
+            continue
+        lines.append(f"  Test {number}: {result['detail']}")
+        if result["outcome"] == "ok":  # ran fine, printed the wrong thing
+            lines.append(f"    expected: {_excerpt(result['expected'])}")
+            lines.append(f"    actual:   {_excerpt(result['actual'])}")
+    return "\n".join(lines)

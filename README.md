@@ -26,6 +26,20 @@ Feedback is template-based rather than model-generated: the scores come from a
 small model trained on few examples, and fluent prose on top of an uncertain
 number would sound more authoritative than the grade deserves.
 
+**Code submissions** (Python only) take a different path entirely: no model is
+involved. Each criterion carries stdin/stdout test cases, the submitted program
+is run against them in a subprocess, and the criterion is worth the fraction of
+its tests that pass. Wrong answers, crashes and timeouts are all ordinary
+grades; only the harness itself breaking sends a submission to `grading_failed`.
+
+**Read [backend/SANDBOX.md](backend/SANDBOX.md) before running this anywhere
+that matters.** Student code is contained by resource limits and interpreter
+patching, not by a container. The CPU, wall-clock, file-write and process
+limits are kernel-enforced and hold; the file-read, network and
+process-spawning guards are best-effort and a determined program gets past
+them. The grader runs as the same OS user as the server, which is the gap that
+matters most.
+
 ## Setup
 
 Requires Python 3.11, Node 20, and PostgreSQL 16.
@@ -101,11 +115,13 @@ destroyed live data.
 ```
 backend/
   app/
-    grading/     embedder, features, per-criterion model store, engine, feedback templates
-    models/      User, Rubric, RubricCriterion, Submission, Grade
+    grading/     embedder, features, model store, engine, feedback templates,
+                 code_runner + _sandbox_runner (the code path)
+    models/      User, Rubric, RubricCriterion, TestCase, Submission, Grade
     routes/      auth, rubrics, submissions (incl. the teacher review flow)
+  SANDBOX.md     what the code sandbox does and does not contain
   migrations/    Alembic; see migrations/README for the workflow
-  scripts/       train_grader.py, seed_demo_rubric.py
+  scripts/       train_grader.py, seed_demo_rubric.py, reset_dev_data.py
   tests/         pytest suite
   training_data/ labeled sample answers
 frontend/        React + Vite
@@ -120,8 +136,18 @@ frontend/        React + Vite
 - **Approval is final.** Re-approving returns 409 and there is no correction
   path for a mistaken approval; that would need a revise endpoint with an
   audit trail.
-- **Code submissions are not graded.** The rubric carries a `code` type, but
-  the sandboxed test runner does not exist yet — only the text path works.
+- **The code sandbox is not a real sandbox.** It raises the cost of
+  misbehaving rather than making it impossible, and student code runs as the
+  server's OS user. See [backend/SANDBOX.md](backend/SANDBOX.md) for exactly
+  what holds and what does not. Running the grader as a separate unprivileged
+  user is the smallest change that would close the worst gap.
+- **Memory is capped by polling, not by the kernel**, because macOS refuses to
+  set `RLIMIT_AS`/`DATA`/`RSS` at all. There is a ~100ms window in which a
+  program can exceed the cap before it is killed.
+- **Only Python submissions are supported**, and test cases compare stdout
+  only — no checking of exit codes, stderr, or files the program writes.
+- **Test cases have no visible/hidden distinction.** They are withheld from
+  students entirely, so a student cannot see any example before submitting.
 - **Tests build their schema from migrations, but `flask db migrate` is not
   run in CI**, so a model change with no matching revision would not be caught
   automatically.

@@ -371,3 +371,36 @@ details.card > summary {
   margin-top: 0.35rem;
   padding-left: 0;
 }
+
+/* code rubric test cases */
+.criterion-block {
+  border-top: 1px solid var(--line);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.criterion-block:first-of-type {
+  border-top: 0;
+}
+
+.test-cases {
+  margin: 0.5rem 0 0 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--line);
+}
+
+.test-case {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.test-case textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+}
+
+.test-case > button {
+  margin-top: 1.6rem;
+}

@@ -55,6 +55,10 @@ class RubricCriterion(db.Model):
 
     rubric = db.relationship("Rubric", back_populates="criteria")
     grades = db.relationship("Grade", back_populates="criterion")
+    test_cases = db.relationship(
+        "TestCase", back_populates="criterion",
+        cascade="all, delete-orphan", order_by="TestCase.position",
+    )
 
     def __repr__(self):
         return f"<RubricCriterion {self.id} {self.name!r} /{self.max_points}>"

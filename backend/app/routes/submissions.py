@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.grading import feedback as feedback_templates
-from app.grading.engine import GradingError, grade_text_submission
+from app.grading.engine import GradingError, grade_submission
 from app.models import Grade, Rubric, Submission
 from app.security import login_required, require_role
 
@@ -19,7 +19,7 @@ def _auto_grade(submission, rubric):
     success it becomes 'ai_graded' with a Grade row per criterion; on any
     failure it becomes 'grading_failed' so a teacher can grade it by hand."""
     try:
-        result = grade_text_submission(submission.content, rubric.criteria)
+        result = grade_submission(rubric, submission.content)
     except GradingError as e:
         current_app.logger.info("Auto-grade skipped for submission %s: %s", submission.id, e)
         submission.status = "grading_failed"
@@ -108,9 +108,7 @@ def create_submission():
         db.session.rollback()
         return jsonify(detail="You have already submitted for this rubric"), 409
 
-    # Code submissions are graded by a separate sandboxed test runner, not built yet
-    if rubric.type == "text":
-        _auto_grade(submission, rubric)
+    _auto_grade(submission, rubric)
 
     return jsonify(_submission_to_dict(submission, for_teacher=False)), 201
 

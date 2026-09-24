@@ -3,7 +3,8 @@ import { useState } from "react";
 import { ApiError } from "../api/client";
 import { fieldErrorsFromDetail, rubricsApi } from "../api/rubrics";
 
-const blankCriterion = () => ({ name: "", max_points: "" });
+const blankCriterion = () => ({ name: "", max_points: "", test_cases: [] });
+const blankTestCase = () => ({ stdin: "", expected_output: "" });
 
 /**
  * Create/edit form for a rubric and its criteria.
@@ -19,8 +20,13 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
+  const [type, setType] = useState(initial?.type ?? "text");
   const [criteria, setCriteria] = useState(
-    initial?.criteria?.map((c) => ({ name: c.name, max_points: String(c.max_points) })) ?? [blankCriterion()],
+    initial?.criteria?.map((c) => ({
+      name: c.name,
+      max_points: String(c.max_points),
+      test_cases: (c.test_cases ?? []).map((t) => ({ stdin: t.stdin, expected_output: t.expected_output })),
+    })) ?? [blankCriterion()],
   );
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -29,6 +35,17 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
 
   function updateCriterion(index, field, value) {
     setCriteria(criteria.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  }
+
+  function updateTestCase(criterionIndex, caseIndex, field, value) {
+    setCriteria(criteria.map((row, i) => (i !== criterionIndex ? row : {
+      ...row,
+      test_cases: row.test_cases.map((c, j) => (j === caseIndex ? { ...c, [field]: value } : c)),
+    })));
+  }
+
+  function setTestCases(criterionIndex, next) {
+    setCriteria(criteria.map((row, i) => (i === criterionIndex ? { ...row, test_cases: next } : row)));
   }
 
   function validate() {
@@ -54,6 +71,11 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
       if (row.max_points === "" || Number.isNaN(points)) rowErrors.max_points = "Enter a number.";
       else if (points <= 0) rowErrors.max_points = "Must be greater than 0.";
 
+      // A code criterion is graded purely by its tests, so it needs at least one.
+      if (type === "code" && row.test_cases.length === 0) {
+        rowErrors.test_cases = "Add at least one test case.";
+      }
+
       if (Object.keys(rowErrors).length) found.criteria[index] = rowErrors;
     });
 
@@ -76,8 +98,12 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
       const payload = {
         title: title.trim(),
         description: description.trim(),
-        type: "text",
-        criteria: criteria.map((row) => ({ name: row.name.trim(), max_points: Number(row.max_points) })),
+        type,
+        criteria: criteria.map((row) => ({
+          name: row.name.trim(),
+          max_points: Number(row.max_points),
+          ...(type === "code" ? { test_cases: row.test_cases } : {}),
+        })),
       };
       const saved = editing
         ? await rubricsApi.update(initial.id, payload)
@@ -120,6 +146,18 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
         </p>
       )}
 
+      <label htmlFor="rubric-type">Type</label>
+      <select
+        id="rubric-type"
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        disabled={editing}
+      >
+        <option value="text">Written answer — graded by the text model</option>
+        <option value="code">Python code — graded by running test cases</option>
+      </select>
+      {editing && <p className="hint">A rubric's type cannot be changed after it is created.</p>}
+
       <label htmlFor="rubric-description">Description (optional)</label>
       <textarea
         id="rubric-description"
@@ -137,7 +175,8 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
         )}
 
         {criteria.map((row, index) => (
-          <div className="criterion-row" key={index}>
+          <div className="criterion-block" key={index}>
+            <div className="criterion-row">
             <div className="criterion-row__field">
               <label htmlFor={`criterion-name-${index}`}>Name</label>
               <input
@@ -176,6 +215,57 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
             >
               Remove
             </button>
+            </div>
+
+            {type === "code" && (
+              <div className="test-cases">
+                <p className="hint">
+                  Each test runs the program with the given input and compares what it prints.
+                  Trailing spaces and blank lines at the ends are ignored; everything else must match.
+                </p>
+                {criterionError(index, "test_cases") && (
+                  <p className="field-error">{criterionError(index, "test_cases")}</p>
+                )}
+
+                {row.test_cases.map((testCase, caseIndex) => (
+                  <div className="test-case" key={caseIndex}>
+                    <div className="criterion-row__field">
+                      <label htmlFor={`stdin-${index}-${caseIndex}`}>Input (stdin)</label>
+                      <textarea
+                        id={`stdin-${index}-${caseIndex}`}
+                        rows={2}
+                        value={testCase.stdin}
+                        onChange={(e) => updateTestCase(index, caseIndex, "stdin", e.target.value)}
+                      />
+                    </div>
+                    <div className="criterion-row__field">
+                      <label htmlFor={`expected-${index}-${caseIndex}`}>Expected output</label>
+                      <textarea
+                        id={`expected-${index}-${caseIndex}`}
+                        rows={2}
+                        value={testCase.expected_output}
+                        onChange={(e) => updateTestCase(index, caseIndex, "expected_output", e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="button--plain"
+                      onClick={() => setTestCases(index, row.test_cases.filter((_, j) => j !== caseIndex))}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  className="button--plain"
+                  onClick={() => setTestCases(index, [...row.test_cases, blankTestCase()])}
+                >
+                  + Add test case
+                </button>
+              </div>
+            )}
           </div>
         ))}
 

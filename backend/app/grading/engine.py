@@ -13,6 +13,7 @@ isn't enough.
 import numpy as np
 
 from app.grading import feedback
+from app.grading.code_runner import run_test_cases
 from app.grading.embedder import embed
 from app.grading.features import extract as extract_features
 from app.grading.model_store import load_model
@@ -61,3 +62,32 @@ def grade_text_submission(content, criteria):
         "feedback": {c.id: feedback.for_criterion(c, scores[c.id]) for c in criteria},
         "summary": feedback.summary(criteria, scores),
     }
+
+
+def grade_code_submission(content, criteria):
+    """Runs the submitted program against each criterion's test cases.
+
+    A criterion is worth the fraction of its tests the program passes. Failing
+    tests -- wrong output, a crash, a timeout -- are a grade, not a grading
+    failure; only the harness breaking raises (CodeRunnerError), which the
+    caller turns into grading_failed so a teacher grades by hand.
+    """
+    untestable = [c.name for c in criteria if not c.test_cases]
+    if untestable:
+        raise GradingError(f"No test cases defined for: {', '.join(untestable)}")
+
+    scores, texts = {}, {}
+    for criterion in criteria:
+        results = run_test_cases(content, list(criterion.test_cases))
+        passed = sum(1 for result in results if result["passed"])
+        scores[criterion.id] = round(passed / len(results) * float(criterion.max_points), 2)
+        texts[criterion.id] = feedback.for_code_criterion(criterion, results)
+
+    return {"scores": scores, "feedback": texts, "summary": feedback.summary(criteria, scores)}
+
+
+def grade_submission(rubric, content):
+    """Picks the engine that fits the rubric."""
+    if rubric.type == "code":
+        return grade_code_submission(content, list(rubric.criteria))
+    return grade_text_submission(content, list(rubric.criteria))

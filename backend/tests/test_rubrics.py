@@ -11,13 +11,24 @@ class TestCreate:
         assert all(c["id"] for c in rubric["criteria"])
 
     def test_creates_a_code_rubric(self, client, auth, teacher):
+        """A code criterion needs test cases -- without them there is nothing to
+        grade against. See test_code_grading.py for the rejection case."""
         response = client.post(
             "/api/rubrics",
-            json={"title": "Sum two numbers", "type": "code", "criteria": [{"name": "Tests pass", "max_points": 10}]},
+            json={
+                "title": "Sum two numbers",
+                "type": "code",
+                "criteria": [{
+                    "name": "Adds correctly",
+                    "max_points": 10,
+                    "test_cases": [{"stdin": "2 3", "expected_output": "5"}],
+                }],
+            },
             headers=auth(teacher),
         )
-        assert response.status_code == 201
+        assert response.status_code == 201, response.get_json()
         assert response.get_json()["type"] == "code"
+        assert len(response.get_json()["criteria"][0]["test_cases"]) == 1
 
     def test_a_student_cannot_create_one(self, client, auth, student):
         response = client.post(
