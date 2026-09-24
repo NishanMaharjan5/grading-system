@@ -6,6 +6,8 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
+import ReviewQueue from "./pages/ReviewQueue";
+import ReviewSubmission from "./pages/ReviewSubmission";
 import StudentDashboard from "./pages/StudentDashboard";
 import SubmissionView from "./pages/SubmissionView";
 import SubmitWork from "./pages/SubmitWork";
@@ -76,6 +78,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute role="teacher">
               <TeacherDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/review"
+          element={
+            <ProtectedRoute role="teacher">
+              <ReviewQueue />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/review/:submissionId"
+          element={
+            <ProtectedRoute role="teacher">
+              <ReviewSubmission />
             </ProtectedRoute>
           }
         />

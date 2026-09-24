@@ -306,3 +306,68 @@ details.card > summary {
 .criteria-summary li {
   margin-bottom: 0.35rem;
 }
+
+/* review queue + form */
+.shell__nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: 1rem;
+  font-size: 0.9rem;
+}
+
+.shell__nav a {
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.shell__nav a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.submitted-preview {
+  font-size: 0.9rem;
+  color: var(--fg);
+  margin: 0.5rem 0 0;
+}
+
+.accept-all {
+  border-color: var(--accent);
+}
+
+.accept-all button {
+  margin-top: 0.5rem;
+}
+
+/* The card is a flex item of the form, but its own children still flow
+   inline -- without this the score label, input and feedback box collide. */
+.criterion-review {
+  display: flex;
+  flex-direction: column;
+}
+
+.criterion-review label {
+  margin-top: 0.75rem;
+}
+
+.criterion-review input[type="number"] {
+  max-width: 8rem;
+}
+
+.ai-suggestion {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  background: #f5f8ff;
+  border-radius: 0 4px 4px 0;
+}
+
+.ai-suggestion__head {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ai-suggestion button {
+  margin-top: 0.35rem;
+  padding-left: 0;
+}

@@ -6,7 +6,35 @@ export const submissionsApi = {
   list: (options) => api.get("/api/submissions", options),
   get: (id, options) => api.get(`/api/submissions/${id}`, options),
   create: (rubricId, content) => api.post("/api/submissions", { rubric_id: rubricId, content }),
+  pending: (options) => api.get("/api/submissions/pending", options),
+  /** Empty body approves the AI's suggestion untouched; a payload overrides it. */
+  review: (id, payload) => api.put(`/api/submissions/${id}/review`, payload ?? {}),
 };
+
+/**
+ * Maps one backend `detail` string back onto the score inputs.
+ *
+ * The API reports the first problem it finds, e.g.
+ * "criterion_scores[1].final_score 99 is outside 0..5 for 'Evidence'". The
+ * index refers to the array that was sent, so criterion_scores must be built
+ * in the same order the inputs are rendered for this to point at the right row.
+ */
+export function reviewErrorsFromDetail(detail, criteriaOrder = []) {
+  if (!detail) return { form: "Something went wrong." };
+
+  const indexed = /^criterion_scores\[(\d+)\]\.?(\w+)?/.exec(detail);
+  if (indexed) {
+    const [, index, field] = indexed;
+    const criterionId = criteriaOrder[Number(index)];
+    if (criterionId !== undefined) {
+      return { criteria: { [criterionId]: { [field === "final_feedback" ? "feedback" : "score"]: detail } } };
+    }
+  }
+
+  if (/^Every criterion needs/.test(detail)) return { form: detail };
+  if (/^No AI score to approve/.test(detail)) return { form: detail };
+  return { form: detail };
+}
 
 /**
  * What a student is told about each status.

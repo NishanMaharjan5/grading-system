@@ -6,7 +6,7 @@ export FLASK_APP := run.py
 # so never point it at a database holding anything you want to keep.
 export TEST_DATABASE_URL ?= postgresql+psycopg2://grading_test:testpass@localhost:5432/grading_system_test
 
-.PHONY: test test-fast migrate upgrade run train
+.PHONY: test test-fast migrate upgrade run train reset-dev
 
 test:  ## run the whole test suite against the test database
 	DATABASE_URL="$(TEST_DATABASE_URL)" JWT_SECRET=test-secret $(VENV)/pytest
@@ -25,3 +25,6 @@ run:  ## start the dev server
 
 train:  ## retrain the per-criterion models from training_data/sample_answers.json
 	$(VENV)/python scripts/train_grader.py
+
+reset-dev:  ## wipe the dev database and re-seed the demo rubric (destructive; dry-run without CONFIRM=1)
+	$(VENV)/python scripts/reset_dev_data.py $(if $(CONFIRM),--yes,)
