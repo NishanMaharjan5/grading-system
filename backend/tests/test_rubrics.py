@@ -67,6 +67,57 @@ class TestRead:
         assert response.status_code == 200
         assert [r["id"] for r in response.get_json()] == [rubric["id"]]
 
+    def test_a_teacher_sees_only_their_own(self, client, auth, teacher, other_teacher, rubric):
+        client.post(
+            "/api/rubrics",
+            json={"title": "Someone else's", "type": "text", "criteria": [{"name": "C", "max_points": 1}]},
+            headers=auth(other_teacher),
+        )
+        mine = client.get("/api/rubrics", headers=auth(teacher)).get_json()
+        assert [r["id"] for r in mine] == [rubric["id"]]
+
+    def test_a_student_still_sees_every_rubric(self, client, auth, student, other_teacher, rubric):
+        client.post(
+            "/api/rubrics",
+            json={"title": "Another", "type": "text", "criteria": [{"name": "C", "max_points": 1}]},
+            headers=auth(other_teacher),
+        )
+        assert len(client.get("/api/rubrics", headers=auth(student)).get_json()) == 2
+
+
+class TestLockedFlag:
+    def test_an_untouched_rubric_is_unlocked(self, client, auth, teacher, rubric):
+        listed = client.get("/api/rubrics", headers=auth(teacher)).get_json()[0]
+        assert listed["locked"] is False
+        assert listed["submission_count"] == 0
+
+    def test_a_submission_locks_it(self, client, auth, teacher, student, submit, rubric):
+        submit(student)
+        listed = client.get("/api/rubrics", headers=auth(teacher)).get_json()[0]
+        assert listed["locked"] is True
+        assert listed["submission_count"] == 1
+
+    def test_the_count_rises_with_each_submission(self, client, auth, teacher, student, other_student, submit):
+        submit(student)
+        submit(other_student)
+        assert client.get("/api/rubrics", headers=auth(teacher)).get_json()[0]["submission_count"] == 2
+
+    def test_the_single_rubric_view_reports_it_too(self, client, auth, teacher, student, submit, rubric):
+        submit(student)
+        body = client.get(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).get_json()
+        assert body["locked"] is True
+        assert body["submission_count"] == 1
+
+    def test_locked_matches_what_editing_actually_does(self, client, auth, teacher, student, submit, rubric):
+        """The flag has to agree with the 409, or the UI disables the wrong thing."""
+        assert client.get(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).get_json()["locked"] is False
+        assert client.put(f"/api/rubrics/{rubric['id']}", json={"title": "ok"}, headers=auth(teacher)).status_code == 200
+
+        submit(student)
+        assert client.get(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).get_json()["locked"] is True
+        assert client.put(f"/api/rubrics/{rubric['id']}", json={"title": "no"}, headers=auth(teacher)).status_code == 409
+        assert client.delete(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).status_code == 409
+
     def test_a_student_can_read_one(self, client, auth, student, rubric):
         assert client.get(f"/api/rubrics/{rubric['id']}", headers=auth(student)).status_code == 200
 
@@ -92,6 +143,46 @@ class TestUpdate:
         )
         assert response.status_code == 200
         assert response.get_json()["total_points"] == 7.0
+
+    def test_can_edit_while_keeping_a_criterion_name(self, client, auth, teacher, rubric):
+        """The ordinary edit: change something else and resend the same criteria.
+        Assigning over the list inserts before deleting, so the unique
+        (rubric_id, name) constraint used to reject this with a 400."""
+        response = client.put(
+            f"/api/rubrics/{rubric['id']}",
+            json={
+                "title": "Essay 1 (revised)",
+                "criteria": [
+                    {"name": "Thesis", "max_points": 5},      # unchanged name
+                    {"name": "Evidence", "max_points": 12},   # unchanged name, new points
+                ],
+            },
+            headers=auth(teacher),
+        )
+        assert response.status_code == 200, response.get_json()
+        assert response.get_json()["total_points"] == 17.0
+        assert [c["name"] for c in response.get_json()["criteria"]] == ["Thesis", "Evidence"]
+
+    def test_resending_identical_criteria_is_accepted(self, client, auth, teacher, rubric):
+        response = client.put(
+            f"/api/rubrics/{rubric['id']}",
+            json={"criteria": [{"name": c["name"], "max_points": c["max_points"]} for c in rubric["criteria"]]},
+            headers=auth(teacher),
+        )
+        assert response.status_code == 200, response.get_json()
+        assert response.get_json()["total_points"] == 15.0
+
+    def test_editing_leaves_no_orphaned_criteria(self, client, auth, teacher, rubric):
+        from app.extensions import db
+        from app.models import RubricCriterion
+
+        client.put(
+            f"/api/rubrics/{rubric['id']}",
+            json={"criteria": [{"name": "Thesis", "max_points": 5}]},
+            headers=auth(teacher),
+        )
+        remaining = db.session.query(RubricCriterion).filter_by(rubric_id=rubric["id"]).all()
+        assert [c.name for c in remaining] == ["Thesis"]
 
     def test_another_teacher_cannot_edit(self, client, auth, other_teacher, rubric):
         response = client.put(f"/api/rubrics/{rubric['id']}", json={"title": "Mine now"},

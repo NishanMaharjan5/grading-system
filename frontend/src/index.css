@@ -166,3 +166,108 @@ button:disabled {
 .kv dd {
   margin: 0;
 }
+
+/* rubric list + form */
+.page__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page__head button {
+  margin-top: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.row button {
+  margin-top: 0;
+}
+
+.field-error {
+  margin: 0.15rem 0 0;
+  color: var(--error-fg);
+  font-size: 0.8rem;
+}
+
+input[aria-invalid="true"] {
+  border-color: var(--error-fg);
+}
+
+.criteria {
+  margin-top: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.5rem 1rem 1rem;
+}
+
+.criteria legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0 0.35rem;
+}
+
+.criterion-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.criterion-row__field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.criterion-row__field label {
+  margin-top: 0;
+}
+
+.criterion-row__field--points {
+  flex: 0 0 8rem;
+}
+
+.criterion-row > button {
+  margin-top: 1.6rem;
+}
+
+.rubric-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.rubric__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rubric__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.badge--locked {
+  border-color: #c98a00;
+  color: #8a5d00;
+  background: #fff6e0;
+}
+
+.button--danger {
+  color: var(--error-fg);
+}
+
+.criteria-summary {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+}

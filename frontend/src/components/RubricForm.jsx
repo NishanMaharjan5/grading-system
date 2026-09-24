@@ -1,0 +1,201 @@
+import { useState } from "react";
+
+import { ApiError } from "../api/client";
+import { fieldErrorsFromDetail, rubricsApi } from "../api/rubrics";
+
+const blankCriterion = () => ({ name: "", max_points: "" });
+
+/**
+ * Create/edit form for a rubric and its criteria.
+ *
+ * Validation runs twice on purpose. The checks here mirror the backend's rules
+ * so an obvious mistake is marked next to the offending input without a round
+ * trip; the backend stays the authority, and whatever it rejects is mapped
+ * back onto the same fields. The two must agree -- if a rule changes server
+ * side, `validate` below has to change with it.
+ */
+export default function RubricForm({ initial, onSaved, onCancel }) {
+  const editing = Boolean(initial);
+
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [criteria, setCriteria] = useState(
+    initial?.criteria?.map((c) => ({ name: c.name, max_points: String(c.max_points) })) ?? [blankCriterion()],
+  );
+  const [errors, setErrors] = useState({});
+  const [busy, setBusy] = useState(false);
+
+  const criterionError = (index, field) => errors.criteria?.[index]?.[field];
+
+  function updateCriterion(index, field, value) {
+    setCriteria(criteria.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  }
+
+  function validate() {
+    const found = { criteria: {} };
+
+    if (!title.trim()) found.title = "Give the rubric a title.";
+    else if (title.trim().length > 200) found.title = "Title must be 200 characters or fewer.";
+
+    if (criteria.length === 0) found.criteriaForm = "Add at least one criterion.";
+
+    const seen = new Map();
+    criteria.forEach((row, index) => {
+      const rowErrors = {};
+      const name = row.name.trim();
+
+      if (!name) rowErrors.name = "Name is required.";
+      else if (name.length > 100) rowErrors.name = "Name must be 100 characters or fewer.";
+      else if (seen.has(name.toLowerCase())) {
+        rowErrors.name = `Duplicate of criterion ${seen.get(name.toLowerCase()) + 1}.`;
+      } else seen.set(name.toLowerCase(), index);
+
+      const points = Number(row.max_points);
+      if (row.max_points === "" || Number.isNaN(points)) rowErrors.max_points = "Enter a number.";
+      else if (points <= 0) rowErrors.max_points = "Must be greater than 0.";
+
+      if (Object.keys(rowErrors).length) found.criteria[index] = rowErrors;
+    });
+
+    if (!Object.keys(found.criteria).length) delete found.criteria;
+    return found;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const found = validate();
+    if (Object.keys(found).length) {
+      setErrors(found);
+      return;
+    }
+
+    setErrors({});
+    setBusy(true);
+    try {
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
+        type: "text",
+        criteria: criteria.map((row) => ({ name: row.name.trim(), max_points: Number(row.max_points) })),
+      };
+      const saved = editing
+        ? await rubricsApi.update(initial.id, payload)
+        : await rubricsApi.create(payload);
+      onSaved(saved);
+    } catch (cause) {
+      setErrors(
+        cause instanceof ApiError && cause.status === 422
+          ? fieldErrorsFromDetail(cause.detail)
+          : { form: cause instanceof ApiError ? cause.message : "Could not save the rubric." },
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const totalPoints = criteria.reduce((sum, row) => sum + (Number(row.max_points) || 0), 0);
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="card">
+      <h2>{editing ? `Edit “${initial.title}”` : "New rubric"}</h2>
+
+      {errors.form && (
+        <p className="alert" role="alert">
+          {errors.form}
+        </p>
+      )}
+
+      <label htmlFor="rubric-title">Title</label>
+      <input
+        id="rubric-title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        aria-invalid={Boolean(errors.title)}
+        aria-describedby={errors.title ? "rubric-title-error" : undefined}
+      />
+      {errors.title && (
+        <p className="field-error" id="rubric-title-error">
+          {errors.title}
+        </p>
+      )}
+
+      <label htmlFor="rubric-description">Description (optional)</label>
+      <textarea
+        id="rubric-description"
+        rows={2}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+
+      <fieldset className="criteria">
+        <legend>Criteria</legend>
+        {errors.criteriaForm && (
+          <p className="alert" role="alert">
+            {errors.criteriaForm}
+          </p>
+        )}
+
+        {criteria.map((row, index) => (
+          <div className="criterion-row" key={index}>
+            <div className="criterion-row__field">
+              <label htmlFor={`criterion-name-${index}`}>Name</label>
+              <input
+                id={`criterion-name-${index}`}
+                value={row.name}
+                onChange={(e) => updateCriterion(index, "name", e.target.value)}
+                aria-invalid={Boolean(criterionError(index, "name"))}
+              />
+              {criterionError(index, "name") && (
+                <p className="field-error">{criterionError(index, "name")}</p>
+              )}
+            </div>
+
+            <div className="criterion-row__field criterion-row__field--points">
+              <label htmlFor={`criterion-points-${index}`}>Max points</label>
+              <input
+                id={`criterion-points-${index}`}
+                type="number"
+                min="0"
+                step="any"
+                value={row.max_points}
+                onChange={(e) => updateCriterion(index, "max_points", e.target.value)}
+                aria-invalid={Boolean(criterionError(index, "max_points"))}
+              />
+              {criterionError(index, "max_points") && (
+                <p className="field-error">{criterionError(index, "max_points")}</p>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="button--plain"
+              onClick={() => setCriteria(criteria.filter((_, i) => i !== index))}
+              disabled={criteria.length === 1}
+              title={criteria.length === 1 ? "A rubric needs at least one criterion" : "Remove"}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+
+        <button type="button" className="button--plain" onClick={() => setCriteria([...criteria, blankCriterion()])}>
+          + Add criterion
+        </button>
+      </fieldset>
+
+      <p className="muted">Total: {totalPoints} points across {criteria.length} criteria</p>
+
+      <div className="row">
+        <button type="submit" disabled={busy}>
+          {busy ? "Saving…" : editing ? "Save changes" : "Create rubric"}
+        </button>
+        {onCancel && (
+          <button type="button" className="button--plain" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}

@@ -1,8 +1,9 @@
 from flask import Blueprint, g, jsonify, request
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Rubric, RubricCriterion
+from app.models import Rubric, RubricCriterion, Submission
 from app.security import login_required, require_role
 
 rubrics_bp = Blueprint("rubrics", __name__)
@@ -20,7 +21,17 @@ def _criterion_to_dict(c):
     }
 
 
-def _rubric_to_dict(r):
+def _rubric_to_dict(r, submission_count=None):
+    """`locked` is the rule, not a hint: once work has been submitted against a
+    rubric, editing or deleting it is refused (409). Naming it here means the
+    frontend disables those actions from the server's answer instead of
+    re-deriving the rule and drifting out of step with it.
+
+    Callers listing many rubrics should pass submission_count to avoid a
+    per-rubric count query."""
+    if submission_count is None:
+        submission_count = len(r.submissions)
+
     return {
         "id": r.id,
         "title": r.title,
@@ -30,6 +41,8 @@ def _rubric_to_dict(r):
         "created_by": r.created_by,
         "created_at": r.created_at.isoformat() if r.created_at else None,
         "total_points": float(r.total_points),
+        "submission_count": submission_count,
+        "locked": submission_count > 0,
         "criteria": [_criterion_to_dict(c) for c in sorted(r.criteria, key=lambda c: c.position)],
     }
 
@@ -97,8 +110,18 @@ def create_rubric():
 @rubrics_bp.get("")
 @login_required
 def list_rubrics():
-    rubrics = db.session.query(Rubric).order_by(Rubric.created_at.desc()).all()
-    return jsonify([_rubric_to_dict(r) for r in rubrics]), 200
+    """Teachers get the rubrics they authored; students get everything they
+    could submit against."""
+    query = db.session.query(Rubric)
+    if g.current_user.get("role") == "teacher":
+        query = query.filter(Rubric.created_by == int(g.current_user["sub"]))
+    rubrics = query.order_by(Rubric.created_at.desc()).all()
+
+    # One grouped count rather than a lazy load per rubric.
+    counts = dict(
+        db.session.query(Submission.rubric_id, func.count(Submission.id)).group_by(Submission.rubric_id).all()
+    )
+    return jsonify([_rubric_to_dict(r, counts.get(r.id, 0)) for r in rubrics]), 200
 
 
 @rubrics_bp.get("/<int:rubric_id>")
@@ -143,6 +166,12 @@ def update_rubric(rubric_id):
         criteria, err = _parse_criteria(body.get("criteria"))
         if err:
             return jsonify(detail=err), 422
+        # Clear and flush before adding: assigning straight over the list makes
+        # SQLAlchemy insert the replacements before deleting the originals, and
+        # uq_criteria_rubric_name then rejects any criterion whose name is being
+        # kept -- which is most edits (retitling, changing points).
+        rubric.criteria.clear()
+        db.session.flush()
         rubric.criteria = [RubricCriterion(**c) for c in criteria]
 
     try:
