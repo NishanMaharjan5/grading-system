@@ -7,6 +7,8 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import StudentDashboard from "./pages/StudentDashboard";
+import SubmissionView from "./pages/SubmissionView";
+import SubmitWork from "./pages/SubmitWork";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import { dashboardFor, ProtectedRoute, PublicOnlyRoute } from "./routes/ProtectedRoute";
 
@@ -50,6 +52,22 @@ function AppRoutes() {
           element={
             <ProtectedRoute role="student">
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/submit/:rubricId"
+          element={
+            <ProtectedRoute role="student">
+              <SubmitWork />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/submissions/:submissionId"
+          element={
+            <ProtectedRoute role="student">
+              <SubmissionView />
             </ProtectedRoute>
           }
         />

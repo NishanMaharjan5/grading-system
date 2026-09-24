@@ -21,18 +21,24 @@ def _criterion_to_dict(c):
     }
 
 
-def _rubric_to_dict(r, submission_count=None):
+def _rubric_to_dict(r, submission_count=None, for_owner=True):
     """`locked` is the rule, not a hint: once work has been submitted against a
     rubric, editing or deleting it is refused (409). Naming it here means the
     frontend disables those actions from the server's answer instead of
     re-deriving the rule and drifting out of step with it.
+
+    Both counts are the author's business, not a classmate's, so they are left
+    out unless the caller owns the rubric.
 
     Callers listing many rubrics should pass submission_count to avoid a
     per-rubric count query."""
     if submission_count is None:
         submission_count = len(r.submissions)
 
+    owner_fields = {"submission_count": submission_count, "locked": submission_count > 0} if for_owner else {}
+
     return {
+        **owner_fields,
         "id": r.id,
         "title": r.title,
         "description": r.description,
@@ -41,8 +47,6 @@ def _rubric_to_dict(r, submission_count=None):
         "created_by": r.created_by,
         "created_at": r.created_at.isoformat() if r.created_at else None,
         "total_points": float(r.total_points),
-        "submission_count": submission_count,
-        "locked": submission_count > 0,
         "criteria": [_criterion_to_dict(c) for c in sorted(r.criteria, key=lambda c: c.position)],
     }
 
@@ -121,7 +125,10 @@ def list_rubrics():
     counts = dict(
         db.session.query(Submission.rubric_id, func.count(Submission.id)).group_by(Submission.rubric_id).all()
     )
-    return jsonify([_rubric_to_dict(r, counts.get(r.id, 0)) for r in rubrics]), 200
+    viewer_id = int(g.current_user["sub"])
+    return jsonify([
+        _rubric_to_dict(r, counts.get(r.id, 0), for_owner=r.created_by == viewer_id) for r in rubrics
+    ]), 200
 
 
 @rubrics_bp.get("/<int:rubric_id>")
@@ -130,7 +137,7 @@ def get_rubric(rubric_id):
     rubric = db.session.get(Rubric, rubric_id)
     if not rubric:
         return jsonify(detail="Rubric not found"), 404
-    return jsonify(_rubric_to_dict(rubric)), 200
+    return jsonify(_rubric_to_dict(rubric, for_owner=rubric.created_by == int(g.current_user["sub"]))), 200
 
 
 @rubrics_bp.put("/<int:rubric_id>")

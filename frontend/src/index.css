@@ -271,3 +271,38 @@ input[aria-invalid="true"] {
   padding-left: 1.1rem;
   font-size: 0.9rem;
 }
+
+/* student submission views */
+.badge--pending {
+  border-color: #c98a00;
+  color: #8a5d00;
+  background: #fff6e0;
+}
+
+.badge--done {
+  border-color: #1f7a3d;
+  color: #1f7a3d;
+  background: #eaf7ee;
+}
+
+.notice {
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  background: #eaf7ee;
+  color: #1f7a3d;
+  font-size: 0.9rem;
+}
+
+.submitted-content {
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}
+
+details.card > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.criteria-summary li {
+  margin-bottom: 0.35rem;
+}

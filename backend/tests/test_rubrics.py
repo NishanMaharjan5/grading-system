@@ -85,6 +85,35 @@ class TestRead:
         assert len(client.get("/api/rubrics", headers=auth(student)).get_json()) == 2
 
 
+class TestOwnerOnlyFields:
+    """How many classmates have submitted is the author's business."""
+
+    def test_a_student_listing_does_not_see_the_counts(self, client, auth, student, rubric):
+        listed = client.get("/api/rubrics", headers=auth(student)).get_json()[0]
+        assert "submission_count" not in listed
+        assert "locked" not in listed
+
+    def test_a_student_reading_one_does_not_see_the_counts(self, client, auth, student, rubric):
+        body = client.get(f"/api/rubrics/{rubric['id']}", headers=auth(student)).get_json()
+        assert "submission_count" not in body
+        assert "locked" not in body
+
+    def test_a_student_still_gets_what_they_need_to_submit(self, client, auth, student, rubric):
+        body = client.get(f"/api/rubrics/{rubric['id']}", headers=auth(student)).get_json()
+        assert body["title"] == "Essay 1"
+        assert body["total_points"] == 15.0
+        assert [c["name"] for c in body["criteria"]] == ["Thesis", "Evidence"]
+
+    def test_another_teacher_does_not_see_them_either(self, client, auth, other_teacher, rubric):
+        body = client.get(f"/api/rubrics/{rubric['id']}", headers=auth(other_teacher)).get_json()
+        assert "submission_count" not in body
+
+    def test_the_owner_does_see_them(self, client, auth, teacher, rubric):
+        body = client.get(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).get_json()
+        assert body["submission_count"] == 0
+        assert body["locked"] is False
+
+
 class TestLockedFlag:
     def test_an_untouched_rubric_is_unlocked(self, client, auth, teacher, rubric):
         listed = client.get("/api/rubrics", headers=auth(teacher)).get_json()[0]
