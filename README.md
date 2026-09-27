@@ -32,13 +32,26 @@ is run against them in a subprocess, and the criterion is worth the fraction of
 its tests that pass. Wrong answers, crashes and timeouts are all ordinary
 grades; only the harness itself breaking sends a submission to `grading_failed`.
 
-**Read [backend/SANDBOX.md](backend/SANDBOX.md) before running this anywhere
-that matters.** Student code is contained by resource limits and interpreter
-patching, not by a container. The CPU, wall-clock, file-write and process
-limits are kernel-enforced and hold; the file-read, network and
-process-spawning guards are best-effort and a determined program gets past
-them. The grader runs as the same OS user as the server, which is the gap that
-matters most.
+**Security: [backend/SANDBOX.md](backend/SANDBOX.md) has the full account.**
+In short, student code runs under **macOS Seatbelt (`sandbox-exec`)**, which
+enforces the file and network rules **at the kernel level**. The student's
+process cannot read anything in the repo (including `backend/.env`, which holds
+`JWT_SECRET` and the database credentials), cannot write outside its own
+scratch directory, cannot open any network connection, and cannot start child
+processes. This was verified with raw syscall bypass tests: the test programs
+call libc directly through `ctypes`, skipping every Python-level guard, and the
+kernel still refuses them with `EPERM`. Positive controls prove the same probes
+succeed when the sandbox is removed, so the tests can't pass by being broken.
+Kernel-enforced resource limits (CPU, file size, process count) and in-process
+Python guards sit on top as defense-in-depth.
+
+This is still not a container, and it has real limits: it is **macOS-only**,
+`sandbox-exec` is a **deprecated (though functional) Apple API**, and memory is
+capped by polling rather than by the kernel. On Linux, the equivalent would be
+**Landlock** for path-based file rules, **seccomp-bpf** for denying process and
+network syscalls, or a **container** for all of it. Until one of those is
+built, grading refuses to run on any platform without Seatbelt, rather than
+running student code unsandboxed.
 
 ## Setup
 
@@ -136,16 +149,25 @@ frontend/        React + Vite
 - **Approval is final.** Re-approving returns 409 and there is no correction
   path for a mistaken approval; that would need a revise endpoint with an
   audit trail.
-- **The code sandbox is not a real sandbox.** It raises the cost of
-  misbehaving rather than making it impossible, and student code runs as the
-  server's OS user. See [backend/SANDBOX.md](backend/SANDBOX.md) for exactly
-  what holds and what does not. Running the grader as a separate unprivileged
-  user is the smallest change that would close the worst gap.
+- **Code grading is macOS-only** and relies on `sandbox-exec`, an Apple API
+  that is deprecated but functional. On any other platform, or if a future
+  macOS removes it, submissions go to `grading_failed` for manual grading
+  instead of running unsandboxed. A Linux port needs Landlock, seccomp-bpf or
+  a container; see [backend/SANDBOX.md](backend/SANDBOX.md).
+- **The sandbox is kernel-enforced, but it is not a container.** The profile
+  denies reads of the repo and common credential directories rather than
+  everything outside the scratch directory, because a true default-deny breaks
+  whenever Apple's Python toolchain changes. Student code still runs as the
+  server's OS user, so anything the profile doesn't mention is reachable. It
+  can also confirm whether a guessed filename exists in the repo, though it
+  can't read or list it.
 - **Memory is capped by polling, not by the kernel**, because macOS refuses to
-  set `RLIMIT_AS`/`DATA`/`RSS` at all. There is a ~100ms window in which a
-  program can exceed the cap before it is killed.
-- **Only Python submissions are supported**, and test cases compare stdout
-  only — no checking of exit codes, stderr, or files the program writes.
+  set `RLIMIT_AS`/`DATA`/`RSS` and Seatbelt has no memory rule. There is a
+  ~100ms window in which a program can exceed the cap before it is killed.
+- **Only Python submissions are supported, under the system Python 3.9** —
+  not the app's venv, which the sandbox makes unreadable. Code rubrics should
+  use the standard library and 3.9 syntax. Test cases compare stdout only, not
+  exit codes, stderr or written files.
 - **Test cases have no visible/hidden distinction.** They are withheld from
   students entirely, so a student cannot see any example before submitting.
 - **Tests build their schema from migrations, but `flask db migrate` is not

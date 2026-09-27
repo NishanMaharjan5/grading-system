@@ -4,12 +4,26 @@ The submitted code is written to a throwaway directory and executed as a
 separate process; it is never exec'd, eval'd or imported into the server.
 Each case gets its own process, so one hanging test cannot affect the next.
 
-What actually contains the code is described in SANDBOX.md. In short: the
-resource limits are real, the Python-level guards are not a security boundary,
-and this is not equivalent to a container.
+Two independent layers now enforce containment, and only one of them is
+trustworthy on its own:
+
+* macOS Seatbelt, via `sandbox-exec` (_build_profile below), applied by the
+  kernel before the student's code ever runs. This is real: proven in
+  tests/test_code_grading.py by bypassing every Python-level guard with a raw
+  ctypes syscall and confirming the kernel still refuses it.
+* The resource limits and Python-level guards in _sandbox_runner.py, kept as
+  defense-in-depth. Cheap to keep, and they catch things Seatbelt doesn't
+  (CPU time, memory, output size).
+
+macOS-only. If sandbox-exec is unavailable -- wrong platform, or a future
+macOS removes it -- grading fails loudly into grading_failed rather than
+silently running student code with no kernel-level containment. See
+SANDBOX.md for what porting this to Linux would need (Landlock, seccomp, or
+a container).
 """
 
 import os
+import platform
 import signal
 import subprocess
 import sys
@@ -17,6 +31,27 @@ import tempfile
 import threading
 
 RUNNER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_sandbox_runner.py")
+
+# Repo root: .../grading-system, four directories up from this file
+# (app/grading/code_runner.py -> app/grading -> app -> backend -> grading-system).
+# Everything sensitive -- .env, ml_models/, training_data/, the app's own
+# source -- lives under here, so denying reads to this one subtree is what
+# actually protects the secrets, rather than trying to allowlist every path a
+# Python interpreter needs to read at startup (fragile and version-specific;
+# see the note in _build_profile below).
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# The system interpreter, not sys.executable: the venv lives under
+# PROJECT_ROOT, which the sandbox profile denies reading, so venv python
+# cannot even be exec'd once the profile applies. This must exist on any
+# reasonably modern macOS (shipped by Xcode Command Line Tools).
+SYSTEM_PYTHON = "/usr/bin/python3"
+SANDBOX_EXEC = "/usr/bin/sandbox-exec"
+
+# Classic high-value credential locations outside the project. Cheap to deny
+# outright; not an attempt at a comprehensive home-directory lockdown, since
+# the application's own secrets all live under PROJECT_ROOT regardless.
+EXTRA_DENIED_READS = (".ssh", ".aws", ".netrc", ".gnupg")
 
 WALL_CLOCK_SECONDS = 10   # outer bound; the child also has a CPU-time rlimit
 CPU_SECONDS = 5
@@ -27,6 +62,65 @@ OUTPUT_CHAR_LIMIT = 10_000  # what we keep, not what the program may print
 class CodeRunnerError(Exception):
     """The harness itself failed -- not the student's code misbehaving.
     Only this should ever cause a submission to land in grading_failed."""
+
+
+def _sb_literal(path):
+    """Escapes a path for use inside a double-quoted Seatbelt string literal.
+    Our own paths (repo location, tempfile.TemporaryDirectory output) never
+    contain quotes or backslashes, but escaping defensively costs nothing."""
+    return path.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _require_sandbox_exec():
+    if platform.system() != "Darwin":
+        raise CodeRunnerError(
+            "Code grading requires macOS Seatbelt (sandbox-exec), which is not available on "
+            f"{platform.system()}. See SANDBOX.md for what a Linux port would need."
+        )
+    if not os.path.exists(SANDBOX_EXEC):
+        raise CodeRunnerError(f"{SANDBOX_EXEC} is not present on this system.")
+    if not os.path.exists(SYSTEM_PYTHON):
+        raise CodeRunnerError(f"{SYSTEM_PYTHON} is not present on this system.")
+
+
+def _build_profile(source_dir):
+    """One Seatbelt profile per submission, with that submission's scratch
+    directory baked in as the sole place allowed to be written.
+
+    Reads are denied for PROJECT_ROOT and a short list of credential
+    directories, not for everything except source_dir. A true default-deny
+    -- allow only source_dir and the interpreter's own files -- was tried and
+    rejected: macOS's own /usr/bin/python3 is a dispatcher that re-execs into
+    a versioned path under CommandLineTools' Python framework, and enumerating
+    every path the interpreter needs to read to start up (dyld cache,
+    framework internals, locale/encoding data) is exactly the kind of
+    Apple-internal, version-specific fragility this project has avoided
+    elsewhere. Since every actual secret lives under PROJECT_ROOT, denying
+    that subtree achieves the real goal without depending on Apple's
+    toolchain internals staying still.
+
+    process-fork is denied outright: on this platform it also blocks
+    posix_spawn (confirmed: a raw ctypes posix_spawn() call is refused the
+    same as a raw fork()), which covers subprocess/os.system/os.fork at the
+    kernel level without needing a process-exec allowlist -- which would hit
+    the same dispatcher-chain fragility as the read side.
+    """
+    home = os.path.expanduser("~")
+    extra_denies = "".join(
+        f'(deny file-read* (subpath "{_sb_literal(os.path.join(home, name))}"))\n'
+        for name in EXTRA_DENIED_READS
+    )
+    return f"""
+(version 1)
+(allow default)
+(deny file-read* (subpath "{_sb_literal(PROJECT_ROOT)}"))
+(allow file-read* (literal "{_sb_literal(RUNNER)}"))
+{extra_denies}
+(deny file-write*)
+(allow file-write* (subpath "{_sb_literal(source_dir)}"))
+(deny process-fork)
+(deny network*)
+"""
 
 
 def normalise_output(text):
@@ -75,7 +169,9 @@ def _resident_bytes(pid):
     Darwin refuses to set RLIMIT_AS/DATA/RSS at all -- setrlimit raises
     "current limit exceeds maximum limit" even when lowering -- so on macOS
     the kernel will not cap memory for us and this poll is the only thing
-    standing between a runaway allocation and the machine's RAM.
+    standing between a runaway allocation and the machine's RAM. Seatbelt has
+    no memory-capping primitive either; this gap is orthogonal to the
+    file/network/process containment sandbox-exec adds.
     """
     try:
         out = subprocess.run(["ps", "-o", "rss=", "-p", str(pid)],
@@ -86,9 +182,11 @@ def _resident_bytes(pid):
 
 
 def run_one(source_dir, stdin_text):
-    """Runs the program once. Returns a dict describing what happened -- a
-    crash, a timeout or a memory breach is a normal result here, not an
-    exception."""
+    """Runs the program once, under sandbox-exec. Returns a dict describing
+    what happened -- a crash, a timeout or a memory breach is a normal result
+    here, not an exception."""
+    _require_sandbox_exec()
+
     env = {
         "PATH": "/usr/bin:/bin",
         "HOME": source_dir,
@@ -99,9 +197,14 @@ def run_one(source_dir, stdin_text):
         **({"SANDBOX_DEBUG": "1"} if os.environ.get("SANDBOX_DEBUG") else {}),
     }
 
+    command = [
+        SANDBOX_EXEC, "-p", _build_profile(source_dir),
+        SYSTEM_PYTHON, "-I", "-B", RUNNER, "main.py",
+    ]
+
     try:
         process = subprocess.Popen(
-            [sys.executable, "-I", "-B", RUNNER, "main.py"],
+            command,
             cwd=source_dir,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,

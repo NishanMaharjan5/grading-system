@@ -3,17 +3,25 @@ on itself, then hands control to the student's code.
 
 Launched as:  python -I -B _sandbox_runner.py <student_file>
 
-Two layers, and they are not equally strong:
+This process is itself launched by code_runner.py under a macOS Seatbelt
+profile (sandbox-exec), which is the layer that actually holds against a
+determined program -- it is kernel-enforced and cannot be bypassed from inside
+this interpreter, ctypes included. Everything in this file is a second,
+weaker layer kept for defense-in-depth and for the things Seatbelt does not
+cover:
 
-* Kernel-enforced resource limits (RLIMIT_*). These genuinely hold. Student
-  code cannot lift them, because setrlimit can only lower a hard limit.
-* Python-level guards on sockets, file reads and process spawning. These are
-  a speed bump, not a wall. They live in the same interpreter as the student's
-  code, so anything determined -- ctypes, importlib.reload, direct syscalls --
-  gets around them. They exist to stop careless or casually curious code, not
-  an attacker.
+* Kernel-enforced resource limits (RLIMIT_*), set below. These genuinely
+  hold on their own terms -- student code cannot lift them, because setrlimit
+  can only lower a hard limit -- but they bound CPU/output/process-count, not
+  file or network access, which is Seatbelt's job now.
+* Python-level guards on sockets, file reads and process spawning. On their
+  own these are a speed bump, not a wall: they live in the same interpreter
+  as the student's code, so ctypes, importlib.reload or a direct syscall gets
+  around them. Kept because they're cheap and they give a clearer error
+  message than a raw kernel denial when they do catch something.
 
-See SANDBOX.md for what is and isn't actually contained.
+See SANDBOX.md for the full picture, including how the Seatbelt layer was
+verified (a raw ctypes syscall bypass of everything in this file).
 """
 
 import builtins

@@ -5,10 +5,16 @@ The containment tests below assert what this sandbox actually does, which is
 less than a container does. See SANDBOX.md.
 """
 
+import errno
 import os
+import re
+import socket
+import subprocess
+import tempfile
 
 import pytest
 
+from app.grading import code_runner
 from app.grading.code_runner import MEMORY_BYTES, normalise_output, run_test_cases
 
 
@@ -89,8 +95,13 @@ class TestResourceLimits:
 
 
 class TestContainment:
-    """What the sandbox stops. Everything here is best-effort except the
-    file-write limit, which the kernel enforces."""
+    """What the sandbox stops, exercised through normal Python calls (open(),
+    socket, subprocess) -- these are caught by the in-process guard in
+    _sandbox_runner.py before they would even reach the kernel layer, so
+    passing here does not by itself prove OS-level enforcement. See
+    TestKernelEnforcement below for that: it bypasses the in-process guard
+    entirely with raw ctypes syscalls, so a denial there can only have come
+    from the Seatbelt profile in code_runner.py."""
 
     def test_writing_a_file_is_blocked(self, tmp_path):
         target = tmp_path / "written_by_student.txt"
@@ -121,6 +132,303 @@ class TestContainment:
 
     def test_the_program_can_read_its_own_file(self):
         assert run("print('ok' if open('main.py').read() else 'empty')", "", "ok")["passed"]
+
+
+RAW_OPEN = """
+import ctypes, ctypes.util
+libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+fd = libc.open({path!r}.encode(), 0)  # O_RDONLY
+if fd < 0:
+    print("DENIED errno=%d" % ctypes.get_errno())
+else:
+    buf = ctypes.create_string_buffer(4096)
+    n = libc.read(fd, buf, 4096)
+    libc.close(fd)
+    print("LEAKED:" + buf.raw[:n].decode(errors="replace"))
+"""
+
+RAW_CONNECT = """
+import ctypes, ctypes.util, struct, socket
+libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+fd = libc.socket(2, 1, 0)  # AF_INET, SOCK_STREAM
+if fd < 0:
+    print("DENIED errno=%d" % ctypes.get_errno())
+else:
+    addr = struct.pack("!BBH4s8x", 16, 2, {port}, socket.inet_aton("127.0.0.1"))
+    rc = libc.connect(fd, addr, len(addr))
+    print("CONNECTED" if rc == 0 else "DENIED errno=%d" % ctypes.get_errno())
+"""
+
+RAW_FORK = """
+import ctypes, ctypes.util, os
+libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+pid = libc.fork()
+if pid < 0:
+    print("DENIED errno=%d" % ctypes.get_errno())
+elif pid == 0:
+    os._exit(0)
+else:
+    os.waitpid(pid, 0)
+    print("FORKED")
+"""
+
+RAW_SPAWN = """
+import ctypes, ctypes.util, os
+libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+argv = (ctypes.c_char_p * 2)(b"/usr/bin/true", None)
+pid = ctypes.c_int(0)
+rc = libc.posix_spawn(ctypes.byref(pid), b"/usr/bin/true", None, None, argv, None)
+if rc != 0:
+    print("DENIED errno=%d" % rc)  # posix_spawn returns the error number directly
+else:
+    os.waitpid(pid.value, 0)
+    print("SPAWNED")
+"""
+
+RAW_LISTDIR = """
+import ctypes, ctypes.util
+libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+libc.opendir.restype = ctypes.c_void_p
+handle = libc.opendir({path!r}.encode())
+print("LISTED" if handle else "DENIED errno=%d" % ctypes.get_errno())
+"""
+
+ENV_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+PROJECT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app", "__init__.py")
+
+
+def denied_errno(output):
+    """The errno a probe reported, or None if it didn't report a denial."""
+    match = re.search(r"DENIED errno=(\d+)", output or "")
+    return int(match.group(1)) if match else None
+
+
+@pytest.fixture
+def listener():
+    """A local TCP listener, so the network tests need no internet access and
+    can't pass by accident on a machine that simply has no route out."""
+    server = socket.socket()
+    server.bind(("127.0.0.1", 0))
+    server.listen(1)
+    yield server.getsockname()[1]
+    server.close()
+
+
+def run_unsandboxed(source):
+    """Runs a probe with the same system interpreter but no Seatbelt profile,
+    no rlimits and no Python-level guards. Used only as a positive control."""
+    with tempfile.TemporaryDirectory() as scratch:
+        with open(os.path.join(scratch, "main.py"), "w") as handle:
+            handle.write(source)
+        completed = subprocess.run(
+            [code_runner.SYSTEM_PYTHON, "-I", "-B", "main.py"],
+            cwd=scratch, capture_output=True, text=True, timeout=30,
+        )
+        return completed.stdout
+
+
+def run_under_profile_only(source):
+    """Runs a probe under the real Seatbelt profile from code_runner, but with
+    none of the other layers: no rlimits, no Python-level guards, no runner.
+    Isolates the profile, so a denial here can only be Seatbelt's."""
+    with tempfile.TemporaryDirectory(prefix="grading_") as scratch:
+        with open(os.path.join(scratch, "main.py"), "w") as handle:
+            handle.write(source)
+        completed = subprocess.run(
+            [code_runner.SANDBOX_EXEC, "-p", code_runner._build_profile(scratch),
+             code_runner.SYSTEM_PYTHON, "-I", "-B", "main.py"],
+            cwd=scratch, capture_output=True, text=True, timeout=30,
+        )
+        return completed.stdout
+
+
+def first_existing_credential_file():
+    """A real file inside one of the extra-denied credential directories, if
+    this machine has one. None of them exist on some machines."""
+    home = os.path.expanduser("~")
+    for name in code_runner.EXTRA_DENIED_READS:
+        path = os.path.join(home, name)
+        if os.path.isfile(path):
+            return path
+        if os.path.isdir(path):
+            for entry in sorted(os.listdir(path)):
+                candidate = os.path.join(path, entry)
+                if os.path.isfile(candidate):
+                    return candidate
+    return None
+
+
+class TestProbesCanDetectALeak:
+    """Positive controls. Every probe in TestKernelEnforcement is run here
+    with the sandbox removed, and must succeed. Without this, a probe that was
+    broken -- a typo, a wrong constant, a missing library -- would print
+    DENIED for its own reasons and the security tests would pass while
+    proving nothing."""
+
+    def test_raw_open_reads_project_files_when_unsandboxed(self):
+        output = run_unsandboxed(RAW_OPEN.format(path=PROJECT_FILE))
+        assert output.startswith("LEAKED:")
+        assert "create_app" in output
+
+    def test_raw_connect_reaches_the_listener_when_unsandboxed(self, listener):
+        assert run_unsandboxed(RAW_CONNECT.format(port=listener)).strip() == "CONNECTED"
+
+    def test_raw_fork_succeeds_when_unsandboxed(self):
+        assert run_unsandboxed(RAW_FORK).strip() == "FORKED"
+
+    def test_raw_posix_spawn_succeeds_when_unsandboxed(self):
+        assert run_unsandboxed(RAW_SPAWN).strip() == "SPAWNED"
+
+    def test_raw_listdir_lists_the_repo_when_unsandboxed(self):
+        assert run_unsandboxed(RAW_LISTDIR.format(path=code_runner.PROJECT_ROOT)).strip() == "LISTED"
+
+
+class TestSeatbeltProfileAlone:
+    """The Seatbelt profile, tested in isolation. Through the full runner,
+    RLIMIT_NPROC answers fork() first (EAGAIN) because this user already has
+    more than 32 processes -- which would leave Seatbelt's own process-fork
+    rule untested, and the protection quietly dependent on how busy the
+    machine is. Running the profile alone proves each rule holds by itself."""
+
+    def test_profile_refuses_reading_project_files(self):
+        assert denied_errno(run_under_profile_only(RAW_OPEN.format(path=PROJECT_FILE))) == errno.EPERM
+
+    def test_profile_refuses_network(self, listener):
+        assert denied_errno(run_under_profile_only(RAW_CONNECT.format(port=listener))) == errno.EPERM
+
+    def test_profile_refuses_fork(self):
+        assert denied_errno(run_under_profile_only(RAW_FORK)) == errno.EPERM
+
+    def test_profile_refuses_posix_spawn(self):
+        assert denied_errno(run_under_profile_only(RAW_SPAWN)) == errno.EPERM
+
+    def test_profile_refuses_listing_the_repo(self):
+        """Existence of a guessed name leaks (see below); enumerating what's
+        there does not."""
+        assert denied_errno(run_under_profile_only(RAW_LISTDIR.format(path=code_runner.PROJECT_ROOT))) == errno.EPERM
+
+    @pytest.mark.skipif(first_existing_credential_file() is None,
+                        reason="none of ~/.ssh, ~/.aws, ~/.netrc, ~/.gnupg exists on this machine")
+    def test_profile_refuses_credential_files(self):
+        output = run_under_profile_only(RAW_OPEN.format(path=first_existing_credential_file()))
+        assert denied_errno(output) == errno.EPERM, output
+
+    def test_denial_hides_contents_but_not_existence(self):
+        """A documented limitation, pinned so it can't change unnoticed: a
+        denied path that exists answers EPERM, one that doesn't answers
+        ENOENT. A program can learn whether a guessed filename exists in the
+        project; it cannot read it."""
+        missing = os.path.join(code_runner.PROJECT_ROOT, "backend", "no_such_file_for_this_test")
+        assert denied_errno(run_under_profile_only(RAW_OPEN.format(path=missing))) == errno.ENOENT
+
+
+class TestKernelEnforcement:
+    """The tests the security claim in SANDBOX.md rests on.
+
+    Each program calls libc directly through ctypes, so open(), socket and
+    subprocess are never touched and none of the Python-level guards in
+    _sandbox_runner.py gets a chance to intervene. If the kernel didn't refuse
+    these, they would succeed -- TestProbesCanDetectALeak proves that.
+
+    Every assertion is on EPERM specifically, not just on "denied". That's
+    what separates Seatbelt from the other layers: a missing file is ENOENT,
+    Unix permissions give EACCES, RLIMIT_NPROC gives EAGAIN, and no route to
+    a host is ENETUNREACH. Only the sandbox profile answers EPERM here.
+    """
+
+    def test_raw_read_of_project_source_is_refused_by_the_kernel(self):
+        result = run(RAW_OPEN.format(path=PROJECT_FILE))
+        assert "LEAKED" not in result["actual"]
+        assert denied_errno(result["actual"]) == errno.EPERM, result["actual"]
+
+    @pytest.mark.skipif(not os.path.exists(ENV_FILE), reason="no backend/.env on this machine")
+    def test_raw_read_of_the_env_file_is_refused_by_the_kernel(self):
+        result = run(RAW_OPEN.format(path=ENV_FILE))
+        assert "JWT_SECRET" not in result["actual"]
+        assert denied_errno(result["actual"]) == errno.EPERM, result["actual"]
+
+    def test_raw_connect_is_refused_by_the_kernel(self, listener):
+        result = run(RAW_CONNECT.format(port=listener))
+        assert "CONNECTED" not in result["actual"]
+        assert denied_errno(result["actual"]) == errno.EPERM, result["actual"]
+
+    def test_raw_fork_is_refused_by_the_kernel(self):
+        """EAGAIN is RLIMIT_NPROC answering first, EPERM is Seatbelt; both
+        are the kernel. TestSeatbeltProfileAlone proves Seatbelt alone
+        refuses it too, so this doesn't rest on the rlimit."""
+        result = run(RAW_FORK)
+        assert "FORKED" not in result["actual"]
+        assert denied_errno(result["actual"]) in (errno.EPERM, errno.EAGAIN), result["actual"]
+
+    def test_raw_posix_spawn_is_refused_by_the_kernel(self):
+        """A separate syscall from fork on macOS; denying process-fork was
+        found to cover it too, and this keeps that finding from quietly
+        becoming untrue. EAGAIN/EPERM as for fork."""
+        result = run(RAW_SPAWN)
+        assert "SPAWNED" not in result["actual"]
+        assert denied_errno(result["actual"]) in (errno.EPERM, errno.EAGAIN), result["actual"]
+
+    def test_the_program_can_still_read_its_own_submission(self):
+        """The denial is scoped. The scratch directory holding main.py stays
+        readable even through the raw syscall path."""
+        result = run(RAW_OPEN.format(path="main.py"))
+        assert result["actual"].startswith("LEAKED:")
+        assert "ctypes" in result["actual"]  # it read back its own source
+
+
+class TestFailsLoudlyWithoutTheSandbox:
+    """If Seatbelt isn't available, grading must stop rather than quietly
+    run student code with only the Python-level guards."""
+
+    def test_non_macos_refuses_to_run(self, monkeypatch):
+        monkeypatch.setattr(code_runner.platform, "system", lambda: "Linux")
+        with pytest.raises(code_runner.CodeRunnerError, match="Seatbelt"):
+            run("print('hi')")
+
+    def test_missing_sandbox_exec_refuses_to_run(self, monkeypatch):
+        monkeypatch.setattr(code_runner, "SANDBOX_EXEC", "/nonexistent/sandbox-exec")
+        with pytest.raises(code_runner.CodeRunnerError):
+            run("print('hi')")
+
+    def test_a_submission_lands_in_grading_failed_not_ungraded_execution(
+        self, client, auth, teacher, student, monkeypatch
+    ):
+        rubric = client.post(
+            "/api/rubrics",
+            json={"title": "R", "type": "code", "criteria": [
+                {"name": "C", "max_points": 1, "test_cases": [{"stdin": "", "expected_output": "hi"}]}]},
+            headers=auth(teacher),
+        ).get_json()
+        monkeypatch.setattr(code_runner, "SANDBOX_EXEC", "/nonexistent/sandbox-exec")
+
+        body = client.post(
+            "/api/submissions", json={"rubric_id": rubric["id"], "content": "print('hi')"}, headers=auth(student)
+        ).get_json()
+        assert body["status"] == "grading_failed"
+
+    def test_every_run_goes_through_sandbox_exec(self, monkeypatch):
+        """Guards against a refactor that quietly drops the wrapper: the
+        command actually launched must start with sandbox-exec and carry a
+        profile that denies the project tree, network and process-fork."""
+        launched = []
+        real_popen = code_runner.subprocess.Popen
+
+        def spy(command, *args, **kwargs):
+            launched.append(command)
+            return real_popen(command, *args, **kwargs)
+
+        monkeypatch.setattr(code_runner.subprocess, "Popen", spy)
+        run("print('hi')", "", "hi")
+
+        command = launched[0]
+        assert command[0] == code_runner.SANDBOX_EXEC
+        profile = command[command.index("-p") + 1]
+        assert f'(deny file-read* (subpath "{code_runner.PROJECT_ROOT}"))' in profile
+        assert "(deny network*)" in profile
+        assert "(deny process-fork)" in profile
+        assert "(deny file-write*)" in profile
+        for name in code_runner.EXTRA_DENIED_READS:
+            assert os.path.join(os.path.expanduser("~"), name) in profile
 
 
 class TestCodeRubricGrading:
