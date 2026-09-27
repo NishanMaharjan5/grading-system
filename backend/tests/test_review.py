@@ -28,6 +28,22 @@ class TestPendingQueue:
         assert entry["ai_total"] == 6.0
         assert sorted(g["ai_score"] for g in entry["grades"]) == [2.0, 4.0]
 
+    def test_names_who_submitted_each_item(self, client, auth, teacher, graded, failed):
+        """Two submissions to one rubric were indistinguishable without this."""
+        queue = {s["id"]: s for s in client.get("/api/submissions/pending", headers=auth(teacher)).get_json()}
+        assert queue[graded]["student_name"] == "student"
+        assert queue[graded]["student_email"] == "student@example.com"
+        assert queue[failed]["student_email"] == "other.student@example.com"
+
+    def test_the_review_page_names_the_student_too(self, client, auth, teacher, graded):
+        body = client.get(f"/api/submissions/{graded}", headers=auth(teacher)).get_json()
+        assert body["student_email"] == "student@example.com"
+
+    def test_students_are_not_sent_the_identity_fields(self, client, auth, student, graded):
+        """Nothing a student needs, so the student payload stays as it was."""
+        body = client.get(f"/api/submissions/{graded}", headers=auth(student)).get_json()
+        assert "student_name" not in body and "student_email" not in body
+
     def test_another_teacher_sees_an_empty_queue(self, client, auth, other_teacher, graded, failed):
         assert client.get("/api/submissions/pending", headers=auth(other_teacher)).get_json() == []
 

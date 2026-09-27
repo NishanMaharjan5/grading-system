@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ApiError } from "../api/client";
 import { fieldErrorsFromDetail, rubricsApi } from "../api/rubrics";
+import { refreshShownErrors, sameErrors } from "../forms/errors";
 
 const blankCriterion = () => ({ name: "", max_points: "", test_cases: [] });
 const blankTestCase = () => ({ stdin: "", expected_output: "" });
@@ -82,6 +83,18 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
     if (!Object.keys(found.criteria).length) delete found.criteria;
     return found;
   }
+
+  // Errors already on screen follow the fields as they're edited, instead of
+  // waiting for the next submit. See forms/errors.js for exactly which ones.
+  useEffect(() => {
+    setErrors((shown) => {
+      if (!Object.keys(shown).length) return shown;
+      const next = refreshShownErrors(shown, validate());
+      return sameErrors(shown, next) ? shown : next;
+    });
+    // validate() reads exactly these three values
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, criteria, type]);
 
   async function handleSubmit(event) {
     event.preventDefault();

@@ -26,10 +26,11 @@ export default function Layout() {
           )}
         </nav>
         <span className="shell__spacer" />
-        <span className="muted">
-          {user?.email} · <span className="badge">{role}</span>
+        <span className="shell__user muted">
+          <span className="shell__email" title={user?.email}>{user?.email}</span>
+          <span className="badge">{role}</span>
         </span>
-        <button type="button" className="button--plain" onClick={handleLogout}>
+        <button type="button" className="button--plain shell__signout" onClick={handleLogout}>
           Sign out
         </button>
       </header>

@@ -4,6 +4,26 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { reviewErrorsFromDetail, submissionsApi } from "../api/submissions";
+import { refreshShownErrors, sameErrors } from "../forms/errors";
+
+/** Client-side mirror of the backend's override rules, keyed by criterion id. */
+function validateScores(criteria, scores) {
+  const found = { criteria: {} };
+  criteria.forEach((criterion) => {
+    const raw = scores[criterion.id];
+    const rowErrors = {};
+    if (raw === undefined || String(raw).trim() === "") rowErrors.score = "Enter a score.";
+    else {
+      const value = Number(raw);
+      if (Number.isNaN(value)) rowErrors.score = "Enter a number.";
+      else if (value < 0) rowErrors.score = "Cannot be negative.";
+      else if (value > criterion.max_points) rowErrors.score = `Cannot be more than ${criterion.max_points}.`;
+    }
+    if (Object.keys(rowErrors).length) found.criteria[criterion.id] = rowErrors;
+  });
+  if (!Object.keys(found.criteria).length) delete found.criteria;
+  return found;
+}
 
 /**
  * Grading one submission.
@@ -47,6 +67,18 @@ export default function ReviewSubmission() {
     return () => controller.abort();
   }, [id]);
 
+  // Errors already on screen follow the score inputs as they're edited --
+  // including when "Use this score" fills one in. Declared up here, before
+  // the loading branches, because hooks can't sit behind an early return.
+  useEffect(() => {
+    if (state.status !== "ok") return;
+    setErrors((shown) => {
+      if (!Object.keys(shown).length) return shown;
+      const next = refreshShownErrors(shown, validateScores(state.rubric.criteria, scores));
+      return sameErrors(shown, next) ? shown : next;
+    });
+  }, [scores, state]);
+
   if (state.status === "loading") return <p className="page muted">Loading…</p>;
   if (state.status === "error") return <p className="page alert">{state.message}</p>;
 
@@ -56,24 +88,6 @@ export default function ReviewSubmission() {
   const hasAiScore = (criterionId) => (aiFor(criterionId)?.ai_score ?? null) !== null;
   const everyCriterionHasAi = criteria.length > 0 && criteria.every((c) => hasAiScore(c.id));
   const alreadyApproved = submission.status === "approved";
-
-  function validate() {
-    const found = { criteria: {} };
-    criteria.forEach((criterion) => {
-      const raw = scores[criterion.id];
-      const rowErrors = {};
-      if (raw === undefined || String(raw).trim() === "") rowErrors.score = "Enter a score.";
-      else {
-        const value = Number(raw);
-        if (Number.isNaN(value)) rowErrors.score = "Enter a number.";
-        else if (value < 0) rowErrors.score = "Cannot be negative.";
-        else if (value > criterion.max_points) rowErrors.score = `Cannot be more than ${criterion.max_points}.`;
-      }
-      if (Object.keys(rowErrors).length) found.criteria[criterion.id] = rowErrors;
-    });
-    if (!Object.keys(found.criteria).length) delete found.criteria;
-    return found;
-  }
 
   function onStale(cause) {
     if (cause instanceof ApiError && cause.status === 409) {
@@ -106,7 +120,7 @@ export default function ReviewSubmission() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const found = validate();
+    const found = validateScores(criteria, scores);
     if (Object.keys(found).length) {
       setErrors(found);
       return;
@@ -148,6 +162,12 @@ export default function ReviewSubmission() {
         <Link to="/teacher/review">← Review queue</Link>
       </p>
       <h1>{rubric.title}</h1>
+      <p className="student-line">
+        Submitted by <strong>{submission.student_name}</strong>{" "}
+        <span className="muted">
+          {submission.student_email} · {new Date(submission.created_at).toLocaleString()}
+        </span>
+      </p>
 
       {alreadyApproved && (
         <p className="alert" role="alert">

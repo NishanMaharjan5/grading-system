@@ -404,3 +404,104 @@ details.card > summary {
 .test-case > button {
   margin-top: 1.6rem;
 }
+
+/* header: never wider than the screen. On a phone the nav takes its own row
+   and the email (the long, variable-width part) is dropped in favour of the
+   role badge; on wider screens a long email truncates rather than pushing
+   "Sign out" off the edge. */
+.shell__title,
+.shell__nav a,
+.shell__signout {
+  white-space: nowrap;
+}
+
+.shell__user {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.shell__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell__signout {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .shell__header {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .shell__nav {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+
+  .shell__email {
+    display: none;
+  }
+}
+
+.student-line {
+  margin: 0.25rem 0 0.75rem;
+}
+
+h1 + .student-line {
+  margin-top: -0.5rem;
+}
+
+/* rubric form at phone width. Two browser defaults stop it shrinking: a
+   fieldset's minimum width is its content's minimum width, and a flex item
+   won't shrink below its input's natural width. Lift both, then stack the
+   rows so nothing is squeezed to an unusable sliver. */
+.criteria {
+  min-width: 0;
+}
+
+.criterion-row__field {
+  min-width: 0;
+}
+
+.criterion-row__field input,
+.criterion-row__field textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .criteria {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  .criterion-row,
+  .test-case {
+    flex-wrap: wrap;
+  }
+
+  .criterion-row__field {
+    flex: 1 1 100%;
+  }
+
+  /* points and its Remove button share the second line */
+  .criterion-row__field--points {
+    flex: 1 1 0;
+  }
+
+  .criterion-row > button,
+  .test-case > button {
+    margin-top: 0;
+    align-self: flex-end;
+  }
+
+  .test-cases {
+    margin-left: 0;
+    padding-left: 0.5rem;
+  }
+}

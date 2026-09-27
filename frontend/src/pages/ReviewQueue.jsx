@@ -81,6 +81,11 @@ export default function ReviewQueue() {
                   <span className={`badge badge--${copy.tone}`}>{copy.label}</span>
                 </div>
 
+                <p className="student-line">
+                  <strong>{submission.student_name}</strong>{" "}
+                  <span className="muted">{submission.student_email}</span>
+                </p>
+
                 <p className="muted">
                   Submitted {new Date(submission.created_at).toLocaleString()} · {copy.hint}
                 </p>

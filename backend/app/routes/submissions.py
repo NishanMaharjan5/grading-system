@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, g, jsonify, request
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 
 from app.extensions import db
 from app.grading import feedback as feedback_templates
@@ -74,6 +75,11 @@ def _submission_to_dict(sub, *, for_teacher):
     if for_teacher:
         base["ai_total"] = float(sub.ai_total) if sub.ai_total is not None else None
         base["ai_summary"] = sub.ai_summary
+        # Without these, two submissions to the same rubric are
+        # indistinguishable in the review queue. Email alongside the name
+        # because names aren't unique.
+        base["student_name"] = sub.student.name
+        base["student_email"] = sub.student.email
     return base
 
 
@@ -120,7 +126,7 @@ def list_submissions():
     user_id = int(g.current_user["sub"])
     rubric_id = request.args.get("rubric_id", type=int)
 
-    query = db.session.query(Submission)
+    query = db.session.query(Submission).options(joinedload(Submission.student))
     if role == "student":
         query = query.filter(Submission.student_id == user_id)
     else:
@@ -141,7 +147,7 @@ def list_pending_review():
     /<int:submission_id> rule -- the int converter won't match "pending" anyway,
     but keeping them adjacent makes that obvious to the next reader."""
     submissions = (
-        db.session.query(Submission)
+        db.session.query(Submission).options(joinedload(Submission.student))
         .join(Rubric)
         .filter(Rubric.created_by == int(g.current_user["sub"]))
         .filter(Submission.status.in_(("ai_graded", "grading_failed")))
