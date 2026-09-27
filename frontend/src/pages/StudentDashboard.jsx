@@ -82,9 +82,9 @@ export default function StudentDashboard() {
 
                 <div className="row">
                   {submission ? (
-                    <Link to={`/student/submissions/${submission.id}`}>View your submission</Link>
+                    <Link to={`/student/submissions/${submission.id}`} className="button button--secondary">View your submission</Link>
                   ) : (
-                    <Link to={`/student/submit/${rubric.id}`}>Submit work</Link>
+                    <Link to={`/student/submit/${rubric.id}`} className="button">Submit work</Link>
                   )}
                 </div>
               </li>

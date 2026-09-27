@@ -44,7 +44,7 @@ def for_criterion(criterion, score):
     max_points = float(criterion.max_points)
     label, guidance = band_for(score, max_points)
 
-    text = f"{criterion.name}: {score:g}/{max_points:g} -- {label}. {guidance}"
+    text = f"{criterion.name}: {score:g}/{max_points:g} — {label}. {guidance}"
 
     description = (criterion.description or "").strip()
     if description and _ratio(score, max_points) < QUOTE_CRITERION_BELOW:
@@ -64,7 +64,7 @@ def summary(criteria, scores):
     total = sum(score for _, score, _ in scored)
     possible = sum(max_points for _, _, max_points in scored)
     label, _ = band_for(total, possible)
-    parts = [f"Overall {total:g}/{possible:g} -- {label}."]
+    parts = [f"Overall {total:g}/{possible:g} — {label}."]
 
     if len(scored) > 1:
         by_ratio = sorted(scored, key=lambda row: _ratio(row[1], row[2]))
@@ -74,7 +74,7 @@ def summary(criteria, scores):
         if _ratio(weakest[1], weakest[2]) < _ratio(strongest[1], strongest[2]):
             parts.append(f"Strongest: {strongest[0].name} ({strongest[1]:g}/{strongest[2]:g}).")
             parts.append(f"Weakest: {weakest[0].name} ({weakest[1]:g}/{weakest[2]:g})"
-                         " -- focus your revision there first.")
+                         " — focus your revision there first.")
 
     return " ".join(parts)
 

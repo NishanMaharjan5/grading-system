@@ -87,15 +87,52 @@ button:focus-visible {
   outline-offset: 1px;
 }
 
-button {
+/* Actions. Four kinds, used the same way everywhere:
+   - primary (plain <button>, or .button on a link): the one main action on a
+     card or form -- submit, "New rubric", "Submit work", "Grade this"
+   - .button--secondary: an alternative to it -- View, Edit, Cancel, Delete,
+     "Accept all AI scores" (secondary because manual grading is the main path)
+   - .button--plain: small tools inside a form -- Add, Remove, "Use this score"
+   - plain links: back navigation and links inside a sentence */
+button,
+.button {
+  display: inline-block;
   font: inherit;
+  line-height: 1.25;
   margin-top: 1.25rem;
   padding: 0.55rem 1rem;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 4px;
   background: var(--accent);
   color: #fff;
   cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+a.button {
+  margin-top: 0;
+}
+
+button:hover:not(:disabled),
+a.button:hover {
+  filter: brightness(0.93);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.button--secondary {
+  background: var(--bg);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.button--secondary:hover:not(:disabled) {
+  filter: none;
+  background: #f1f5ff;
 }
 
 button:disabled {
@@ -264,6 +301,14 @@ input[aria-invalid="true"] {
 
 .button--danger {
   color: var(--error-fg);
+}
+
+.button--secondary.button--danger {
+  border-color: var(--error-fg);
+}
+
+.button--secondary.button--danger:hover:not(:disabled) {
+  background: var(--error-bg);
 }
 
 .criteria-summary {
@@ -504,4 +549,64 @@ h1 + .student-line {
     margin-left: 0;
     padding-left: 0.5rem;
   }
+}
+
+/* code: submitted programs, previews and test feedback keep their line
+   breaks and indentation, in a monospace face */
+.code,
+.code-input,
+.feedback--code,
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.code {
+  margin: 0.5rem 0 0;
+  padding: 0.75rem;
+  background: #f6f7f9;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 4;
+}
+
+.code--preview {
+  max-height: 10rem;
+}
+
+.code-input {
+  tab-size: 4;
+  line-height: 1.45;
+}
+
+code {
+  padding: 0.05rem 0.3rem;
+  background: #f6f7f9;
+  border-radius: 3px;
+}
+
+/* feedback keeps its line structure; code feedback lines up expected/actual */
+.feedback {
+  white-space: pre-wrap;
+  margin: 0.25rem 0 0;
+}
+
+.feedback--code {
+  overflow-x: auto;
+}
+
+.code-guide ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.code-guide li {
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.code-guide .rubric__title {
+  font-size: 1rem;
 }

@@ -79,6 +79,8 @@ export default function SubmitWork() {
   if (loadError) return <p className="page alert">{loadError}</p>;
   if (!rubric) return <p className="page muted">Loading…</p>;
 
+  const isCode = rubric.type === "code";
+
   return (
     <div className="page">
       <p className="muted">
@@ -106,14 +108,42 @@ export default function SubmitWork() {
           </p>
         )}
 
-        <label htmlFor="content">Your answer</label>
+        {isCode && (
+          <div className="card code-guide" id="code-guide">
+            <h2 className="rubric__title">How your program is tested</h2>
+            <ul>
+              <li>
+                It runs once per test with <strong>Python 3.9</strong>, using the{" "}
+                <strong>standard library only</strong> (no numpy, requests or other installed packages).
+              </li>
+              <li>
+                Each test&apos;s input arrives on <strong>standard input</strong>. Read it with{" "}
+                <code>input()</code> or <code>sys.stdin</code>.
+              </li>
+              <li>
+                You&apos;re marked on what it <strong>prints</strong>. Trailing spaces and blank lines at
+                the start or end are ignored; everything else has to match exactly.
+              </li>
+              <li>
+                It can&apos;t read files, use the network or start other programs, and a run is stopped
+                after 5 seconds of processing time.
+              </li>
+            </ul>
+          </div>
+        )}
+
+        <label htmlFor="content">{isCode ? "Your Python program" : "Your answer"}</label>
         <textarea
           id="content"
-          rows={14}
+          rows={isCode ? 18 : 14}
+          className={isCode ? "code-input" : undefined}
+          spellCheck={isCode ? false : undefined}
+          autoCapitalize={isCode ? "off" : undefined}
+          autoCorrect={isCode ? "off" : undefined}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           aria-invalid={Boolean(contentError)}
-          aria-describedby={contentError ? "content-error" : undefined}
+          aria-describedby={[isCode ? "code-guide" : null, contentError ? "content-error" : null].filter(Boolean).join(" ") || undefined}
         />
         {contentError && (
           <p className="field-error" id="content-error">

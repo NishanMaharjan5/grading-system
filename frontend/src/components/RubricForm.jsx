@@ -294,7 +294,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
           {busy ? "Saving…" : editing ? "Save changes" : "Create rubric"}
         </button>
         {onCancel && (
-          <button type="button" className="button--plain" onClick={onCancel}>
+          <button type="button" className="button--secondary" onClick={onCancel}>
             Cancel
           </button>
         )}

@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { statusCopy, submissionsApi } from "../api/submissions";
+import { criterionFeedbackForDisplay, summaryForDisplay } from "../grading/feedbackText";
 
 /**
  * A student's view of one submission.
@@ -49,6 +50,7 @@ export default function SubmissionView() {
   const criterionName = (id) => rubric.criteria.find((c) => c.id === id)?.name ?? `Criterion ${id}`;
   const criterionMax = (id) => rubric.criteria.find((c) => c.id === id)?.max_points;
   const isApproved = submission.status === "approved";
+  const isCode = rubric.type === "code";
 
   return (
     <div className="page">
@@ -77,25 +79,44 @@ export default function SubmissionView() {
           <h2 className="rubric__title">
             Your grade: {submission.final_total} / {rubric.total_points}
           </h2>
-          {submission.final_summary && <p>{submission.final_summary}</p>}
+          {submission.final_summary && (
+            <p>{summaryForDisplay(submission.final_summary, { total: submission.final_total, maxTotal: rubric.total_points })}</p>
+          )}
 
           <ul className="criteria-summary">
-            {submission.grades.map((grade) => (
-              <li key={grade.criterion_id}>
-                <strong>
-                  {criterionName(grade.criterion_id)}: {grade.final_score}
-                  {criterionMax(grade.criterion_id) !== undefined && ` / ${criterionMax(grade.criterion_id)}`}
-                </strong>
-                {grade.final_feedback && <div className="muted">{grade.final_feedback}</div>}
-              </li>
-            ))}
+            {submission.grades.map((grade) => {
+              const criterion = rubric.criteria.find((c) => c.id === grade.criterion_id);
+              return (
+                <li key={grade.criterion_id}>
+                  <strong>
+                    {criterionName(grade.criterion_id)}: {grade.final_score}
+                    {criterionMax(grade.criterion_id) !== undefined && ` / ${criterionMax(grade.criterion_id)}`}
+                  </strong>
+                  {grade.final_feedback && (
+                    <div className={`feedback muted${isCode ? " feedback--code" : ""}`}>
+                      {criterionFeedbackForDisplay(grade.final_feedback, {
+                        criterionName: criterionName(grade.criterion_id),
+                        score: grade.final_score,
+                        maxPoints: criterion?.max_points,
+                        description: criterion?.description,
+                        hideDescription: false,  // not shown elsewhere on this page, so the quote is useful
+                      })}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
 
       <details className="card">
         <summary>What you submitted</summary>
-        <p className="submitted-content">{submission.content}</p>
+        {isCode ? (
+          <pre className="code">{submission.content}</pre>
+        ) : (
+          <p className="submitted-content">{submission.content}</p>
+        )}
       </details>
     </div>
   );

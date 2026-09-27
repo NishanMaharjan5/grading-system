@@ -81,6 +81,19 @@ class TestScoreBands:
         assert feedback.for_criterion(thesis, 0)
 
 
+class TestTypography:
+    """Generated text is shown to students, so it uses a real dash rather than
+    the double hyphen it was written with."""
+
+    @pytest.mark.parametrize("score", [0, 2, 3, 4, 5])
+    def test_criterion_feedback_has_no_double_hyphen(self, criteria, score):
+        assert "--" not in feedback.for_criterion(criteria[0], score)
+
+    def test_summary_has_no_double_hyphen(self, criteria, criterion_ids):
+        thesis, evidence = criterion_ids
+        assert "--" not in feedback.summary(criteria, {thesis: 4, evidence: 2})
+
+
 class TestSummary:
     def test_leads_with_the_total_then_names_both_ends(self, criteria, criterion_ids):
         thesis, evidence = criterion_ids

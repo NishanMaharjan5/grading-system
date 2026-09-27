@@ -195,7 +195,7 @@ def _parse_review_scores(raw, criteria):
     # never be computed and the student would see an incomplete grade.
     missing = [c.name for c in criteria if c.id not in parsed]
     if missing:
-        return None, f"Every criterion needs a score -- missing: {', '.join(missing)}"
+        return None, f"Every criterion needs a score — missing: {', '.join(missing)}"
     return parsed, None
 
 

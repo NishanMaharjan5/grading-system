@@ -22,6 +22,14 @@ const STATUS_COPY = {
   grading_failed: { label: "Needs manual grading", tone: "neutral", hint: "No trained model for this rubric." },
 };
 
+/** First few lines of a program, with its line breaks kept -- collapsing code
+    onto one line (as a text preview does) makes it unreadable. */
+const PREVIEW_LINES = 6;
+function codePreview(source) {
+  const lines = source.replace(/\s+$/, "").split("\n");
+  return lines.length > PREVIEW_LINES ? [...lines.slice(0, PREVIEW_LINES), "…"].join("\n") : lines.join("\n");
+}
+
 export default function ReviewQueue() {
   const location = useLocation();
   const justApproved = location.state?.approvedId;
@@ -90,13 +98,17 @@ export default function ReviewQueue() {
                   Submitted {new Date(submission.created_at).toLocaleString()} · {copy.hint}
                 </p>
 
-                <p className="submitted-preview">
-                  {submission.content.slice(0, 180)}
-                  {submission.content.length > 180 ? "…" : ""}
-                </p>
+                {rubric?.type === "code" ? (
+                  <pre className="code code--preview">{codePreview(submission.content)}</pre>
+                ) : (
+                  <p className="submitted-preview">
+                    {submission.content.slice(0, 180)}
+                    {submission.content.length > 180 ? "…" : ""}
+                  </p>
+                )}
 
                 <div className="row">
-                  <Link to={`/teacher/review/${submission.id}`}>
+                  <Link to={`/teacher/review/${submission.id}`} className="button">
                     {submission.status === "ai_graded" ? "Review suggestion" : "Grade this"}
                   </Link>
                 </div>

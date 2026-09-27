@@ -5,6 +5,7 @@ import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { reviewErrorsFromDetail, submissionsApi } from "../api/submissions";
 import { refreshShownErrors, sameErrors } from "../forms/errors";
+import { criterionFeedbackForDisplay } from "../grading/feedbackText";
 
 /** Client-side mirror of the backend's override rules, keyed by criterion id. */
 function validateScores(criteria, scores) {
@@ -88,6 +89,7 @@ export default function ReviewSubmission() {
   const hasAiScore = (criterionId) => (aiFor(criterionId)?.ai_score ?? null) !== null;
   const everyCriterionHasAi = criteria.length > 0 && criteria.every((c) => hasAiScore(c.id));
   const alreadyApproved = submission.status === "approved";
+  const isCode = rubric.type === "code";
 
   function onStale(cause) {
     if (cause instanceof ApiError && cause.status === 409) {
@@ -177,7 +179,11 @@ export default function ReviewSubmission() {
 
       <details className="card" open>
         <summary>The student's work</summary>
-        <p className="submitted-content">{submission.content}</p>
+        {isCode ? (
+          <pre className="code">{submission.content}</pre>
+        ) : (
+          <p className="submitted-content">{submission.content}</p>
+        )}
       </details>
 
       {errors.form && (
@@ -191,14 +197,14 @@ export default function ReviewSubmission() {
           <p className="muted">
             The engine scored every criterion. You can accept all of its scores unchanged, or grade below.
           </p>
-          <button type="button" onClick={acceptAllAsIs} disabled={busy}>
+          <button type="button" className="button--secondary" onClick={acceptAllAsIs} disabled={busy}>
             Accept all AI scores as-is
           </button>
         </div>
       )}
 
       <form onSubmit={handleSubmit} noValidate>
-        <h2>Your grade</h2>
+        <h2>Scores and feedback</h2>
         {criteria.map((criterion) => {
           const ai = aiFor(criterion.id);
           const showsAi = hasAiScore(criterion.id);
@@ -219,7 +225,17 @@ export default function ReviewSubmission() {
                   <p className="ai-suggestion__head">
                     AI suggestion: <strong>{ai.ai_score}</strong> / {criterion.max_points}
                   </p>
-                  {ai.ai_feedback && <p className="muted">{ai.ai_feedback}</p>}
+                  {ai.ai_feedback && (
+                    <p className={`feedback muted${isCode ? " feedback--code" : ""}`}>
+                      {criterionFeedbackForDisplay(ai.ai_feedback, {
+                        criterionName: criterion.name,
+                        score: ai.ai_score,
+                        maxPoints: criterion.max_points,
+                        description: criterion.description,
+                        hideDescription: true,  // already shown just above this block
+                      })}
+                    </p>
+                  )}
                   <button
                     type="button"
                     className="button--plain"
@@ -277,7 +293,7 @@ export default function ReviewSubmission() {
           <button type="submit" disabled={busy || alreadyApproved}>
             {busy ? "Saving…" : "Approve and release grade"}
           </button>
-          <Link to="/teacher/review">Cancel</Link>
+          <Link to="/teacher/review" className="button button--secondary">Cancel</Link>
         </div>
       </form>
     </div>

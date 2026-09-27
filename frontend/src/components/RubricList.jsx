@@ -43,7 +43,7 @@ export default function RubricList({ rubrics, onEdit, onDelete, busyId }) {
           <div className="row">
             <button
               type="button"
-              className="button--plain"
+              className="button--secondary"
               onClick={() => onEdit(rubric)}
               disabled={rubric.locked}
               title={rubric.locked ? "Cannot edit: work has already been submitted" : "Edit this rubric"}
@@ -52,7 +52,7 @@ export default function RubricList({ rubrics, onEdit, onDelete, busyId }) {
             </button>
             <button
               type="button"
-              className="button--plain button--danger"
+              className="button--secondary button--danger"
               onClick={() => onDelete(rubric)}
               disabled={rubric.locked || busyId === rubric.id}
               title={rubric.locked ? "Cannot delete: work has already been submitted" : "Delete this rubric"}
