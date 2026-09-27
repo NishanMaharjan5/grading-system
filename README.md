@@ -142,16 +142,19 @@ frontend/        React + Vite
 
 ## Known limitations
 
-- **The grader is trained on 70 labeled examples** (33 Thesis, 37
-  Evidence). Leave-one-out MAE is 0.85 for Thesis (baseline 1.39) and 1.62 for
+- **The grader is trained on 76 labeled examples** (33 Thesis, 43
+  Evidence). Leave-one-out MAE is 0.85 for Thesis (baseline 1.39) and 1.49 for
   Evidence (baseline 3.30). With this few examples, the numbers move noticeably
-  if a single example changes.
+  if a single example changes. Tuning has stopped here: further gains on a
+  dataset this size are small.
 - **The Evidence grader rewards what evidence looks like, not whether it is
   relevant or true.** Padding a vague answer with names and numbers used to
-  lift it from 0-2 to 4-8 out of 10. Five labelled examples of
-  exactly that kind of padding roughly halved the effect, but padding with
-  statistics (percentages, dollar figures) still gains 2-3 points. The review
-  step is the backstop: no AI score reaches a student unapproved.
+  lift it from 0-2 to 4-8 out of 10. Adversarial and paired examples cut that
+  to 1-2 points. But a fluent sentence that states a statistic without using it
+  in an argument still scores 5-7 out of 10: the low-scored halves of the pairs
+  are sentence fragments, so the model mostly learned that fragments score low,
+  not that unconnected numbers do. The review step is the backstop: no AI score
+  reaches a student unapproved.
 - **Approval is final.** Re-approving returns 409 and there is no correction
   path for a mistaken approval; that would need a revise endpoint with an
   audit trail.

@@ -418,5 +418,41 @@
     "criterion": "Evidence",
     "text": "According to various numbers and statistics from multiple countries and organizations over the last several years, this is a topic that affects millions of people worldwide in significant ways.",
     "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "A 2021 study found that 64% of surveyed teens reported feeling worse about their body image after using image-heavy platforms, which directly supports the case that these platforms cause measurable psychological harm.",
+    "score": 9
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "64% of teens surveyed in 2021. Body image. Image-heavy platforms.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "The FTC's $5 billion settlement in 2019 shows that financial penalties alone haven't been enough to change platform behavior, since violations continued afterward.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "FTC. $5 billion. 2019. Settlement.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Stanford researchers identified over 200 coordinated accounts tied to a single influence campaign in 2022, illustrating how easily platforms can be exploited at scale despite existing safeguards.",
+    "score": 9
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Stanford. 200 accounts. 2022. Influence campaign.",
+    "score": 2
   }
 ]
