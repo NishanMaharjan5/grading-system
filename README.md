@@ -18,7 +18,7 @@ is never fine-tuned.
 
 Regression rather than classification because rubric scores are ordinal —
 predicting 0 for a true 5 should not cost the same as predicting 4. Measured on
-the current 35 labeled examples, classification on embeddings alone scored
+the first 35 labeled examples, classification on embeddings alone scored
 *worse than always guessing the mean*; see `backend/app/grading/features.py`
 for why, and the commit history for the numbers.
 
@@ -142,10 +142,16 @@ frontend/        React + Vite
 
 ## Known limitations
 
-- **The grader is trained on 35 labeled examples.** It beats a
-  guess-the-mean baseline but not by much, and the numbers move several points
-  if a single example changes. More labeled data is the highest-value
-  improvement available.
+- **The grader is trained on 70 labeled examples** (33 Thesis, 37
+  Evidence). Leave-one-out MAE is 0.85 for Thesis (baseline 1.39) and 1.62 for
+  Evidence (baseline 3.30). With this few examples, the numbers move noticeably
+  if a single example changes.
+- **The Evidence grader rewards what evidence looks like, not whether it is
+  relevant or true.** Padding a vague answer with names and numbers used to
+  lift it from 0-2 to 4-8 out of 10. Five labelled examples of
+  exactly that kind of padding roughly halved the effect, but padding with
+  statistics (percentages, dollar figures) still gains 2-3 points. The review
+  step is the backstop: no AI score reaches a student unapproved.
 - **Approval is final.** Re-approving returns 409 and there is no correction
   path for a mistaken approval; that would need a revise endpoint with an
   audit trail.

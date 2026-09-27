@@ -208,5 +208,215 @@
     "criterion": "Evidence",
     "text": "Twitter was founded in 2006 and has changed a lot each year.",
     "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Because social media platforms function as de facto public squares, governments should regulate them under the same speech-access principles applied to traditional utilities.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Platforms' business model depends on maximizing engagement even when that means amplifying self-harm content to vulnerable teenagers, which justifies binding safety regulation rather than voluntary guidelines.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Regulation should target market concentration specifically: a handful of companies controlling public discourse infrastructure is a competition problem as much as a speech problem.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media companies should face stricter privacy regulation because they collect far more personal data than users realize.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Because algorithmic recommendation systems can radicalize users toward extremism, governments have a legitimate interest in regulating how those systems are designed.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Election interference conducted through social media ad targeting justifies new government oversight of political advertising on these platforms.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Kids are spending too much time on social media and parents can't really do anything about it, so maybe the government should.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Privacy on social media is a real problem and companies should be held responsible somehow.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "There's a strong case for regulating how these platforms target ads at users.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Elections and social media are connected in ways that concern a lot of people.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Kids' mental health and social media use come up a lot in the news lately.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Privacy is important and companies collect a lot of data these days.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media has changed how elections work in some ways.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Instagram has over a billion users worldwide as of recent counts.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Many parents worry about how much time their children spend online.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "A 2023 Stanford Internet Observatory report traced over 200 coordinated inauthentic accounts to a single influence operation targeting the 2022 midterms, demonstrating the scale platforms fail to catch without external pressure.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "The FTC's 2019 settlement required Facebook to pay $5 billion specifically over data practices that violated a prior consent decree, showing existing self-regulation had already failed once.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Common Sense Media's 2023 survey of 1,300 teens found 41% who described themselves as heavy social media users rated their own mental health as poor or very poor, compared to 23% of light users.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Reports have documented that political ad targeting on these platforms allowed messages tailored to exploit specific demographic anxieties during past election cycles.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Internal company documents leaked to journalists showed executives were aware of mental health impacts on teen users well before public disclosure.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "A number of antitrust cases have been filed against major platforms over the past several years citing anticompetitive acquisition patterns.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Many people feel their privacy is violated by how much data these companies collect.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "There have been several news stories about election interference linked to social media.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Reports suggest that heavy social media use is linked to worse mental health outcomes.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "It's well known that these companies collect a lot of data.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Everyone has read about problems with social media and elections at some point.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Parents and experts alike express concern about this issue regularly.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Data privacy is a topic that comes up in the news frequently.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Elections happen every few years in most democracies.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Many people use social media to keep up with friends and family.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Facebook, Instagram, Twitter, TikTok, YouTube, LinkedIn, Snapchat, Reddit, and Pinterest are all major platforms used across North America, Europe, Asia, and Africa by billions of people in over 190 countries.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "In 2010, 2015, and 2020, social media usage statistics changed significantly across countries like the United States, Brazil, India, Germany, and Japan, with numbers ranging from millions to billions of users.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Meta, Alphabet, ByteDance, and X Corp are four of the largest technology companies, operating in dozens of countries with thousands of employees and billions of dollars in revenue each year.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Studies, reports, surveys, and articles from sources like universities, government agencies, and news organizations in the US, UK, Canada, and Australia have discussed this topic at length over the past 5, 10, and 15 years.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "According to various numbers and statistics from multiple countries and organizations over the last several years, this is a topic that affects millions of people worldwide in significant ways.",
+    "score": 1
   }
 ]
