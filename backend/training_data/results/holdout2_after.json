@@ -1,0 +1,688 @@
+{
+  "label": "FINAL TEST SET (holdout2), AFTER: models retrained on 98 examples",
+  "holdout_file": "holdout2_team_scored.json",
+  "training_file": "sample_answers.json",
+  "training_rows": 98,
+  "models": {
+    "Thesis": {
+      "n_examples": 44,
+      "md5": "25bfd58417cbbd14379c7326507b6cc5"
+    },
+    "Evidence": {
+      "n_examples": 54,
+      "md5": "d0db591c5068c58893f14e084e493854"
+    }
+  },
+  "git_head": "815da2ba1467c15fe9369ced0e83af18e9e4c70f",
+  "run_at": "2026-09-28T17:17:22+00:00",
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 0
+  },
+  "leakage": {
+    "duplicates": 0,
+    "notable_overlaps": [
+      {
+        "essay_id": 7,
+        "criterion": "Thesis",
+        "cosine": 0.756,
+        "closest_training_text": "Kids are spending too much time on social media and parents can't really do anything about it, so maybe the government should."
+      },
+      {
+        "essay_id": 11,
+        "criterion": "Thesis",
+        "cosine": 0.754,
+        "closest_training_text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for compan"
+      },
+      {
+        "essay_id": 11,
+        "criterion": "Evidence",
+        "cosine": 0.754,
+        "closest_training_text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for compan"
+      },
+      {
+        "essay_id": 7,
+        "criterion": "Evidence",
+        "cosine": 0.731,
+        "closest_training_text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them respon"
+      },
+      {
+        "essay_id": 5,
+        "criterion": "Thesis",
+        "cosine": 0.718,
+        "closest_training_text": "This essay will discuss social media regulation and look at different viewpoints."
+      },
+      {
+        "essay_id": 9,
+        "criterion": "Thesis",
+        "cosine": 0.705,
+        "closest_training_text": "Governments should regulate social media to curb the spread of harmful content aimed at minors."
+      },
+      {
+        "essay_id": 3,
+        "criterion": "Thesis",
+        "cosine": 0.686,
+        "closest_training_text": "Election interference conducted through social media ad targeting justifies new government oversight of political advertising on these platf"
+      },
+      {
+        "essay_id": 5,
+        "criterion": "Evidence",
+        "cosine": 0.685,
+        "closest_training_text": "I think social media regulation is an interesting topic to write about."
+      },
+      {
+        "essay_id": 12,
+        "criterion": "Evidence",
+        "cosine": 0.677,
+        "closest_training_text": "Social media is used by billions of people around the world every single day."
+      },
+      {
+        "essay_id": 1,
+        "criterion": "Thesis",
+        "cosine": 0.647,
+        "closest_training_text": "Social media is a big part of modern life and governments have been discussing what to do about it."
+      },
+      {
+        "essay_id": 1,
+        "criterion": "Evidence",
+        "cosine": 0.643,
+        "closest_training_text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them respon"
+      },
+      {
+        "essay_id": 3,
+        "criterion": "Evidence",
+        "cosine": 0.626,
+        "closest_training_text": "Several documented cases exist of foreign governments using social media ads to interfere in elections, which regulation could help prevent."
+      },
+      {
+        "essay_id": 9,
+        "criterion": "Evidence",
+        "cosine": 0.625,
+        "closest_training_text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them respon"
+      },
+      {
+        "essay_id": 12,
+        "criterion": "Thesis",
+        "cosine": 0.61,
+        "closest_training_text": "Social media is a big part of modern life and governments have been discussing what to do about it."
+      }
+    ]
+  },
+  "criteria": {
+    "Thesis": {
+      "max_points": 5.0,
+      "n": 12,
+      "model": {
+        "mae": 1.1666666666666667,
+        "within_one": 0.5,
+        "exact": 0.3333333333333333,
+        "qwk": 0.6276849642004774
+      },
+      "baseline": {
+        "mae": 1.75,
+        "within_one": 0.3333333333333333,
+        "exact": 0.08333333333333333,
+        "qwk": 0.0,
+        "constant": 3.0
+      },
+      "ci": {
+        "model": {
+          "mae": [
+            0.6666666666666666,
+            1.6666666666666667
+          ],
+          "within_one": [
+            0.25,
+            0.75
+          ],
+          "exact": [
+            0.08333333333333333,
+            0.5833333333333334
+          ],
+          "qwk": [
+            0.2784708589995261,
+            0.7782340862422997
+          ]
+        },
+        "baseline_mae": [
+          0.8333333333333334,
+          2.1666666666666665
+        ],
+        "mae_improvement_over_baseline": [
+          -0.75,
+          1.1666666666666665
+        ]
+      },
+      "essays": [
+        {
+          "essay_id": 1,
+          "true": 5.0,
+          "raw": 2.984,
+          "pred": 3.0,
+          "word_count": 71
+        },
+        {
+          "essay_id": 2,
+          "true": 5.0,
+          "raw": 2.597,
+          "pred": 3.0,
+          "word_count": 66
+        },
+        {
+          "essay_id": 3,
+          "true": 4.0,
+          "raw": 2.803,
+          "pred": 3.0,
+          "word_count": 43
+        },
+        {
+          "essay_id": 4,
+          "true": 0.0,
+          "raw": 0.683,
+          "pred": 1.0,
+          "word_count": 43
+        },
+        {
+          "essay_id": 5,
+          "true": 1.0,
+          "raw": 0.698,
+          "pred": 1.0,
+          "word_count": 40
+        },
+        {
+          "essay_id": 6,
+          "true": 1.0,
+          "raw": 0.955,
+          "pred": 1.0,
+          "word_count": 56
+        },
+        {
+          "essay_id": 7,
+          "true": 3.0,
+          "raw": 2.594,
+          "pred": 3.0,
+          "word_count": 35
+        },
+        {
+          "essay_id": 8,
+          "true": 5.0,
+          "raw": 3.212,
+          "pred": 3.0,
+          "word_count": 78
+        },
+        {
+          "essay_id": 9,
+          "true": 4.0,
+          "raw": 2.415,
+          "pred": 2.0,
+          "word_count": 34
+        },
+        {
+          "essay_id": 10,
+          "true": 4.0,
+          "raw": 2.283,
+          "pred": 2.0,
+          "word_count": 42
+        },
+        {
+          "essay_id": 11,
+          "true": 5.0,
+          "raw": 2.918,
+          "pred": 3.0,
+          "word_count": 58
+        },
+        {
+          "essay_id": 12,
+          "true": 0.0,
+          "raw": 0.213,
+          "pred": 0.0,
+          "word_count": 52
+        }
+      ]
+    },
+    "Evidence": {
+      "max_points": 10.0,
+      "n": 12,
+      "model": {
+        "mae": 1.75,
+        "within_one": 0.25,
+        "exact": 0.25,
+        "qwk": 0.6313253012048192
+      },
+      "baseline": {
+        "mae": 2.75,
+        "within_one": 0.16666666666666666,
+        "exact": 0.08333333333333333,
+        "qwk": 0.0,
+        "constant": 4.0
+      },
+      "ci": {
+        "model": {
+          "mae": [
+            1.0833333333333333,
+            2.3333333333333335
+          ],
+          "within_one": [
+            0.0,
+            0.5
+          ],
+          "exact": [
+            0.0,
+            0.5
+          ],
+          "qwk": [
+            0.28343683651804663,
+            0.7813530347203814
+          ]
+        },
+        "baseline_mae": [
+          1.6666666666666667,
+          3.4166666666666665
+        ],
+        "mae_improvement_over_baseline": [
+          -0.08333333333333326,
+          1.5000000000000002
+        ]
+      },
+      "essays": [
+        {
+          "essay_id": 1,
+          "true": 8.0,
+          "raw": 4.744,
+          "pred": 5.0,
+          "word_count": 71
+        },
+        {
+          "essay_id": 2,
+          "true": 8.0,
+          "raw": 6.197,
+          "pred": 6.0,
+          "word_count": 66
+        },
+        {
+          "essay_id": 3,
+          "true": 6.0,
+          "raw": 5.908,
+          "pred": 6.0,
+          "word_count": 43
+        },
+        {
+          "essay_id": 4,
+          "true": 0.0,
+          "raw": 1.977,
+          "pred": 2.0,
+          "word_count": 43
+        },
+        {
+          "essay_id": 5,
+          "true": 0.0,
+          "raw": 1.6,
+          "pred": 2.0,
+          "word_count": 40
+        },
+        {
+          "essay_id": 6,
+          "true": 5.0,
+          "raw": 5.273,
+          "pred": 5.0,
+          "word_count": 56
+        },
+        {
+          "essay_id": 7,
+          "true": 2.0,
+          "raw": 3.947,
+          "pred": 4.0,
+          "word_count": 35
+        },
+        {
+          "essay_id": 8,
+          "true": 9.0,
+          "raw": 7.382,
+          "pred": 7.0,
+          "word_count": 78
+        },
+        {
+          "essay_id": 9,
+          "true": 2.0,
+          "raw": 5.118,
+          "pred": 5.0,
+          "word_count": 34
+        },
+        {
+          "essay_id": 10,
+          "true": 7.0,
+          "raw": 5.47,
+          "pred": 5.0,
+          "word_count": 42
+        },
+        {
+          "essay_id": 11,
+          "true": 4.0,
+          "raw": 3.513,
+          "pred": 4.0,
+          "word_count": 58
+        },
+        {
+          "essay_id": 12,
+          "true": 2.0,
+          "raw": 4.801,
+          "pred": 5.0,
+          "word_count": 52
+        }
+      ]
+    }
+  },
+  "compare": {
+    "against": "holdout2_before.json",
+    "criteria": {
+      "Thesis": {
+        "metrics": {
+          "mae": {
+            "before": 1.0,
+            "after": 1.1666666666666667,
+            "change": 0.16666666666666674,
+            "change_ci": [
+              -0.5000000000000001,
+              0.75
+            ],
+            "before_ci": [
+              0.6666666666666666,
+              1.3333333333333333
+            ]
+          },
+          "within_one": {
+            "before": 0.8333333333333334,
+            "after": 0.5,
+            "change": -0.33333333333333337,
+            "change_ci": [
+              -0.75,
+              0.08333333333333337
+            ],
+            "before_ci": [
+              0.5833333333333334,
+              1.0
+            ]
+          },
+          "exact": {
+            "before": 0.16666666666666666,
+            "after": 0.3333333333333333,
+            "change": 0.16666666666666666,
+            "change_ci": [
+              -0.16666666666666666,
+              0.5
+            ],
+            "before_ci": [
+              0.0,
+              0.4166666666666667
+            ]
+          },
+          "qwk": {
+            "before": 0.73109243697479,
+            "after": 0.6276849642004774,
+            "change": -0.10340747277431261,
+            "change_ci": [
+              -0.37467332757918415,
+              0.15454626702514254
+            ],
+            "before_ci": [
+              0.4744333461390703,
+              0.8425196850393701
+            ]
+          }
+        },
+        "per_essay": [
+          {
+            "essay_id": 1,
+            "true": 5.0,
+            "before_pred": 4.0,
+            "after_pred": 3.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 2,
+            "true": 5.0,
+            "before_pred": 4.0,
+            "after_pred": 3.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 3,
+            "true": 4.0,
+            "before_pred": 4.0,
+            "after_pred": 3.0,
+            "before_abs_error": 0.0,
+            "after_abs_error": 1.0
+          },
+          {
+            "essay_id": 4,
+            "true": 0.0,
+            "before_pred": 1.0,
+            "after_pred": 1.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 1.0
+          },
+          {
+            "essay_id": 5,
+            "true": 1.0,
+            "before_pred": 3.0,
+            "after_pred": 1.0,
+            "before_abs_error": 2.0,
+            "after_abs_error": 0.0
+          },
+          {
+            "essay_id": 6,
+            "true": 1.0,
+            "before_pred": 2.0,
+            "after_pred": 1.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 0.0
+          },
+          {
+            "essay_id": 7,
+            "true": 3.0,
+            "before_pred": 3.0,
+            "after_pred": 3.0,
+            "before_abs_error": 0.0,
+            "after_abs_error": 0.0
+          },
+          {
+            "essay_id": 8,
+            "true": 5.0,
+            "before_pred": 4.0,
+            "after_pred": 3.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 9,
+            "true": 4.0,
+            "before_pred": 3.0,
+            "after_pred": 2.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 10,
+            "true": 4.0,
+            "before_pred": 5.0,
+            "after_pred": 2.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 11,
+            "true": 5.0,
+            "before_pred": 4.0,
+            "after_pred": 3.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 12,
+            "true": 0.0,
+            "before_pred": 2.0,
+            "after_pred": 0.0,
+            "before_abs_error": 2.0,
+            "after_abs_error": 0.0
+          }
+        ]
+      },
+      "Evidence": {
+        "metrics": {
+          "mae": {
+            "before": 1.9166666666666667,
+            "after": 1.75,
+            "change": -0.16666666666666674,
+            "change_ci": [
+              -1.0833333333333333,
+              0.7499999999999998
+            ],
+            "before_ci": [
+              1.1666666666666667,
+              2.6666666666666665
+            ]
+          },
+          "within_one": {
+            "before": 0.5,
+            "after": 0.25,
+            "change": -0.25,
+            "change_ci": [
+              -0.5833333333333334,
+              0.08333333333333337
+            ],
+            "before_ci": [
+              0.25,
+              0.75
+            ]
+          },
+          "exact": {
+            "before": 0.16666666666666666,
+            "after": 0.25,
+            "change": 0.08333333333333334,
+            "change_ci": [
+              -0.25,
+              0.4166666666666667
+            ],
+            "before_ci": [
+              0.0,
+              0.4166666666666667
+            ]
+          },
+          "qwk": {
+            "before": 0.6338797814207651,
+            "after": 0.6313253012048192,
+            "change": -0.0025544802159458424,
+            "change_ci": [
+              -0.26406987514197894,
+              0.16508903970901403
+            ],
+            "before_ci": [
+              0.3966942148760332,
+              0.7837475384382336
+            ]
+          }
+        },
+        "per_essay": [
+          {
+            "essay_id": 1,
+            "true": 8.0,
+            "before_pred": 7.0,
+            "after_pred": 5.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 3.0
+          },
+          {
+            "essay_id": 2,
+            "true": 8.0,
+            "before_pred": 7.0,
+            "after_pred": 6.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 3,
+            "true": 6.0,
+            "before_pred": 9.0,
+            "after_pred": 6.0,
+            "before_abs_error": 3.0,
+            "after_abs_error": 0.0
+          },
+          {
+            "essay_id": 4,
+            "true": 0.0,
+            "before_pred": 3.0,
+            "after_pred": 2.0,
+            "before_abs_error": 3.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 5,
+            "true": 0.0,
+            "before_pred": 4.0,
+            "after_pred": 2.0,
+            "before_abs_error": 4.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 6,
+            "true": 5.0,
+            "before_pred": 6.0,
+            "after_pred": 5.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 0.0
+          },
+          {
+            "essay_id": 7,
+            "true": 2.0,
+            "before_pred": 4.0,
+            "after_pred": 4.0,
+            "before_abs_error": 2.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 8,
+            "true": 9.0,
+            "before_pred": 9.0,
+            "after_pred": 7.0,
+            "before_abs_error": 0.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 9,
+            "true": 2.0,
+            "before_pred": 5.0,
+            "after_pred": 5.0,
+            "before_abs_error": 3.0,
+            "after_abs_error": 3.0
+          },
+          {
+            "essay_id": 10,
+            "true": 7.0,
+            "before_pred": 7.0,
+            "after_pred": 5.0,
+            "before_abs_error": 0.0,
+            "after_abs_error": 2.0
+          },
+          {
+            "essay_id": 11,
+            "true": 4.0,
+            "before_pred": 5.0,
+            "after_pred": 4.0,
+            "before_abs_error": 1.0,
+            "after_abs_error": 0.0
+          },
+          {
+            "essay_id": 12,
+            "true": 2.0,
+            "before_pred": 6.0,
+            "after_pred": 5.0,
+            "before_abs_error": 4.0,
+            "after_abs_error": 3.0
+          }
+        ]
+      }
+    }
+  }
+}

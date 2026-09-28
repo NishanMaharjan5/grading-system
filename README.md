@@ -134,39 +134,55 @@ backend/
     routes/      auth, rubrics, submissions (incl. the teacher review flow)
   SANDBOX.md     what the code sandbox does and does not contain
   migrations/    Alembic; see migrations/README for the workflow
-  scripts/       train_grader.py, seed_demo_rubric.py, reset_dev_data.py
+  scripts/       train_grader.py, seed_demo_rubric.py, reset_dev_data.py,
+                 evaluate_holdout.py + leakage_guard.py + padding_probe.py
+                 (held-out evaluation; none of them train or save a model)
   tests/         pytest suite
-  training_data/ labeled sample answers
+  training_data/ labeled sample answers, the two holdout sets,
+                 holdout_results.md and results/ (saved evaluation runs)
 frontend/        React + Vite
 ```
 
 ## Known limitations
 
-- **The grader is trained on 76 labeled examples** (33 Thesis, 43
-  Evidence). Leave-one-out MAE is 0.85 for Thesis (baseline 1.39) and 1.49 for
-  Evidence (baseline 3.30). With this few examples, the numbers move noticeably
-  if a single example changes. Tuning has stopped here: further gains on a
-  dataset this size are small.
+- **The grader is trained on 98 labeled examples** (44 Thesis, 54 Evidence).
+  Leave-one-out MAE is 1.11 for Thesis (baseline 1.48) and 1.52 for Evidence
+  (baseline 3.07). With this few examples the numbers move noticeably if a
+  single example changes.
+- **Adding training data did not improve the held-out result.** Two sets of 12
+  paragraph-length essays were built (`backend/training_data/`, full write-up
+  in `holdout_results.md`, run with `scripts/evaluate_holdout.py`). Set 1 was
+  studied and its failures used to write 22 new training rows; set 2 was
+  committed untouched beforehand and read only afterwards. After retraining,
+  **set 1 improved on both criteria and set 2 did not move**:
+
+  | | set 1 (studied) | set 2 (untouched) |
+  |---|---|---|
+  | Thesis MAE | 1.00 → 0.75 | 1.00 → 1.17 |
+  | Evidence MAE | 1.67 → 1.42 | 1.92 → 1.75 |
+
+  Every one of those changes has a bootstrap 95% interval containing zero, so
+  with 12 essays none is distinguishable from noise. Set 2 is the one to
+  believe, and it says the round bought nothing measurable. Keeping only set 1
+  would have made this look like a clear win.
 - **The Evidence grader rewards what evidence looks like, not whether it is
-  relevant or true.** Padding a vague answer with names and numbers used to
-  lift it from 0-2 to 4-8 out of 10. Adversarial and paired examples cut that
-  to 1-2 points. But a fluent sentence that states a statistic without using it
-  in an argument still scores 5-7 out of 10: the low-scored halves of the pairs
-  are sentence fragments, so the model mostly learned that fragments score low,
-  not that unconnected numbers do. The review step is the backstop: no AI score
-  reaches a student unapproved.
-- **A held-out check on 12 paragraph-length essays** (`backend/training_data/
-  holdout_team_scored.json`, results in `holdout_results.md`, run with
-  `scripts/evaluate_holdout.py`) confirms this: the model clears its own
-  guess-the-mean baseline (Thesis MAE 1.00 vs. 1.83; Evidence MAE 1.67 vs.
-  2.75), but its two worst misses are a fence-sitting essay scored as if it
-  took a strong stance, and a facts-only essay (no argument connecting them)
-  scored near the maximum on both Evidence *and* Thesis — because production
-  feeds the same submitted text to every criterion's model. These 12 essays
-  and their scores were written by the project team, not independent
-  teachers, so this is a team-scored check on generalisation, not a measure
-  of agreement with real graders — and 12 essays is too few for the
-  held-out QWK (0.67 Thesis, 0.71 Evidence) to be more than indicative.
+  relevant or true.** Padding a vague answer with names and numbers once
+  lifted it from 0-2 to 4-8 out of 10; adversarial and paired examples cut
+  that, and `scripts/padding_probe.py` now measures it on fresh probes: the
+  padding gain is +1.75 points on Evidence (was +2.25), and on Thesis padding
+  now costs a point rather than being free. But **a statistic stated without
+  being used in an argument still scores 5-7 out of 10**, and the gap between
+  a tied and an untied statistic narrowed (1.33 → 0.67 points). What the
+  retrain mostly did was make the grader more pessimistic — it fixed the
+  over-scoring of weak essays and started under-scoring strong ones, dropping
+  six of set 2's strongest essays by two points each. The review step is the
+  backstop: no AI score reaches a student unapproved.
+- **Both holdout sets were written by the project team**, essays and scores
+  alike, and every essay in the training data and both holdout sets answers
+  the same prompt about regulating social media. So this measures
+  generalisation against the team's own judgment on one question, not
+  agreement with real teachers, and says nothing about a different prompt.
+  QWK on 12 essays is indicative at best.
 - **Approval is final.** Re-approving returns 409 and there is no correction
   path for a mistaken approval; that would need a revise endpoint with an
   audit trail.

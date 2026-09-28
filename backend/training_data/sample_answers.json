@@ -454,5 +454,159 @@
     "criterion": "Evidence",
     "text": "Stanford. 200 accounts. 2022. Influence campaign.",
     "score": 2
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Social media regulation is a complicated issue with good points on both sides. Supporters of rules say they would protect people, while opponents worry about freedom. It depends on how you look at it, and different people will reach different conclusions. I can see why people disagree.",
+    "score": 1,
+    "essay_id": "A1"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Social media regulation is a complicated issue with good points on both sides. Supporters of rules say they would protect people, while opponents worry about freedom. It depends on how you look at it, and different people will reach different conclusions. I can see why people disagree.",
+    "score": 0,
+    "essay_id": "A1"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for companies and limit what users can say. Some countries have tried regulation and others have not, so it is difficult to say which approach is best.",
+    "score": 1,
+    "essay_id": "A2"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for companies and limit what users can say. Some countries have tried regulation and others have not, so it is difficult to say which approach is best.",
+    "score": 2,
+    "essay_id": "A2"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Germany's NetzDG law, in force since 2017, requires large platforms to remove clearly illegal content within 24 hours. The United Kingdom passed its Online Safety Act in 2023. The United States still relies on Section 230, passed in 1996, which protects platforms from liability for what users post. Different countries have chosen different approaches.",
+    "score": 1,
+    "essay_id": "A3"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Germany's NetzDG law, in force since 2017, requires large platforms to remove clearly illegal content within 24 hours. The United Kingdom passed its Online Safety Act in 2023. The United States still relies on Section 230, passed in 1996, which protects platforms from liability for what users post. Different countries have chosen different approaches.",
+    "score": 5,
+    "essay_id": "A3"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Frances Haugen, a former Facebook employee, gave internal documents to journalists and regulators in 2021 and testified before the United States Senate that October. The documents included internal research about Instagram and teenage users. Facebook's parent company was renamed Meta in the same year.",
+    "score": 1,
+    "essay_id": "A4"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Frances Haugen, a former Facebook employee, gave internal documents to journalists and regulators in 2021 and testified before the United States Senate that October. The documents included internal research about Instagram and teenage users. Facebook's parent company was renamed Meta in the same year.",
+    "score": 5,
+    "essay_id": "A4"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Many news stories about social media have appeared over the years, and politicians have made statements about it at various hearings. Companies have released reports and issued apologies at different times. People have strong feelings about all of this.",
+    "score": 0,
+    "essay_id": "A5"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Many news stories about social media have appeared over the years, and politicians have made statements about it at various hearings. Companies have released reports and issued apologies at different times. People have strong feelings about all of this.",
+    "score": 2,
+    "essay_id": "A5"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "In May 2023 Ireland's data protection regulator fined Meta 1.2 billion euros over transfers of European users' data to the United States. The GDPR took effect in 2018. Meta said it would appeal the decision.",
+    "score": 1,
+    "essay_id": "A6"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "In May 2023 Ireland's data protection regulator fined Meta 1.2 billion euros over transfers of European users' data to the United States. The GDPR took effect in 2018. Meta said it would appeal the decision.",
+    "score": 5,
+    "essay_id": "A6"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Governments should require large platforms to open their recommendation systems to independent auditors, because self-reporting has repeatedly failed. When Frances Haugen released internal Facebook research in 2021, it showed the company knew Instagram worsened body-image problems for some teenage girls, yet the public learned this only through a leak. Mandatory audits, like the risk assessments required under the EU's Digital Services Act, would surface such findings before a whistleblower has to.",
+    "score": 5,
+    "essay_id": "B1"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Governments should require large platforms to open their recommendation systems to independent auditors, because self-reporting has repeatedly failed. When Frances Haugen released internal Facebook research in 2021, it showed the company knew Instagram worsened body-image problems for some teenage girls, yet the public learned this only through a leak. Mandatory audits, like the risk assessments required under the EU's Digital Services Act, would surface such findings before a whistleblower has to.",
+    "score": 9,
+    "essay_id": "B1"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Governments should not force platforms to remove lawful but offensive speech, because the power to define harmful content is easily abused. Germany's NetzDG law, which requires removal of clearly illegal content within 24 hours, has been criticised because platforms facing heavy fines tend to delete borderline posts to be safe. Rules should target transparency and clearly illegal content, not opinions.",
+    "score": 5,
+    "essay_id": "B2"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Governments should not force platforms to remove lawful but offensive speech, because the power to define harmful content is easily abused. Germany's NetzDG law, which requires removal of clearly illegal content within 24 hours, has been criticised because platforms facing heavy fines tend to delete borderline posts to be safe. Rules should target transparency and clearly illegal content, not opinions.",
+    "score": 8,
+    "essay_id": "B2"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Stricter enforcement of privacy law is the most realistic way to regulate social media. In May 2023, Ireland's data protection regulator fined Meta 1.2 billion euros for moving European users' data to the United States, the largest fine issued under the GDPR at that time, which shows existing law can bite when it is enforced.",
+    "score": 4,
+    "essay_id": "B3"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Stricter enforcement of privacy law is the most realistic way to regulate social media. In May 2023, Ireland's data protection regulator fined Meta 1.2 billion euros for moving European users' data to the United States, the largest fine issued under the GDPR at that time, which shows existing law can bite when it is enforced.",
+    "score": 8,
+    "essay_id": "B3"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "Platforms need stricter age checks because children can easily lie about their age when they sign up. Reports have shown that many young children have accounts despite minimum-age rules, which exposes them to content meant for adults. Governments should require platforms to verify ages.",
+    "score": 4,
+    "essay_id": "C1"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "Platforms need stricter age checks because children can easily lie about their age when they sign up. Reports have shown that many young children have accounts despite minimum-age rules, which exposes them to content meant for adults. Governments should require platforms to verify ages.",
+    "score": 5,
+    "essay_id": "C1"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Thesis",
+    "text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them responsible and ordinary people are the ones who suffer, so laws must be introduced soon.",
+    "score": 3,
+    "essay_id": "C2"
+  },
+  {
+    "rubric": "Essay 1",
+    "criterion": "Evidence",
+    "text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them responsible and ordinary people are the ones who suffer, so laws must be introduced soon.",
+    "score": 2,
+    "essay_id": "C2"
   }
 ]

@@ -1,0 +1,122 @@
+{
+  "models_trained_on": {
+    "Thesis": 33,
+    "Evidence": 43
+  },
+  "criteria": {
+    "Thesis": {
+      "max_points": 5.0,
+      "n_examples": 33,
+      "probes": [
+        {
+          "probe": "pad-1",
+          "kind": "padding",
+          "weak": 2.0,
+          "strong": 2.0,
+          "gap": 0.0
+        },
+        {
+          "probe": "pad-2",
+          "kind": "padding",
+          "weak": 3.0,
+          "strong": 2.0,
+          "gap": -1.0
+        },
+        {
+          "probe": "pad-3",
+          "kind": "padding",
+          "weak": 1.0,
+          "strong": 2.0,
+          "gap": 1.0
+        },
+        {
+          "probe": "pad-4",
+          "kind": "padding",
+          "weak": 3.0,
+          "strong": 3.0,
+          "gap": 0.0
+        },
+        {
+          "probe": "tie-1",
+          "kind": "tying",
+          "weak": 1.0,
+          "strong": 2.0,
+          "gap": 1.0
+        },
+        {
+          "probe": "tie-2",
+          "kind": "tying",
+          "weak": 3.0,
+          "strong": 4.0,
+          "gap": 1.0
+        },
+        {
+          "probe": "tie-3",
+          "kind": "tying",
+          "weak": 2.0,
+          "strong": 2.0,
+          "gap": 0.0
+        }
+      ],
+      "padding_gain_mean": 0.0,
+      "tying_gap_mean": 0.6666666666666666
+    },
+    "Evidence": {
+      "max_points": 10.0,
+      "n_examples": 43,
+      "probes": [
+        {
+          "probe": "pad-1",
+          "kind": "padding",
+          "weak": 2.0,
+          "strong": 4.0,
+          "gap": 2.0
+        },
+        {
+          "probe": "pad-2",
+          "kind": "padding",
+          "weak": 3.0,
+          "strong": 5.0,
+          "gap": 2.0
+        },
+        {
+          "probe": "pad-3",
+          "kind": "padding",
+          "weak": 1.0,
+          "strong": 4.0,
+          "gap": 3.0
+        },
+        {
+          "probe": "pad-4",
+          "kind": "padding",
+          "weak": 4.0,
+          "strong": 6.0,
+          "gap": 2.0
+        },
+        {
+          "probe": "tie-1",
+          "kind": "tying",
+          "weak": 5.0,
+          "strong": 7.0,
+          "gap": 2.0
+        },
+        {
+          "probe": "tie-2",
+          "kind": "tying",
+          "weak": 6.0,
+          "strong": 8.0,
+          "gap": 2.0
+        },
+        {
+          "probe": "tie-3",
+          "kind": "tying",
+          "weak": 7.0,
+          "strong": 7.0,
+          "gap": 0.0
+        }
+      ],
+      "padding_gain_mean": 2.25,
+      "tying_gap_mean": 1.3333333333333333
+    }
+  }
+}

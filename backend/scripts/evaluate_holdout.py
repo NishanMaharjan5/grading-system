@@ -50,6 +50,7 @@ sys.path.insert(0, BACKEND_DIR)
 
 from app import create_app
 from app.grading.engine import build_matrix
+from app.grading.metrics import quadratic_weighted_kappa as qwk
 from app.grading.model_store import load_model, model_path
 from app.models import Rubric
 
@@ -109,21 +110,6 @@ def predict_for(criterion, texts):
 
 
 # ---------------------------------------------------------------- metrics
-
-def qwk(y_true, y_pred, max_points):
-    """Quadratic weighted kappa in plain numpy, so it is cheap enough to
-    bootstrap. NaN when there is no variation to measure agreement against."""
-    k = int(max_points) + 1
-    t, p = np.asarray(y_true, dtype=int), np.asarray(y_pred, dtype=int)
-    observed = np.bincount(t * k + p, minlength=k * k).reshape(k, k).astype(float)
-    expected = np.outer(observed.sum(axis=1), observed.sum(axis=0)) / observed.sum()
-    i, j = np.indices((k, k))
-    weights = (i - j) ** 2
-    denominator = (weights * expected).sum()
-    if denominator == 0:
-        return float("nan")
-    return float(1.0 - (weights * observed).sum() / denominator)
-
 
 def metrics_for(y_true, y_pred, max_points):
     y_true, y_pred = np.asarray(y_true, dtype=float), np.asarray(y_pred, dtype=float)
