@@ -258,3 +258,216 @@ features were.
 - A difference whose bootstrap interval includes zero will be reported as
   **not distinguishable**, whichever direction it points.
 
+
+## Amendment, recorded before any test number existed
+
+The first attempt ran on the Apple M1 at batch size 8 and froze the machine
+after its first epoch; it was killed. The only number it produced was a dev
+score after epoch 1 at learning rate 2e-5 (dev QWK 0.789, dev MAE 0.618).
+**The test split was never scored**, and nothing was written.
+
+The run moves to a Google Colab T4 GPU. **The design above is unchanged**:
+the same model, 512-token limit, target and loss, learning-rate and epoch grid,
+batch size 8, seed, both candidates, and one look at test. Only the hardware
+line is superseded, and there is no time cap, because the grid now runs to
+completion.
+
+Three safeguards were added to the script. None of them changes what is
+measured:
+
+- **Pre-flight, before any training.** It checks that the split is the locked
+  one, and that the two reference systems reproduce their published
+  benchmark numbers exactly from the benchmark's cached embeddings. If they
+  don't, the run stops before a new candidate has seen test.
+- **No full run without a GPU** unless explicitly overridden.
+- **One look at test.** A second run into a folder that already holds results
+  is refused.
+
+GPU training isn't bit-for-bit reproducible between runs, even with a fixed
+seed. The output records the GPU, the library versions and a hash of the
+scripts that ran.
+
+---
+
+# Result: fine-tuned DistilBERT
+
+Run once on a Google Colab T4 (2026-09-28 19:20 UTC), exactly as pre-declared above
+(including the Colab amendment). The scripts that ran are byte-identical to
+the committed ones: the run recorded `asap_finetune.py` as `4b32dc9be05af209`
+and `asap_benchmark.py` as `dded0a5d0eeab799`. The pre-flight passed: the split
+was the locked one, and both reference systems reproduced their published test
+QWK exactly (0.776 and 0.765) from the cached embeddings. Only then was
+anything trained, and test was scored once, at the end. The run's own output
+is in `results/asap_finetune.json`, which has every metric at full precision
+with its interval, and in `results/finetune_log.txt`.
+
+## Headline
+
+**On the like-for-like comparison, the fine-tuned model is statistically
+indistinguishable from a second human rater on this benchmark.** Both are
+asked to predict what rater 1 said, on the raters' own 1-6 scale, for the same
+268 test essays:
+
+| predicting what rater 1 said (1-6) | QWK | MAE |
+|---|---|---|
+| fine-tuned DistilBERT (halved onto 1-6) | 0.710 [0.638, 0.769] | 0.358 |
+| rater 2 (a human doing the same job) | 0.739 [0.662, 0.794] | 0.340 |
+| **human advantage** | **+0.030 [−0.031, +0.093]** — not distinguishable | |
+
+**This does not show that the model equals or beats a human grader.** The
+human is still ahead on the point estimate. With 268 essays, the interval runs
+from the model being ahead by 0.03 to the human being ahead by 0.09, and the
+data cannot tell those apart. Not finding a difference is not the same as
+finding none.
+
+What did change is the size of the gap. On the same comparison, the shipped
+frozen-embedding pipeline trailed a human by **0.152 [+0.073, +0.242]**, a gap
+this data could clearly see. Fine-tuning shrank it to one it cannot.
+
+## Test results
+
+The test split was scored once. These are the same 268 essays, with the same
+rounding and clamping and the same 2,000 bootstrap resamples (seed 0) as the
+five earlier systems, so every interval below is directly comparable.
+
+| system | MAE | QWK | exact | within 1 |
+|---|---|---|---|---|
+| (i) guess-the-mean | 1.220 [1.101, 1.340] | 0.000 [0.000, 0.000] | 19% [14%, 24%] | 75% [70%, 80%] |
+| (ii) word count only | 0.675 [0.597, 0.757] | 0.757 [0.706, 0.798] | 44% [38%, 50%] | 89% [85%, 93%] |
+| (iii) handcrafted only | 0.638 [0.560, 0.720] | 0.776 [0.733, 0.813] | 46% [40%, 52%] | 91% [88%, 95%] |
+| (iv) frozen embeddings only | 0.993 [0.899, 1.082] | 0.621 [0.535, 0.687] | 27% [22%, 32%] | 77% [72%, 82%] |
+| (v) frozen embeddings + handcrafted *(shipped)* | 0.716 [0.638, 0.806] | 0.765 [0.708, 0.809] | 41% [35%, 47%] | 88% [84%, 92%] |
+| **(A) fine-tuned DistilBERT** | **0.552 [0.481, 0.627]** | **0.841 [0.799, 0.871]** | **52% [46%, 58%]** | **93% [90%, 96%]** |
+| (B) fine-tuned + handcrafted, w = 0.5 | 0.549 [0.474, 0.627] | 0.832 [0.791, 0.862] | 51% [46%, 57%] | 94% [91%, 97%] |
+
+The two comparisons pre-declared for the fine-tuned model, as paired
+bootstrap differences in QWK:
+
+| comparison | ΔQWK (95% CI) | distinguishable? |
+|---|---|---|
+| fine-tuned vs handcrafted only | +0.065 [+0.029, +0.099] | **yes** |
+| fine-tuned vs frozen embeddings + handcrafted *(shipped)* | +0.076 [+0.041, +0.118] | **yes** |
+
+**Fine-tuned DistilBERT (67M parameters) reaches test QWK 0.841 and beats
+both reference systems distinguishably.** Both intervals clear zero with room
+to spare. Neither comparison is close to the line, so the result doesn't rest
+on the choice of interval method.
+
+**The blend (B) is not the recommended system.** Averaging in the handcrafted
+Ridge did not improve on the fine-tuned model alone. Its QWK is lower (0.832
+against 0.841) and its MAE is essentially the same (0.549 against 0.552). A
+paired A-vs-B interval was not pre-declared and was not computed, so this is
+not a claim that B is worse, only that the handcrafted features added nothing
+once the model was fine-tuned. On dev the blend was fractionally ahead (0.839
+against 0.834) and on test it was fractionally behind; differences that small
+flip from one sample to the next.
+
+## How the model was chosen (dev only)
+
+| lr | epoch | train MSE | dev QWK | dev MAE | epoch time |
+|---|---|---|---|---|---|
+| 2e-5 | 1 | 0.0207 | 0.796 | 0.618 | 57 s |
+| 2e-5 | 2 | 0.0088 | 0.834 | 0.558 | 63 s |
+| 2e-5 | 3 | 0.0077 | 0.829 | 0.562 | 62 s |
+| 2e-5 | 4 | 0.0066 | 0.809 | 0.573 | 63 s |
+| 3e-5 | 1 | 0.0212 | 0.825 | 0.558 | 63 s |
+| **3e-5** | **2** | **0.0088** | **0.834** ← chosen | **0.581** | 63 s |
+| 3e-5 | 3 | 0.0074 | 0.789 | 0.745 | 63 s |
+| 3e-5 | 4 | 0.0060 | 0.819 | 0.539 | 63 s |
+
+Both learning rates peaked on dev at epoch 2. After that, training loss kept
+falling while dev QWK fell back: the model had started to fit the training
+essays rather than the task. That is why the design picked the epoch on dev
+rather than training to the end. The two epoch-2 runs tied at 0.834 to three
+decimals (0.8337 against 0.8336 at full precision), so the choice between
+them was close to a coin flip. Only the chosen one was ever scored on test.
+
+Candidate B's blend weight, also chosen on dev:
+
+| w (fine-tuned share) | dev QWK | dev MAE |
+|---|---|---|
+| 0.25 | 0.807 | 0.584 |
+| **0.5** | **0.839** ← chosen | **0.528** |
+| 0.75 | 0.837 | 0.528 |
+
+## Truncation
+
+**470 of the 1,783 essays (26%) reached the 512-token limit.** Per the count
+in the pre-declaration, 466 of them were longer than the limit and lost their
+endings. The model reached the numbers above with about a quarter of the
+essays cut short. Whether reading them in full would help further was not
+tested. For comparison, the frozen encoder's 256-token limit cut 89.5% of
+these essays.
+
+## Cost, and what serving it would take
+
+| | |
+|---|---|
+| parameters | 67.0M |
+| saved model | 269 MB |
+| training | 8.9 min for the whole grid (8 epochs) on a Tesla T4; peak GPU memory 2.1 GB |
+| GPU inference | 15 ms per essay, in batches of 8 |
+| **CPU inference** | **477 ms per essay** on average (slowest 541 ms), scored one at a time on a single CPU thread, every essay padded to the full 512 tokens (the worst case) |
+| cold load | 0.05 s, but measured straight after saving, so the file was probably still in memory; a genuinely cold start from disk will be slower |
+
+**It meets a 5-second turnaround on CPU alone, with a wide margin.** Even in
+the worst case (a full 512-token essay on one thread, no GPU), one essay takes
+under half a second. Serving it doesn't need a GPU.
+
+**Where the weights are.** The 269 MB of weights are on Google Drive, in
+`My Drive/asap_finetune/output/best_model/`. They are not on the development
+machine and not in the repo. If they are brought local, their place is
+`backend/ml_experiments/`, which is gitignored. `*.safetensors` and any
+`best_model/` directory are also ignored repo-wide, as a backstop.
+
+**What it would take to use this in the live grading path:**
+
+- **It is a holistic scorer, not a per-criterion one.** It gives one 2-12
+  grade for ASAP set 1's prompt. It does not produce Thesis and Evidence
+  scores, so it cannot replace the rubric model.
+- **Grading the Essay 1 rubric this way would need data we don't have.** This
+  model learned from 1,248 human-scored essays; the rubric model has 44 Thesis
+  and 54 Evidence examples. It would take labelled essays at that scale for
+  each criterion, a fine-tuning run per criterion (or one model with two
+  outputs), and a locked test set of its own.
+- **The engineering is modest.** Load the model once per process, as the
+  current embedder is; tokenize with truncation at 512; predict and rescale.
+  torch and transformers are already dependencies, because
+  sentence-transformers needs them. The weights would live in artifact
+  storage, not in git.
+- **Teacher review stays** whatever model scores first.
+
+## Caveats
+
+- **This is not our grading task.** ASAP essay set 1 is a single holistic
+  score, from grade 7-8 students, on a different prompt: a letter to a
+  newspaper about the effects of computers. It is not the Thesis/Evidence
+  rubric, and a fine-tuned DistilBERT is not the grading engine we ship.
+- **What it does show:** fine-tuning BERT, the approach the original proposal
+  specified and that the build replaced with frozen embeddings to fit the
+  timeline, works well on a real human-scored benchmark when it is done
+  properly. It clearly outperforms the frozen-embedding approach we shipped.
+- **What it does not show:** that our production Thesis and Evidence scores
+  would improve by the same amount. They would need their own fine-tuning
+  effort (labelled data at scale, training and a locked test set), which has
+  not been attempted within the project's one-to-two-week timeline.
+- **This test set has now been used seven times.** The two new candidates
+  were pre-declared, and both of the fine-tuned model's comparisons clear zero
+  comfortably, but the test set is no longer fresh. A genuinely independent
+  confirmation would need a new split or a new corpus.
+- **One training run, one seed.** GPU training is not bit-for-bit
+  reproducible, and a different seed would move these numbers somewhat. The
+  intervals capture sampling of essays, not training randomness.
+
+## Verdict
+
+**On this benchmark, the evidence supports replacing frozen embeddings with a
+fine-tuned model.** The gain over the shipped pipeline is distinguishable
+(+0.076 QWK), and the gap to a human rater shrinks from clearly visible to
+not detectable. The frozen-embedding pipeline does not hold up against it.
+
+**In production, nothing changes yet.** The shipped Thesis/Evidence engine and
+its models stay exactly as they are, because this result does not carry over
+to them without data we don't have. It is a documented benchmark finding. It
+also says what the grading engine's successor should be: a fine-tuned model
+per criterion, once there are enough labelled essays to fine-tune it on.

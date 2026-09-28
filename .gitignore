@@ -25,3 +25,8 @@ backend/data/
 
 # Fine-tuning experiment outputs: weights and checkpoints, never committed
 backend/ml_experiments/
+
+# Model weights, wherever they land (the fine-tuned DistilBERT is 269 MB).
+# backend/ml_experiments/ is where they belong; these are the backstop.
+*.safetensors
+best_model/

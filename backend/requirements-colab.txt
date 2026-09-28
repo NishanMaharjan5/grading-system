@@ -1,0 +1,18 @@
+# Everything scripts/asap_finetune.py needs on Google Colab, in one cell:
+#   !pip install -q -r requirements-colab.txt
+#
+# torch is deliberately absent. Colab ships a CUDA build of it, and installing
+# torch from pip here would replace that with a generic wheel and lose the GPU.
+#
+# Lower bounds only, not exact pins: Colab's preinstalled versions satisfy all
+# of these, so this cell normally installs nothing, and forcing this repo's
+# local versions (pandas 3, numpy 2.4) would fight Colab's own packages. The
+# script records every version it actually ran with in its output instead.
+transformers>=4.40
+scikit-learn>=1.3
+pandas>=2.0
+numpy>=1.26
+openpyxl>=3.1
+# Only imported if an embedding cache file is missing -- which the real run
+# refuses. It's here so --smoke can still compute its tiny slice if needed.
+sentence-transformers>=3.0

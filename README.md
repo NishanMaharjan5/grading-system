@@ -13,8 +13,10 @@ student/teacher roles.
 Text submissions are scored by a **Ridge regression per rubric criterion**,
 trained on frozen Sentence-BERT (`all-MiniLM-L6-v2`) embeddings concatenated
 with hand-crafted features (digit/percentage/year counts, hedging words,
-reasoning connectives, citation words). BERT is a frozen feature extractor; it
-is never fine-tuned.
+reasoning connectives, citation words). In the shipped engine BERT is a frozen
+feature extractor and is never fine-tuned. A fine-tuned BERT was evaluated
+separately and did much better on a public benchmark; *How the approach was
+evaluated* below explains why it still doesn't ship.
 
 Regression rather than classification because rubric scores are ordinal —
 predicting 0 for a true 5 should not cost the same as predicting 4. Measured on
@@ -52,6 +54,94 @@ capped by polling rather than by the kernel. On Linux, the equivalent would be
 network syscalls, or a **container** for all of it. Until one of those is
 built, grading refuses to run on any platform without Seatbelt, rather than
 running student code unsandboxed.
+
+## How the approach was evaluated
+
+The grading approach was tested several ways, each time against something it
+had to beat. Every result is reported below, whether or not it favoured what
+was built:
+
+| approach | tested on | result |
+|---|---|---|
+| Classifier on frozen Sentence-BERT embeddings | the first 35 labelled answers | **worse than always guessing the mean** (Thesis MAE 2.50 vs 1.39) |
+| Ridge on frozen embeddings + handcrafted features (**what ships**) | leave-one-out on 98 labelled answers | beats guessing (Thesis MAE 1.11 vs 1.48; Evidence 1.52 vs 3.07) |
+| More training data for the shipped model | a held-out set locked before retraining | **no measurable change** |
+| The shipped features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
+| **Fine-tuned DistilBERT** | the same 268 essays | **QWK 0.841**: distinguishably better, and **statistically indistinguishable from a second human rater** |
+
+The first three rows use answers the team wrote and scored itself; that
+write-up is `backend/training_data/holdout_results.md`. The last two use
+**ASAP-AES set 1**: 1,783 public essays, each scored by two real teachers.
+The ASAP split was committed before anything was fit. Every choice was made
+on a separate dev split, and the test split was scored once per system. The
+full write-up is
+**[backend/training_data/asap_results.md](backend/training_data/asap_results.md)**.
+
+### Frozen embeddings don't carry the grading
+
+| system (ASAP test, n=268) | MAE | QWK |
+|---|---|---|
+| guess-the-mean | 1.220 | 0.000 |
+| word count only | 0.675 | 0.757 |
+| handcrafted only | 0.638 | 0.776 |
+| frozen embeddings only | 0.993 | 0.621 |
+| frozen embeddings + handcrafted *(shipped)* | 0.716 | 0.765 |
+| **fine-tuned DistilBERT** | **0.552** | **0.841** |
+
+A Ridge model on word count alone can't be told apart from the shipped
+pipeline (ΔQWK 0.008). Frozen embeddings on their own do *worse* than word
+count. Adding them to the handcrafted features doesn't improve on those
+features alone (ΔQWK −0.011, CI [−0.055, +0.026]), and tuning the Ridge alpha
+doesn't change that. Frozen `all-MiniLM-L6-v2` vectors capture what an essay
+is about, not how good it is. The project's own data had already pointed that
+way (see `app/grading/features.py`).
+
+### Fine-tuning works
+
+The original proposal specified fine-tuning BERT; the build replaced it with
+frozen embeddings to fit the timeline. Fine-tuning DistilBERT end to end on
+the same ASAP training essays changes the picture. The design was
+pre-declared before training, and the model was run once on a Colab GPU. It
+beats the shipped pipeline by **+0.076 QWK [+0.041, +0.118]** and the
+handcrafted features by +0.065 [+0.029, +0.099]. Both intervals are clear of
+zero.
+
+Raw QWK flatters any model on this dataset, because the model is scored
+against *two raters' scores added together*, while each human is compared
+with one other rater's score. So the model and a human are put on the same
+task: predict what rater 1 said.
+
+| predicting what rater 1 said | QWK | gap to a second human rater |
+|---|---|---|
+| shipped frozen-embedding pipeline | 0.587 | 0.152 [+0.073, +0.242]: clearly behind |
+| fine-tuned DistilBERT | 0.710 | 0.030 [−0.031, +0.093]: **not distinguishable** |
+| a second human rater | 0.739 | |
+
+**Fine-tuned, the model reaches near-human agreement: on this benchmark it is
+statistically indistinguishable from a second human rater.** That is not the
+same as matching one. The human is still ahead on the point estimate, and
+with 268 essays a human advantage of up to 0.09 can't be ruled out.
+
+### What this means for the shipped engine
+
+**Nothing in the shipped engine changed because of this.** It is a benchmark
+finding reported alongside the model that ships, not a late swap. The
+fine-tuned model gives one holistic 2-12 score for a single ASAP prompt. It
+learned from 1,248 teacher-scored essays by grade 7-8 students, and it
+produces no Thesis or Evidence scores. Doing the same for those criteria would
+need labelled essays on that scale (the rubric model has 44 and 54), a
+fine-tuning run, and a locked test set of their own. That hasn't been
+attempted within the project's one-to-two-week timeline.
+
+What the result does establish is where the weak point was: the frozen
+embeddings, not the idea of using BERT. It also shows that a fine-tuned
+successor would be practical to serve. It takes under half a second per
+essay on a single CPU thread in the worst case, with no GPU. Its 269 MB of
+weights are kept out of the repo.
+
+Three caveats apply. ASAP set 1 differs from the Essay 1 rubric in prompt,
+age group and scoring scheme. Its test split has now been used for seven
+systems. And the fine-tuned result comes from one training run with one seed.
 
 ## Setup
 
@@ -137,56 +227,26 @@ backend/
   scripts/       train_grader.py, seed_demo_rubric.py, reset_dev_data.py,
                  evaluate_holdout.py + leakage_guard.py + padding_probe.py
                  (held-out evaluation; none of them train or save a model),
-                 asap_benchmark.py (independent public-dataset benchmark)
+                 asap_benchmark.py + asap_finetune.py (public-dataset benchmark;
+                 the fine-tune runs on Colab via asap_finetune_colab.ipynb)
   tests/         pytest suite
   training_data/ labeled sample answers, the two holdout sets,
                  holdout_results.md, asap_results.md + asap_split.json,
                  and results/ (saved evaluation runs)
   data/          benchmark corpora -- gitignored, never committed
+  ml_experiments/ fine-tuning outputs and weights -- gitignored
 frontend/        React + Vite
 ```
 
-## Independent benchmark (ASAP-AES)
-
-Every other number in this project comes from essays the team wrote and scored
-itself. To check the *method* against strangers' work, the same featurisation
-was benchmarked on **ASAP-AES set 1** — 1,783 public essays scored 2-12 by two
-real teachers. Full write-up: **[backend/training_data/asap_results.md](backend/training_data/asap_results.md)**;
-run with `scripts/asap_benchmark.py`. The split was committed before anything
-was fit, and test was scored once.
-
-| system (test, n=268) | MAE | QWK |
-|---|---|---|
-| guess-the-mean | 1.220 | 0.000 |
-| **word count only** | 0.675 | **0.757** |
-| handcrafted only | 0.638 | 0.776 |
-| embeddings only | 0.993 | 0.621 |
-| **embeddings + handcrafted (shipped)** | 0.716 | **0.765** |
-
-**The embeddings are not doing the work; length is.** A Ridge model on word
-count alone is not statistically distinguishable from the full pipeline
-(ΔQWK 0.008), embeddings alone are *worse* than word count, and adding
-embeddings to the handcrafted features does not improve on those features
-alone (ΔQWK −0.011, CI [−0.055, +0.026]). Sweeping the Ridge alpha on dev
-does not rescue them. This confirms on independent data what
-`app/grading/features.py` already said: these embeddings encode topic, not
-quality.
-
-Two honest caveats on it: ASAP is grade 7-8 students on a different prompt
-with a single holistic score, so **this validates the method, not the Essay 1
-rubric**; and word count predicting ASAP scores well is a property of that
-corpus, not a licence to grade by length — the padding probe shows where that
-leads.
-
-It also does **not** beat human graders. Compared naively, the model (QWK
-0.765) looks to edge the raters' agreement with each other (0.739) — but the
-model is scored against *two raters summed*, a smoother target than the single
-rater each human is judged against. On a like-for-like task, predicting what
-rater 1 said, the model scores 0.587 against a human's 0.739; the human is
-ahead by 0.152, CI [+0.073, +0.242].
-
 ## Known limitations
 
+- **The shipped grader is not the best approach measured.** It uses frozen
+  embeddings, and on the public benchmark it does no better than a word count
+  and clearly trails a human rater. A fine-tuned model did distinguishably
+  better (see *How the approach was evaluated*). Fine-tuning the Thesis and
+  Evidence criteria would need far more labelled essays than the 98 available.
+  Until then, teacher review is what makes the scores safe to use: no AI score
+  reaches a student unapproved.
 - **The encoder silently truncates long submissions.** `all-MiniLM-L6-v2`
   reads at most **256 tokens (~226 words)**; anything beyond is dropped
   without warning. Two 377-word essays that differ only after that point embed

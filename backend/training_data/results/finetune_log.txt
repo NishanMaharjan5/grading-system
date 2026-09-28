@@ -1,0 +1,55 @@
+environment: python 3.13.15, torch 2.11.0+cu128, transformers 5.16.1, scikit-learn 1.6.1, numpy 2.1.3, pandas 2.2.3, device cuda, cpu_count 2, gpu Tesla T4, cuda 12.8
+scripts: asap_finetune.py 4b32dc9be05af209, asap_benchmark.py dded0a5d0eeab799
+ASAP set 1, locked split 828dbd347ea2cf81: train 1248, dev 267, test 268
+model distilbert-base-uncased, max_length 512, batch 8, seed 20260928, device cuda
+grid: lr 2e-05, 3e-05 x up to 4 epochs, best by dev QWK; blend weights (0.25, 0.5, 0.75) chosen on dev
+
+=== pre-flight ===
+  handcrafted only: test QWK 0.776, identical to the published benchmark
+  embeddings + handcrafted: test QWK 0.765, identical to the published benchmark
+  split is the locked one (828dbd347ea2cf81); no new candidate has touched test
+PRE-FLIGHT PASSED
+tokenised: 470/1783 essays fill the 512-token window (anything beyond is cut)
+
+=== training grid (chosen on dev) ===
+  lr 2e-05:
+      epoch 1: train MSE 0.0207  dev QWK 0.796  dev MAE 0.618  (57s)
+      epoch 2: train MSE 0.0088  dev QWK 0.834  dev MAE 0.558  (63s)
+      epoch 3: train MSE 0.0077  dev QWK 0.829  dev MAE 0.562  (62s)
+      epoch 4: train MSE 0.0066  dev QWK 0.809  dev MAE 0.573  (63s)
+  lr 3e-05:
+      epoch 1: train MSE 0.0212  dev QWK 0.825  dev MAE 0.558  (63s)
+      epoch 2: train MSE 0.0088  dev QWK 0.834  dev MAE 0.581  (63s)
+      epoch 3: train MSE 0.0074  dev QWK 0.789  dev MAE 0.745  (63s)
+      epoch 4: train MSE 0.0060  dev QWK 0.819  dev MAE 0.539  (63s)
+
+best on dev: lr 3e-05, epoch 2, dev QWK 0.834
+grid time: 8.9 min
+
+=== candidate B blend weight (dev only) ===
+  w=0.25: dev QWK 0.807  dev MAE 0.584
+  w=0.5: dev QWK 0.839  dev MAE 0.528
+  w=0.75: dev QWK 0.837  dev MAE 0.528
+  -> chosen: w=0.5
+
+=== TEST (scored once) ===
+  fine-tuned DistilBERT              MAE 0.552 [0.481, 0.627]  QWK 0.841 [0.799, 0.871]  exact 52% [46%, 58%]  within-1 93% [90%, 96%]
+  fine-tuned + handcrafted (blend)   MAE 0.549 [0.474, 0.627]  QWK 0.832 [0.791, 0.862]  exact 51% [46%, 57%]  within-1 94% [91%, 97%]
+
+  paired differences (positive = fine-tuned better):
+    fine-tuned vs handcrafted only: QWK +0.065 [+0.029, +0.099] -- distinguishable
+    fine-tuned vs embeddings + handcrafted: QWK +0.076 [+0.041, +0.118] -- distinguishable
+
+  like-for-like, fine-tuned DistilBERT vs a human, both predicting rater 1 (1-6):
+    model:   QWK 0.710 [0.638, 0.769]  MAE 0.358
+    rater 2: QWK 0.739 [0.662, 0.794]  MAE 0.340
+    human advantage: +0.030 [-0.031, +0.093] -- NOT distinguishable
+
+=== cost ===
+  67.0M parameters; grid 8.9 min on Tesla T4; inference 15 ms/essay on cuda in batches of 8
+  peak GPU memory 2.1 GB
+  CPU (1 threads, 2 cores): cold load 0.1s, then 477 ms/essay (max 541) one at a time, padded to 512 tokens
+  saved model 269 MB
+  weights saved to /content/drive/MyDrive/asap_finetune/output/best_model
+
+Saved /content/drive/MyDrive/asap_finetune/output/asap_finetune.json
