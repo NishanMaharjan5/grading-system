@@ -22,3 +22,6 @@ dist/
 
 # Benchmark data (ASAP-AES): licensed dataset, never committed
 backend/data/
+
+# Fine-tuning experiment outputs: weights and checkpoints, never committed
+backend/ml_experiments/

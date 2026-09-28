@@ -205,3 +205,56 @@ Place `essays.xlsx` at `backend/data/asap/essays.xlsx`. Embeddings are cached
 under `backend/data/asap/.cache/`. The run is deterministic: repeated runs
 produce byte-identical output, and the script refuses to start if the split
 file's ids no longer match the fingerprint recorded in it.
+
+---
+
+# Experiment: fine-tuned DistilBERT (pre-declared)
+
+**This section was written and committed before the model was trained or the
+test split was touched.** It fixes the design so the result cannot be chosen
+after the fact. Nothing below was edited once test numbers existed.
+
+## Why
+
+The benchmark above found the *frozen* embedding contributes almost nothing:
+word count alone matches the shipped pipeline. That is a statement about
+frozen `all-MiniLM-L6-v2` features, not about transformers in general. A model
+fine-tuned end to end on these essays learns its own representation, so it is
+a fair test of whether the *approach* was the limit or only the frozen
+features were.
+
+## Design, fixed in advance
+
+| | |
+|---|---|
+| model | `distilbert-base-uncased`, single-output regression head |
+| size | 67.0M parameters, 268 MB fp32 |
+| max length | **512 tokens** — 466/1783 essays (**26.1%**) still exceed it and are truncated (at 256, the frozen encoder's limit, 89.5% did) |
+| target | score rescaled to 0-1 as `(score - 2) / 10`, MSE loss |
+| prediction | rescale back, round to integer, clamp to 2-12 — same as every other system here |
+| data | the **train split only**, from the locked `asap_split.json` (fingerprint `828dbd347ea2cf81`), same cleaned text as the benchmark above |
+| grid | learning rate ∈ {2e-5, 3e-5}; up to 4 epochs; **best epoch and learning rate chosen by dev QWK** |
+| batch size | 8 — measured to fit this machine; 16 falls off a memory cliff (117 s/step vs 1.37 s/step) |
+| seed | 20260928, fixed |
+| hardware | Apple M1, 8 GB, MPS |
+
+## The two candidates, fixed in advance
+
+- **(A) fine-tuned alone** — the DistilBERT prediction.
+- **(B) fine-tuned + handcrafted Ridge, averaged** — `w · finetuned + (1-w) · ridge`,
+  with **w chosen on dev** from {0.25, 0.5, 0.75}. The Ridge half is the
+  handcrafted-features system already benchmarked above, refit on train only.
+
+## Honesty conditions, fixed in advance
+
+- The test split is scored **once**, at the end, after every choice is locked
+  on dev.
+- **This test set has already been used** to evaluate the five systems above.
+  It is no longer virgin: each additional look raises the chance that some
+  system wins by luck. These two candidates are pre-declared to limit that,
+  but the honest reading is that test is now a *repeatedly used* benchmark,
+  not a fresh one. A genuinely clean comparison would need a new split or a
+  new corpus.
+- A difference whose bootstrap interval includes zero will be reported as
+  **not distinguishable**, whichever direction it points.
+
