@@ -136,15 +136,69 @@ backend/
   migrations/    Alembic; see migrations/README for the workflow
   scripts/       train_grader.py, seed_demo_rubric.py, reset_dev_data.py,
                  evaluate_holdout.py + leakage_guard.py + padding_probe.py
-                 (held-out evaluation; none of them train or save a model)
+                 (held-out evaluation; none of them train or save a model),
+                 asap_benchmark.py (independent public-dataset benchmark)
   tests/         pytest suite
   training_data/ labeled sample answers, the two holdout sets,
-                 holdout_results.md and results/ (saved evaluation runs)
+                 holdout_results.md, asap_results.md + asap_split.json,
+                 and results/ (saved evaluation runs)
+  data/          benchmark corpora -- gitignored, never committed
 frontend/        React + Vite
 ```
 
+## Independent benchmark (ASAP-AES)
+
+Every other number in this project comes from essays the team wrote and scored
+itself. To check the *method* against strangers' work, the same featurisation
+was benchmarked on **ASAP-AES set 1** — 1,783 public essays scored 2-12 by two
+real teachers. Full write-up: **[backend/training_data/asap_results.md](backend/training_data/asap_results.md)**;
+run with `scripts/asap_benchmark.py`. The split was committed before anything
+was fit, and test was scored once.
+
+| system (test, n=268) | MAE | QWK |
+|---|---|---|
+| guess-the-mean | 1.220 | 0.000 |
+| **word count only** | 0.675 | **0.757** |
+| handcrafted only | 0.638 | 0.776 |
+| embeddings only | 0.993 | 0.621 |
+| **embeddings + handcrafted (shipped)** | 0.716 | **0.765** |
+
+**The embeddings are not doing the work; length is.** A Ridge model on word
+count alone is not statistically distinguishable from the full pipeline
+(ΔQWK 0.008), embeddings alone are *worse* than word count, and adding
+embeddings to the handcrafted features does not improve on those features
+alone (ΔQWK −0.011, CI [−0.055, +0.026]). Sweeping the Ridge alpha on dev
+does not rescue them. This confirms on independent data what
+`app/grading/features.py` already said: these embeddings encode topic, not
+quality.
+
+Two honest caveats on it: ASAP is grade 7-8 students on a different prompt
+with a single holistic score, so **this validates the method, not the Essay 1
+rubric**; and word count predicting ASAP scores well is a property of that
+corpus, not a licence to grade by length — the padding probe shows where that
+leads.
+
+It also does **not** beat human graders. Compared naively, the model (QWK
+0.765) looks to edge the raters' agreement with each other (0.739) — but the
+model is scored against *two raters summed*, a smoother target than the single
+rater each human is judged against. On a like-for-like task, predicting what
+rater 1 said, the model scores 0.587 against a human's 0.739; the human is
+ahead by 0.152, CI [+0.073, +0.242].
+
 ## Known limitations
 
+- **The encoder silently truncates long submissions.** `all-MiniLM-L6-v2`
+  reads at most **256 tokens (~226 words)**; anything beyond is dropped
+  without warning. Two 377-word essays that differ only after that point embed
+  *identically*. Submissions accept 50,000 characters and the seeded
+  Reflection rubric asks for 200-300 words, so this is reachable in normal
+  use. On ASAP it affects **89.5% of essays**, with the median essay losing
+  40% of itself — and yet chunked embeddings (embed each ~170-word piece, then
+  mean-pool) scored **identically to the single pass on dev** (MAE 0.700 both,
+  QWK 0.781 vs 0.780). So production is deliberately left unchanged: fixing
+  truncation is not worth ~2.6x the embedding cost when the embedding
+  contributes almost nothing to begin with. The hand-crafted features do read
+  the whole text, which is part of why this never showed up.
 - **The grader is trained on 98 labeled examples** (44 Thesis, 54 Evidence).
   Leave-one-out MAE is 1.11 for Thesis (baseline 1.48) and 1.52 for Evidence
   (baseline 3.07). With this few examples the numbers move noticeably if a

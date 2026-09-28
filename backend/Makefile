@@ -12,7 +12,7 @@ test:  ## run the whole test suite against the test database
 	DATABASE_URL="$(TEST_DATABASE_URL)" JWT_SECRET=test-secret $(VENV)/pytest
 
 test-fast:  ## skip the tests that load Sentence-BERT
-	DATABASE_URL="$(TEST_DATABASE_URL)" JWT_SECRET=test-secret $(VENV)/pytest -k "not AutoGradeEndToEnd"
+	DATABASE_URL="$(TEST_DATABASE_URL)" JWT_SECRET=test-secret $(VENV)/pytest -k "not AutoGradeEndToEnd" -m "not slow"
 
 upgrade:  ## apply migrations to the database in .env
 	$(VENV)/flask db upgrade
