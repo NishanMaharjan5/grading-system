@@ -155,6 +155,18 @@ frontend/        React + Vite
   are sentence fragments, so the model mostly learned that fragments score low,
   not that unconnected numbers do. The review step is the backstop: no AI score
   reaches a student unapproved.
+- **A held-out check on 12 paragraph-length essays** (`backend/training_data/
+  holdout_team_scored.json`, results in `holdout_results.md`, run with
+  `scripts/evaluate_holdout.py`) confirms this: the model clears its own
+  guess-the-mean baseline (Thesis MAE 1.00 vs. 1.83; Evidence MAE 1.67 vs.
+  2.75), but its two worst misses are a fence-sitting essay scored as if it
+  took a strong stance, and a facts-only essay (no argument connecting them)
+  scored near the maximum on both Evidence *and* Thesis — because production
+  feeds the same submitted text to every criterion's model. These 12 essays
+  and their scores were written by the project team, not independent
+  teachers, so this is a team-scored check on generalisation, not a measure
+  of agreement with real graders — and 12 essays is too few for the
+  held-out QWK (0.67 Thesis, 0.71 Evidence) to be more than indicative.
 - **Approval is final.** Re-approving returns 409 and there is no correction
   path for a mistaken approval; that would need a revise endpoint with an
   audit trail.
