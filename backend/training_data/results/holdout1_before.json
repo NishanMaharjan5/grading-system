@@ -1,0 +1,381 @@
+{
+  "label": "DEVELOPMENT SET: studied before the round-two fixes, so its improvement is not evidence",
+  "holdout_file": "holdout_team_scored.json",
+  "training_file": "sample_answers.json",
+  "training_rows": 76,
+  "models": {
+    "Thesis": {
+      "n_examples": 33,
+      "md5": "8478be5631baff1bf305b2124cd32506"
+    },
+    "Evidence": {
+      "n_examples": 43,
+      "md5": "5ace08ce172150e7b3631709c7f5443e"
+    }
+  },
+  "git_head": "3623730a19b3c41947156e6673c0e8d5a294b5dd",
+  "run_at": "2026-09-28T17:01:05+00:00",
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 0
+  },
+  "leakage": {
+    "duplicates": 0,
+    "notable_overlaps": [
+      {
+        "essay_id": 3,
+        "criterion": "Thesis",
+        "cosine": 0.833,
+        "closest_training_text": "Kids are spending too much time on social media and parents can't really do anything about it, so maybe the government should."
+      },
+      {
+        "essay_id": 2,
+        "criterion": "Thesis",
+        "cosine": 0.81,
+        "closest_training_text": "Governments should regulate social media platforms because unchecked algorithmic amplification of harmful content poses a measurable risk to"
+      },
+      {
+        "essay_id": 6,
+        "criterion": "Evidence",
+        "cosine": 0.788,
+        "closest_training_text": "The EU's Digital Services Act, enacted in 2022, cut documented instances of illegal content on major platforms by a measurable margin within"
+      },
+      {
+        "essay_id": 1,
+        "criterion": "Thesis",
+        "cosine": 0.768,
+        "closest_training_text": "Government regulation of social media is necessary specifically to address data privacy violations, even though content moderation should re"
+      },
+      {
+        "essay_id": 12,
+        "criterion": "Thesis",
+        "cosine": 0.745,
+        "closest_training_text": "Governments should regulate social media platforms because unchecked algorithmic amplification of harmful content poses a measurable risk to"
+      },
+      {
+        "essay_id": 10,
+        "criterion": "Thesis",
+        "cosine": 0.742,
+        "closest_training_text": "While free expression matters, social media companies' size and influence over public opinion now rival that of traditional media, and they "
+      },
+      {
+        "essay_id": 4,
+        "criterion": "Evidence",
+        "cosine": 0.741,
+        "closest_training_text": "Facebook, Instagram, Twitter, TikTok, YouTube, LinkedIn, Snapchat, Reddit, and Pinterest are all major platforms used across North America, "
+      },
+      {
+        "essay_id": 1,
+        "criterion": "Evidence",
+        "cosine": 0.722,
+        "closest_training_text": "The FTC's 2019 settlement required Facebook to pay $5 billion specifically over data practices that violated a prior consent decree, showing"
+      },
+      {
+        "essay_id": 5,
+        "criterion": "Thesis",
+        "cosine": 0.714,
+        "closest_training_text": "There are many different social media platforms that people use every day for different purposes."
+      },
+      {
+        "essay_id": 5,
+        "criterion": "Evidence",
+        "cosine": 0.708,
+        "closest_training_text": "Social media is used by billions of people around the world every single day."
+      },
+      {
+        "essay_id": 3,
+        "criterion": "Evidence",
+        "cosine": 0.686,
+        "closest_training_text": "Studies show that social media can be harmful to mental health."
+      },
+      {
+        "essay_id": 8,
+        "criterion": "Thesis",
+        "cosine": 0.664,
+        "closest_training_text": "Kids are spending too much time on social media and parents can't really do anything about it, so maybe the government should."
+      },
+      {
+        "essay_id": 11,
+        "criterion": "Evidence",
+        "cosine": 0.651,
+        "closest_training_text": "The FTC's 2019 settlement required Facebook to pay $5 billion specifically over data practices that violated a prior consent decree, showing"
+      },
+      {
+        "essay_id": 12,
+        "criterion": "Evidence",
+        "cosine": 0.648,
+        "closest_training_text": "Several documented cases exist of foreign governments using social media ads to interfere in elections, which regulation could help prevent."
+      },
+      {
+        "essay_id": 2,
+        "criterion": "Evidence",
+        "cosine": 0.622,
+        "closest_training_text": "I think social media regulation is an interesting topic to write about."
+      }
+    ]
+  },
+  "criteria": {
+    "Thesis": {
+      "max_points": 5.0,
+      "n": 12,
+      "model": {
+        "mae": 1.0,
+        "within_one": 0.8333333333333334,
+        "exact": 0.4166666666666667,
+        "qwk": 0.6666666666666667
+      },
+      "baseline": {
+        "mae": 1.8333333333333333,
+        "within_one": 0.25,
+        "exact": 0.08333333333333333,
+        "qwk": 0.0,
+        "constant": 3.0
+      },
+      "ci": {
+        "model": {
+          "mae": [
+            0.4166666666666667,
+            1.75
+          ],
+          "within_one": [
+            0.5833333333333334,
+            1.0
+          ],
+          "exact": [
+            0.16666666666666666,
+            0.6666666666666666
+          ],
+          "qwk": [
+            0.1555532212885154,
+            0.9486301369863014
+          ]
+        },
+        "baseline_mae": [
+          1.0,
+          2.1666666666666665
+        ],
+        "mae_improvement_over_baseline": [
+          -0.16666666666666674,
+          1.583333333333333
+        ]
+      },
+      "essays": [
+        {
+          "essay_id": 1,
+          "true": 5.0,
+          "raw": 5.363,
+          "pred": 5.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 2,
+          "true": 5.0,
+          "raw": 5.693,
+          "pred": 5.0,
+          "word_count": 55
+        },
+        {
+          "essay_id": 3,
+          "true": 3.0,
+          "raw": 2.875,
+          "pred": 3.0,
+          "word_count": 35
+        },
+        {
+          "essay_id": 4,
+          "true": 1.0,
+          "raw": 0.52,
+          "pred": 1.0,
+          "word_count": 44
+        },
+        {
+          "essay_id": 5,
+          "true": 0.0,
+          "raw": -0.123,
+          "pred": 0.0,
+          "word_count": 17
+        },
+        {
+          "essay_id": 6,
+          "true": 5.0,
+          "raw": 4.35,
+          "pred": 4.0,
+          "word_count": 62
+        },
+        {
+          "essay_id": 7,
+          "true": 1.0,
+          "raw": 4.542,
+          "pred": 5.0,
+          "word_count": 31
+        },
+        {
+          "essay_id": 8,
+          "true": 5.0,
+          "raw": 3.874,
+          "pred": 4.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 9,
+          "true": 0.0,
+          "raw": 0.517,
+          "pred": 1.0,
+          "word_count": 36
+        },
+        {
+          "essay_id": 10,
+          "true": 4.0,
+          "raw": 5.201,
+          "pred": 5.0,
+          "word_count": 51
+        },
+        {
+          "essay_id": 11,
+          "true": 1.0,
+          "raw": 3.557,
+          "pred": 4.0,
+          "word_count": 47
+        },
+        {
+          "essay_id": 12,
+          "true": 4.0,
+          "raw": 4.917,
+          "pred": 5.0,
+          "word_count": 51
+        }
+      ]
+    },
+    "Evidence": {
+      "max_points": 10.0,
+      "n": 12,
+      "model": {
+        "mae": 1.6666666666666667,
+        "within_one": 0.5,
+        "exact": 0.4166666666666667,
+        "qwk": 0.7148846960167715
+      },
+      "baseline": {
+        "mae": 2.75,
+        "within_one": 0.3333333333333333,
+        "exact": 0.0,
+        "qwk": 0.0,
+        "constant": 4.0
+      },
+      "ci": {
+        "model": {
+          "mae": [
+            0.75,
+            2.6666666666666665
+          ],
+          "within_one": [
+            0.25,
+            0.75
+          ],
+          "exact": [
+            0.16666666666666666,
+            0.6666666666666666
+          ],
+          "qwk": [
+            0.4239112438813706,
+            0.8984417712475149
+          ]
+        },
+        "baseline_mae": [
+          1.5833333333333333,
+          3.3333333333333335
+        ],
+        "mae_improvement_over_baseline": [
+          -0.6666666666666665,
+          2.25
+        ]
+      },
+      "essays": [
+        {
+          "essay_id": 1,
+          "true": 8.0,
+          "raw": 8.407,
+          "pred": 8.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 2,
+          "true": 5.0,
+          "raw": 5.619,
+          "pred": 6.0,
+          "word_count": 55
+        },
+        {
+          "essay_id": 3,
+          "true": 5.0,
+          "raw": 4.568,
+          "pred": 5.0,
+          "word_count": 35
+        },
+        {
+          "essay_id": 4,
+          "true": 1.0,
+          "raw": 1.001,
+          "pred": 1.0,
+          "word_count": 44
+        },
+        {
+          "essay_id": 5,
+          "true": 0.0,
+          "raw": -0.733,
+          "pred": 0.0,
+          "word_count": 17
+        },
+        {
+          "essay_id": 6,
+          "true": 8.0,
+          "raw": 8.399,
+          "pred": 8.0,
+          "word_count": 62
+        },
+        {
+          "essay_id": 7,
+          "true": 0.0,
+          "raw": 4.133,
+          "pred": 4.0,
+          "word_count": 31
+        },
+        {
+          "essay_id": 8,
+          "true": 8.0,
+          "raw": 5.527,
+          "pred": 6.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 9,
+          "true": 0.0,
+          "raw": 1.551,
+          "pred": 2.0,
+          "word_count": 36
+        },
+        {
+          "essay_id": 10,
+          "true": 2.0,
+          "raw": 4.695,
+          "pred": 5.0,
+          "word_count": 51
+        },
+        {
+          "essay_id": 11,
+          "true": 5.0,
+          "raw": 10.478,
+          "pred": 10.0,
+          "word_count": 47
+        },
+        {
+          "essay_id": 12,
+          "true": 5.0,
+          "raw": 7.578,
+          "pred": 8.0,
+          "word_count": 51
+        }
+      ]
+    }
+  }
+}
