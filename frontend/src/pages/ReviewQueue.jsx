@@ -18,7 +18,7 @@ import { submissionsApi } from "../api/submissions";
  * matched up here.
  */
 const STATUS_COPY = {
-  ai_graded: { label: "AI suggestion ready", tone: "pending", hint: "Review the suggested scores." },
+  ai_graded: { label: "AI suggestion ready", tone: "ai", hint: "Review the suggested scores." },
   grading_failed: { label: "Needs manual grading", tone: "neutral", hint: "No trained model for this rubric." },
 };
 

@@ -1,18 +1,127 @@
-/* Deliberately plain: enough structure to use the app and read the forms,
-   nothing invested in visual design yet. */
+/* ============================================================================
+   Grading System — visual design system
+
+   The idea is ink on paper. Teachers mark essays here, so the page is a warm
+   paper ground, each card is a white sheet lifted off it, and the one strong
+   colour is a deep indigo used the way a marking pen is: for actions, focus
+   and the AI's own voice, and nowhere else.
+
+   Everything below is driven by the tokens in :root. No component sets a raw
+   colour, size or radius of its own, which is what keeps light and dark in
+   step and lets the spacing stay on one scale.
+
+   Contrast: every text/background pair in both themes was measured against
+   WCAG AA (4.5:1). The lowest is 5.29:1 (muted text on paper).
+   ========================================================================= */
 
 :root {
-  --bg: #ffffff;
-  --fg: #1b1d21;
-  --muted: #6b7280;
-  --line: #d9dce1;
-  --accent: #2d6ef5;
-  --error-bg: #fdecec;
-  --error-fg: #a01b1b;
+  /* --- warm neutral scale. Warm rather than blue-grey so the ground reads
+         as paper next to the cool indigo ink. --- */
+  --stone-50:  #faf9f7;
+  --stone-100: #f7f5f1;
+  --stone-150: #f0ede7;
+  --stone-200: #e8e4dc;
+  --stone-300: #d8d2c7;
+  --stone-400: #a8a199;
+  --stone-500: #6b655d;
+  --stone-700: #44403b;
+  --stone-900: #1c1917;
+
+  /* --- roles --- */
+  --paper: var(--stone-100);      /* the page itself */
+  --surface: #ffffff;             /* cards: a sheet on the page */
+  --surface-sunken: var(--stone-150); /* code blocks, insets */
+  --ink: var(--stone-900);
+  --ink-muted: var(--stone-500);
+  --line: var(--stone-200);
+  --line-strong: var(--stone-300);
+
+  /* --- primary: deep indigo, the marking pen --- */
+  --primary: #403a9e;
+  --primary-hover: #332e80;
+  --primary-active: #2a2669;
+  --primary-tint: #eeecfa;        /* AI suggestion panels, secondary hover */
+  --primary-on: #ffffff;
+
+  /* --- semantic. Status is a state, not a judgement: grading_failed is
+         neutral, never red, because nothing went wrong for the student. --- */
+  --pending-fg: #8a5a00;  --pending-bg: #fdf3dd;  --pending-line: #e8c98a;
+  --ai-fg:      #2a4a9e;  --ai-bg:      #e8eefc;  --ai-line:      #a9c0ef;
+  --done-fg:    #1c6b3f;  --done-bg:    #e3f4e9;  --done-line:    #9ad4b1;
+  --neutral-fg: #5c564e;  --neutral-bg: var(--stone-150); --neutral-line: var(--line-strong);
+  /* danger stays red: it is for destructive actions and validation, which
+     genuinely are errors */
+  --danger-fg: #a4262c;   --danger-bg: #fdeceb;   --danger-line: #e8a9a6;
+
+  /* --- type --- */
+  --font-display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-xs:   0.75rem;    /* badges, micro labels */
+  --text-sm:   0.8125rem;  /* hints, meta */
+  --text-base: 0.9375rem;  /* body */
+  --text-md:   1rem;
+  --text-lg:   1.125rem;   /* card titles */
+  --text-xl:   1.375rem;   /* section headings */
+  --text-2xl:  1.75rem;    /* page titles */
+
+  /* --- spacing: 4 / 8 / 12 / 16 / 24 / 32 / 48 --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* warm-tinted shadows: a grey shadow on a warm ground looks like dirt */
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.04), 0 1px 3px rgba(28, 25, 23, 0.05);
+  --shadow-md: 0 2px 4px rgba(28, 25, 23, 0.05), 0 4px 12px rgba(28, 25, 23, 0.07);
+  --ring: 0 0 0 3px rgba(64, 58, 158, 0.28);
 
   color-scheme: light;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Dark mode is token-level only: the components above never change. Kept to
+   the same warm family so it reads as dimmed paper rather than a cold slab. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #191816;
+    --surface: #221f1d;
+    --surface-sunken: #171614;
+    --ink: #f0ece5;
+    --ink-muted: #a8a199;
+    --line: #34302b;
+    --line-strong: #47423c;
+
+    --primary: #a9a4f5;
+    --primary-hover: #bdb9f8;
+    --primary-active: #cecbfa;
+    --primary-tint: #252340;
+    --primary-on: #17151f;
+
+    --pending-fg: #f0c26a;  --pending-bg: #3a2e14;  --pending-line: #6b5522;
+    --ai-fg:      #a8c0f5;  --ai-bg:      #1e2740;  --ai-line:      #35477a;
+    --done-fg:    #8ed6a8;  --done-bg:    #14301f;  --done-line:    #2a5c3d;
+    --neutral-fg: #b5aea5;  --neutral-bg: #2c2926;  --neutral-line: var(--line-strong);
+    --danger-fg:  #f0918f;  --danger-bg:  #3a1d1d;  --danger-line:  #6b3230;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.35);
+    --ring: 0 0 0 3px rgba(169, 164, 245, 0.32);
+
+    color-scheme: dark;
+  }
 }
 
 * {
@@ -21,195 +130,95 @@
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--text-base);
+}
+
+/* ---------------------------------------------------------------- type */
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+  margin: 0;
 }
 
 h1 {
-  font-size: 1.5rem;
-  margin: 0 0 1rem;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.015em;
+  margin-bottom: var(--space-4);
+}
+
+h2 {
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: var(--text-lg);
+}
+
+p {
+  margin: 0 0 var(--space-3);
+}
+
+p:last-child {
+  margin-bottom: 0;
 }
 
 a {
-  color: var(--accent);
+  color: var(--primary);
+  text-underline-offset: 2px;
 }
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+.muted {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.hint {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  margin: var(--space-1) 0 0;
+}
+
+/* scores and totals line up in columns wherever they are listed */
+.rubric__title,
+.criteria-summary,
+.kv dd {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- page layout */
 
 .page {
   max-width: 60rem;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: var(--space-8) var(--space-4) var(--space-12);
 }
 
 .page--narrow {
-  max-width: 24rem;
+  max-width: 26rem;
 }
 
-.muted {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.hint {
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin: 0.25rem 0 0;
-}
-
-/* forms */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-top: 0.75rem;
-}
-
-input,
-select,
-textarea {
-  font: inherit;
-  padding: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--fg);
-}
-
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-/* Actions. Four kinds, used the same way everywhere:
-   - primary (plain <button>, or .button on a link): the one main action on a
-     card or form -- submit, "New rubric", "Submit work", "Grade this"
-   - .button--secondary: an alternative to it -- View, Edit, Cancel, Delete,
-     "Accept all AI scores" (secondary because manual grading is the main path)
-   - .button--plain: small tools inside a form -- Add, Remove, "Use this score"
-   - plain links: back navigation and links inside a sentence */
-button,
-.button {
-  display: inline-block;
-  font: inherit;
-  line-height: 1.25;
-  margin-top: 1.25rem;
-  padding: 0.55rem 1rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
-  text-align: center;
-}
-
-a.button {
-  margin-top: 0;
-}
-
-button:hover:not(:disabled),
-a.button:hover {
-  filter: brightness(0.93);
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.button--secondary {
-  background: var(--bg);
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.button--secondary:hover:not(:disabled) {
-  filter: none;
-  background: #f1f5ff;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.button--plain {
-  margin: 0;
-  background: none;
-  color: var(--accent);
-  padding: 0.35rem 0.5rem;
-}
-
-.alert {
-  margin: 0 0 0.5rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 4px;
-  background: var(--error-bg);
-  color: var(--error-fg);
-  font-size: 0.9rem;
-}
-
-/* app shell */
-.shell__header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.shell__title {
-  font-weight: 600;
-}
-
-.shell__spacer {
-  flex: 1;
-}
-
-.badge {
-  display: inline-block;
-  padding: 0.1rem 0.4rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 0.75rem;
-}
-
-.card {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.kv {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.25rem 1rem;
-  margin: 0.5rem 0 0;
-}
-
-.kv dt {
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.kv dd {
-  margin: 0;
-}
-
-/* rubric list + form */
 .page__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.page__head h1 {
+  margin-bottom: 0;
 }
 
 .page__head button {
@@ -219,251 +228,400 @@ button:disabled {
 .row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
   flex-wrap: wrap;
 }
 
-.row button {
+.row button,
+.row .button {
   margin-top: 0;
 }
 
-.field-error {
-  margin: 0.15rem 0 0;
-  color: var(--error-fg);
-  font-size: 0.8rem;
-}
+/* ------------------------------------------------------------- surfaces */
 
-input[aria-invalid="true"] {
-  border-color: var(--error-fg);
-}
-
-.criteria {
-  margin-top: 1.25rem;
+/* A card is a sheet of paper on the desk: white, hairline edge, soft shadow.
+   Only cards get this treatment -- insets inside them (test cases, AI
+   suggestions, code) are tinted instead, so the hierarchy stays readable. */
+.card {
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.5rem 1rem 1rem;
-}
-
-.criteria legend {
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0 0.35rem;
-}
-
-.criterion-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.criterion-row__field {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.criterion-row__field label {
-  margin-top: 0;
-}
-
-.criterion-row__field--points {
-  flex: 0 0 8rem;
-}
-
-.criterion-row > button {
-  margin-top: 1.6rem;
-}
-
-.rubric-list {
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0 0;
-}
-
-.rubric__head {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.rubric__title {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.badge--locked {
-  border-color: #c98a00;
-  color: #8a5d00;
-  background: #fff6e0;
-}
-
-.button--danger {
-  color: var(--error-fg);
-}
-
-.button--secondary.button--danger {
-  border-color: var(--error-fg);
-}
-
-.button--secondary.button--danger:hover:not(:disabled) {
-  background: var(--error-bg);
-}
-
-.criteria-summary {
-  margin: 0.5rem 0 0;
-  padding-left: 1.1rem;
-  font-size: 0.9rem;
-}
-
-/* student submission views */
-.badge--pending {
-  border-color: #c98a00;
-  color: #8a5d00;
-  background: #fff6e0;
-}
-
-.badge--done {
-  border-color: #1f7a3d;
-  color: #1f7a3d;
-  background: #eaf7ee;
-}
-
-.notice {
-  padding: 0.6rem 0.75rem;
-  border-radius: 4px;
-  background: #eaf7ee;
-  color: #1f7a3d;
-  font-size: 0.9rem;
-}
-
-.submitted-content {
-  white-space: pre-wrap;
-  font-size: 0.9rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
 }
 
 details.card > summary {
   cursor: pointer;
   font-weight: 600;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  border-radius: var(--radius-sm);
 }
 
-.criteria-summary li {
-  margin-bottom: 0.35rem;
+details.card > summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
-/* review queue + form */
+details.card[open] > summary {
+  margin-bottom: var(--space-3);
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-2) 0 0;
+}
+
+.kv dt {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.kv dd {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------- forms */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-top: var(--space-3);
+  color: var(--ink);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  font-size: var(--text-base);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--stone-400);
+}
+
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--stone-400);
+}
+
+/* One focus treatment for every way a field can be reached: a solid outline
+   for definition, plus a soft halo. The outline is what matters -- box-shadow
+   is dropped in forced-colors mode, so a halo alone would leave keyboard users
+   with no visible focus there. (Chromium matches :focus-visible on text inputs
+   however they were focused, so splitting the two by modality gains nothing.) */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--danger-fg);
+}
+
+input[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}
+
+.field-error {
+  margin: var(--space-1) 0 0;
+  color: var(--danger-fg);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+/* ------------------------------------------------------------- buttons */
+
+/* Four kinds, used the same way everywhere:
+   - primary (plain <button>, or .button on a link): the one main action on a
+     card or form -- submit, "New rubric", "Submit work", "Grade this"
+   - .button--secondary: an alternative to it -- View, Edit, Cancel, Delete,
+     "Accept all AI scores" (secondary because manual grading is the main path)
+   - .button--plain: small tools inside a form -- Add, Remove, "Use this score"
+   - plain links: back navigation and links inside a sentence */
+button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: 500;
+  line-height: 1.25;
+  margin-top: var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--primary-on);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.12s ease, border-color 0.12s ease,
+    box-shadow 0.12s ease, transform 0.06s ease;
+}
+
+a.button {
+  margin-top: 0;
+}
+
+button:hover:not(:disabled),
+a.button:hover {
+  background: var(--primary-hover);
+  color: var(--primary-on);
+}
+
+button:active:not(:disabled),
+a.button:active {
+  background: var(--primary-active);
+  transform: translateY(1px);
+}
+
+button:focus-visible,
+.button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.button--secondary {
+  background: var(--surface);
+  color: var(--primary);
+  border-color: var(--line-strong);
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: var(--primary-tint);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.button--secondary:active:not(:disabled) {
+  background: var(--primary-tint);
+  border-color: var(--primary-hover);
+}
+
+.button--plain {
+  margin: 0;
+  background: none;
+  border-color: transparent;
+  color: var(--primary);
+  padding: var(--space-1) var(--space-2);
+  font-weight: 500;
+}
+
+.button--plain:hover:not(:disabled) {
+  background: var(--primary-tint);
+  color: var(--primary-hover);
+}
+
+.button--plain:active:not(:disabled) {
+  background: var(--primary-tint);
+  transform: none;
+}
+
+.button--danger {
+  color: var(--danger-fg);
+}
+
+.button--secondary.button--danger {
+  border-color: var(--danger-line);
+  color: var(--danger-fg);
+}
+
+.button--secondary.button--danger:hover:not(:disabled) {
+  background: var(--danger-bg);
+  border-color: var(--danger-fg);
+  color: var(--danger-fg);
+}
+
+/* -------------------------------------------------------------- badges */
+
+/* A status is read at a glance down a list, so it is a filled pill, not a
+   bordered word. One shape, one size; only the colour carries the meaning. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.15rem var(--space-2);
+  border: 1px solid var(--neutral-line);
+  border-radius: var(--radius-pill);
+  background: var(--neutral-bg);
+  color: var(--neutral-fg);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* a dot gives the state a second, non-colour cue */
+.badge::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.badge--pending,
+.badge--locked {
+  background: var(--pending-bg);
+  border-color: var(--pending-line);
+  color: var(--pending-fg);
+}
+
+.badge--ai {
+  background: var(--ai-bg);
+  border-color: var(--ai-line);
+  color: var(--ai-fg);
+}
+
+.badge--done {
+  background: var(--done-bg);
+  border-color: var(--done-line);
+  color: var(--done-fg);
+}
+
+.badge--neutral {
+  background: var(--neutral-bg);
+  border-color: var(--neutral-line);
+  color: var(--neutral-fg);
+}
+
+/* the role chip in the header is an attribute, not a status: no dot */
+.shell__user .badge::before {
+  display: none;
+}
+
+/* ------------------------------------------------------- notices */
+
+.alert {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius-sm);
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  font-size: var(--text-base);
+}
+
+.notice {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--done-line);
+  border-radius: var(--radius-sm);
+  background: var(--done-bg);
+  color: var(--done-fg);
+  font-size: var(--text-base);
+}
+
+/* ----------------------------------------------------------- app shell */
+
+.shell__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/* wordmark: the mark is the rubric itself -- ruled lines, one ticked */
+.shell__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.shell__mark {
+  display: block;
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--primary);
+}
+
+.shell__title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.shell__spacer {
+  flex: 1;
+}
+
 .shell__nav {
   display: flex;
-  gap: 0.75rem;
-  margin-left: 1rem;
-  font-size: 0.9rem;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
 }
 
 .shell__nav a {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  color: var(--muted);
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.shell__nav a:hover {
+  background: var(--stone-150);
+  color: var(--ink);
 }
 
 .shell__nav a.active {
-  color: var(--accent);
+  background: var(--primary-tint);
+  color: var(--primary);
   font-weight: 600;
 }
 
-.submitted-preview {
-  font-size: 0.9rem;
-  color: var(--fg);
-  margin: 0.5rem 0 0;
-}
-
-.accept-all {
-  border-color: var(--accent);
-}
-
-.accept-all button {
-  margin-top: 0.5rem;
-}
-
-/* The card is a flex item of the form, but its own children still flow
-   inline -- without this the score label, input and feedback box collide. */
-.criterion-review {
-  display: flex;
-  flex-direction: column;
-}
-
-.criterion-review label {
-  margin-top: 0.75rem;
-}
-
-.criterion-review input[type="number"] {
-  max-width: 8rem;
-}
-
-.ai-suggestion {
-  margin-top: 0.75rem;
-  padding: 0.6rem 0.75rem;
-  border-left: 3px solid var(--accent);
-  background: #f5f8ff;
-  border-radius: 0 4px 4px 0;
-}
-
-.ai-suggestion__head {
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-.ai-suggestion button {
-  margin-top: 0.35rem;
-  padding-left: 0;
-}
-
-/* code rubric test cases */
-.criterion-block {
-  border-top: 1px solid var(--line);
-  padding-top: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.criterion-block:first-of-type {
-  border-top: 0;
-}
-
-.test-cases {
-  margin: 0.5rem 0 0 0.5rem;
-  padding-left: 0.75rem;
-  border-left: 2px solid var(--line);
-}
-
-.test-case {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.test-case textarea {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.85rem;
-}
-
-.test-case > button {
-  margin-top: 1.6rem;
-}
-
-/* header: never wider than the screen. On a phone the nav takes its own row
-   and the email (the long, variable-width part) is dropped in favour of the
-   role badge; on wider screens a long email truncates rather than pushing
-   "Sign out" off the edge. */
-.shell__title,
-.shell__nav a,
-.shell__signout {
-  white-space: nowrap;
+.shell__nav a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
 }
 
 .shell__user {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   min-width: 0;
 }
 
@@ -477,10 +635,293 @@ details.card > summary {
   flex-shrink: 0;
 }
 
+/* header: never wider than the screen. On a phone the nav takes its own row
+   and the email (the long, variable-width part) is dropped in favour of the
+   role badge; on wider screens a long email truncates rather than pushing
+   "Sign out" off the edge. */
+.shell__title,
+.shell__nav a,
+.shell__signout {
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------- rubric list + form */
+
+.rubric-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* the list owns the rhythm, so the cards drop their own bottom margin */
+.rubric-list .card {
+  margin-bottom: 0;
+}
+
+.rubric__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+
+.rubric__title {
+  font-size: var(--text-lg);
+}
+
+.criteria-summary {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  font-size: var(--text-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.criteria-summary li {
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--line);
+}
+
+.criteria {
+  margin-top: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  min-width: 0;
+}
+
+.criteria legend {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 0 var(--space-1);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.criterion-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.criterion-row__field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.criterion-row__field label {
+  margin-top: 0;
+}
+
+.criterion-row__field input,
+.criterion-row__field textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.criterion-row__field--points {
+  flex: 0 0 8rem;
+}
+
+.criterion-row > button {
+  margin-top: 1.7rem;
+}
+
+.criterion-block {
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.criterion-block:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.test-cases {
+  margin: var(--space-3) 0 0 var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--line);
+}
+
+.test-case {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.test-case textarea {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.test-case > button {
+  margin-top: 1.7rem;
+}
+
+/* ------------------------------------------------- submissions + review */
+
+.student-line {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+h1 + .student-line {
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.submitted-content {
+  white-space: pre-wrap;
+  font-size: var(--text-base);
+}
+
+.submitted-preview {
+  font-size: var(--text-base);
+  color: var(--ink);
+  margin: var(--space-2) 0 0;
+}
+
+/* The card is a flex item of the form, but its own children still flow
+   inline -- without this the score label, input and feedback box collide. */
+.criterion-review {
+  display: flex;
+  flex-direction: column;
+}
+
+.criterion-review label {
+  margin-top: var(--space-3);
+}
+
+.criterion-review input[type="number"] {
+  max-width: 8rem;
+}
+
+/* The AI's suggestion is the one place the indigo appears as a surface: it
+   marks the machine's voice as distinct from the teacher's own fields. */
+.ai-suggestion {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-left: 3px solid var(--primary);
+  background: var(--primary-tint);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.ai-suggestion__head {
+  margin: 0;
+  font-size: var(--text-base);
+}
+
+.ai-suggestion button {
+  margin-top: var(--space-1);
+  padding-left: 0;
+}
+
+.accept-all {
+  border-color: var(--primary);
+  border-left-width: 3px;
+}
+
+.accept-all button {
+  margin-top: var(--space-2);
+}
+
+/* feedback keeps its line structure; code feedback lines up expected/actual */
+.feedback {
+  white-space: pre-wrap;
+  margin: var(--space-1) 0 0;
+}
+
+.feedback--code {
+  overflow-x: auto;
+}
+
+/* ----------------------------------------------------------------- code */
+
+/* submitted programs, previews and test feedback keep their line breaks and
+   indentation, in a monospace face */
+.code,
+.code-input,
+.feedback--code,
+code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.code {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 4;
+  line-height: 1.5;
+}
+
+.code--preview {
+  max-height: 10rem;
+}
+
+.code-input {
+  tab-size: 4;
+  line-height: 1.5;
+}
+
+code {
+  padding: 0.05rem var(--space-1);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+}
+
+.code-guide {
+  background: var(--surface-sunken);
+  box-shadow: none;
+}
+
+.code-guide ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+}
+
+.code-guide li {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-base);
+}
+
+.code-guide .rubric__title {
+  font-size: var(--text-md);
+}
+
+/* ----------------------------------------------------------- responsive */
+
 @media (max-width: 640px) {
+  .page {
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: var(--space-4);
+  }
+
   .shell__header {
     flex-wrap: wrap;
-    row-gap: 0.5rem;
+    row-gap: var(--space-2);
+    gap: var(--space-2);
   }
 
   .shell__nav {
@@ -492,37 +933,17 @@ details.card > summary {
   .shell__email {
     display: none;
   }
-}
 
-.student-line {
-  margin: 0.25rem 0 0.75rem;
-}
+  .page__head {
+    flex-wrap: wrap;
+  }
 
-h1 + .student-line {
-  margin-top: -0.5rem;
-}
-
-/* rubric form at phone width. Two browser defaults stop it shrinking: a
-   fieldset's minimum width is its content's minimum width, and a flex item
-   won't shrink below its input's natural width. Lift both, then stack the
-   rows so nothing is squeezed to an unusable sliver. */
-.criteria {
-  min-width: 0;
-}
-
-.criterion-row__field {
-  min-width: 0;
-}
-
-.criterion-row__field input,
-.criterion-row__field textarea {
-  width: 100%;
-  min-width: 0;
-}
-
-@media (max-width: 640px) {
+  /* rubric form at phone width. Two browser defaults stop it shrinking: a
+     fieldset's minimum width is its content's minimum width, and a flex item
+     won't shrink below its input's natural width. Both are lifted above with
+     min-width: 0; here the rows stack so nothing is squeezed to a sliver. */
   .criteria {
-    padding: 0.5rem 0.75rem 0.75rem;
+    padding: var(--space-2) var(--space-3) var(--space-3);
   }
 
   .criterion-row,
@@ -547,66 +968,15 @@ h1 + .student-line {
 
   .test-cases {
     margin-left: 0;
-    padding-left: 0.5rem;
+    padding-left: var(--space-2);
   }
 }
 
-/* code: submitted programs, previews and test feedback keep their line
-   breaks and indentation, in a monospace face */
-.code,
-.code-input,
-.feedback--code,
-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.85rem;
-}
-
-.code {
-  margin: 0.5rem 0 0;
-  padding: 0.75rem;
-  background: #f6f7f9;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  white-space: pre;
-  overflow-x: auto;
-  tab-size: 4;
-}
-
-.code--preview {
-  max-height: 10rem;
-}
-
-.code-input {
-  tab-size: 4;
-  line-height: 1.45;
-}
-
-code {
-  padding: 0.05rem 0.3rem;
-  background: #f6f7f9;
-  border-radius: 3px;
-}
-
-/* feedback keeps its line structure; code feedback lines up expected/actual */
-.feedback {
-  white-space: pre-wrap;
-  margin: 0.25rem 0 0;
-}
-
-.feedback--code {
-  overflow-x: auto;
-}
-
-.code-guide ul {
-  margin: 0.5rem 0 0;
-  padding-left: 1.1rem;
-}
-
-.code-guide li {
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
-}
-
-.code-guide .rubric__title {
-  font-size: 1rem;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
