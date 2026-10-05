@@ -102,6 +102,7 @@ was built:
 | The shipped features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
 | **Fine-tuned DistilBERT** | the same 268 essays | **QWK 0.841**: distinguishably better, and **statistically indistinguishable from a second human rater** |
 | The shipped pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis generalised** (QWK 0.79); **Evidence did not** (gain over baseline 0.12, CI [−1.88, +1.62] — not distinguishable from zero) |
+| **Conditioning on the rubric text** instead of a fixed criterion id | 8 essays for a criterion never trained on | **null**: reading the description made no measurable difference (ΔQWK −0.056, CI [−0.345, +0.047]) |
 
 The first three rows use answers the team wrote and scored itself; that
 write-up is `backend/training_data/holdout_results.md`. The last two use
@@ -195,6 +196,48 @@ A weakness that survives a change of subject is a limitation of the method,
 not a quirk of the social-media training set. That is stronger evidence than
 anything the Essay 1 holdouts could give, because there the training and test
 essays shared a topic.
+
+### Can a grader score a criterion it has never seen?
+
+Every grader here is keyed to one criterion *row id*: it learns "Thesis" as an
+opaque label, so a teacher adding a criterion gets nothing until they have
+labelled examples for it. The third experiment asked whether conditioning on
+the criterion's **description** instead transfers — score the essay against
+*this question about it*, rather than against criterion #1. Full write-up:
+**[backend/training_data/results/rubric_conditioning_results.md](backend/training_data/results/rubric_conditioning_results.md)**.
+
+Design pre-declared and committed, 8-essay holdout for an unseen criterion
+("Counterargument") locked a commit earlier, two models trained on identical
+data — one reading the description, one reading a placeholder — and the test
+scored once.
+
+**The answer is a clean null.** The paired difference between the two is
+−0.056 QWK with an interval of [−0.345, +0.047]; every metric's interval
+contains zero and every point estimate that moves favours the *ablation*. By
+the criteria written down beforehand that is a null result, not a near-miss.
+
+Two things make it worth reading anyway:
+
+- **Zero-shot transfer did happen.** Both models reached QWK ≈ 0.7 on a
+  criterion with no training data, against a baseline of 0.0 — just not
+  because of the description.
+- **The experiment probably couldn't have detected the effect.** On the
+  criteria the models *were* trained on, the two scored identically to three
+  decimal places (MAE 1.038, within-1 76.9%). With only two distinct
+  descriptions in training, a model can minimise its loss by judging general
+  essay quality and never reading the description at all. So this cannot
+  separate "conditioning doesn't help" from "two criteria is too few for
+  conditioning to be learned" — a limitation of the design, not evidence
+  against the idea.
+
+What transferred looks like a general quality proxy rather than counterargument
+detection: both models are within one point on seven of eight essays and both
+are three points out on the one essay built to pull those apart — a confident,
+one-sided claim that engages no objection, scored 4/5 by both against a true 1.
+
+The clean follow-up is scoped: train across five or more genuinely distinct
+criteria, so that reading the description becomes necessary rather than
+optional, and test on more than eight essays.
 
 ### What this means for the shipped engine
 

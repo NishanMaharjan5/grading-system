@@ -1,0 +1,360 @@
+{
+  "pre_declared_in": "training_data/results/rubric_conditioning_results.md",
+  "smoke": false,
+  "environment": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.17.0",
+    "numpy": "2.1.3",
+    "device": "cuda",
+    "gpu": "Tesla T4",
+    "cuda": "13.0",
+    "script_sha256": "071f6960895a55c9"
+  },
+  "config": {
+    "model": "distilbert-base-uncased",
+    "max_length": 384,
+    "batch_size": 8,
+    "learning_rates": [
+      2e-05,
+      3e-05
+    ],
+    "max_epochs": 4,
+    "seed": 20261005,
+    "dev_fraction": 0.2,
+    "placeholder": "criterion: unspecified",
+    "bootstrap": {
+      "n": 2000,
+      "seed": 0
+    }
+  },
+  "data": {
+    "train_triples": 128,
+    "seen_train": 102,
+    "seen_dev": 26,
+    "holdout": 8,
+    "train_sha256": "c6dccc50f8223d1c",
+    "holdout_sha256": "ca94cac65049f18b"
+  },
+  "variants": {
+    "rubric-aware": {
+      "grid": {
+        "2e-05": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 0.17532015362611184,
+              "dev_mae_points": 2.076923076923077
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.09135416952463296,
+              "dev_mae_points": 1.8076923076923077
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.038500978253208674,
+              "dev_mae_points": 1.2692307692307692
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.025259713642299175,
+              "dev_mae_points": 1.2307692307692308
+            }
+          ],
+          "best_epoch": 4,
+          "best_dev_mae_points": 1.2307692307692308
+        },
+        "3e-05": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 0.14023093649974236,
+              "dev_mae_points": 2.6153846153846154
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.09882328057518372,
+              "dev_mae_points": 1.6923076923076923
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.033705335253706344,
+              "dev_mae_points": 1.0384615384615385
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.02207716554403305,
+              "dev_mae_points": 1.3461538461538463
+            }
+          ],
+          "best_epoch": 3,
+          "best_dev_mae_points": 1.0384615384615385
+        }
+      },
+      "chosen": {
+        "lr": 3e-05,
+        "epoch": 3,
+        "dev_mae_points": 1.0384615384615385
+      }
+    },
+    "no-description": {
+      "grid": {
+        "2e-05": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 0.16750488344293374,
+              "dev_mae_points": 2.0
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.07812913034397823,
+              "dev_mae_points": 1.4230769230769231
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.02844354137778282,
+              "dev_mae_points": 1.1538461538461537
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.02052596927835391,
+              "dev_mae_points": 1.1153846153846154
+            }
+          ],
+          "best_epoch": 4,
+          "best_dev_mae_points": 1.1153846153846154
+        },
+        "3e-05": {
+          "history": [
+            {
+              "epoch": 1,
+              "train_loss": 0.12815446120042068,
+              "dev_mae_points": 2.423076923076923
+            },
+            {
+              "epoch": 2,
+              "train_loss": 0.07417895716543381,
+              "dev_mae_points": 1.3461538461538463
+            },
+            {
+              "epoch": 3,
+              "train_loss": 0.028751460405496452,
+              "dev_mae_points": 1.0384615384615385
+            },
+            {
+              "epoch": 4,
+              "train_loss": 0.02236582267169769,
+              "dev_mae_points": 1.3461538461538463
+            }
+          ],
+          "best_epoch": 3,
+          "best_dev_mae_points": 1.0384615384615385
+        }
+      },
+      "chosen": {
+        "lr": 3e-05,
+        "epoch": 3,
+        "dev_mae_points": 1.0384615384615385
+      }
+    }
+  },
+  "zero_shot": {
+    "midpoint baseline": {
+      "mae": 1.875,
+      "exact": 0.125,
+      "within_one": 0.375,
+      "qwk": 0.0,
+      "ci": {
+        "mae": [
+          1.125,
+          2.625
+        ],
+        "exact": [
+          0.0,
+          0.375
+        ],
+        "within_one": [
+          0.125,
+          0.75
+        ],
+        "qwk": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "rubric-aware": {
+      "mae": 1.125,
+      "exact": 0.125,
+      "within_one": 0.875,
+      "qwk": 0.6938775510204082,
+      "ci": {
+        "mae": [
+          0.625,
+          1.75
+        ],
+        "exact": [
+          0.0,
+          0.375
+        ],
+        "within_one": [
+          0.625,
+          1.0
+        ],
+        "qwk": [
+          0.06552168312580511,
+          0.921875
+        ]
+      }
+    },
+    "no-description": {
+      "mae": 0.875,
+      "exact": 0.375,
+      "within_one": 0.875,
+      "qwk": 0.75,
+      "ci": {
+        "mae": [
+          0.375,
+          1.503124999999983
+        ],
+        "exact": [
+          0.125,
+          0.75
+        ],
+        "within_one": [
+          0.625,
+          1.0
+        ],
+        "qwk": [
+          0.2928176795580111,
+          0.9446366782006921
+        ]
+      }
+    }
+  },
+  "per_essay": [
+    {
+      "essay_id": 1,
+      "true": 5.0,
+      "rubric_aware": 4.0,
+      "no_description": 5.0,
+      "words": 32
+    },
+    {
+      "essay_id": 2,
+      "true": 5.0,
+      "rubric_aware": 4.0,
+      "no_description": 5.0,
+      "words": 27
+    },
+    {
+      "essay_id": 3,
+      "true": 3.0,
+      "rubric_aware": 2.0,
+      "no_description": 2.0,
+      "words": 20
+    },
+    {
+      "essay_id": 4,
+      "true": 2.0,
+      "rubric_aware": 1.0,
+      "no_description": 1.0,
+      "words": 15
+    },
+    {
+      "essay_id": 5,
+      "true": 0.0,
+      "rubric_aware": 0.0,
+      "no_description": 1.0,
+      "words": 14
+    },
+    {
+      "essay_id": 6,
+      "true": 4.0,
+      "rubric_aware": 5.0,
+      "no_description": 5.0,
+      "words": 21
+    },
+    {
+      "essay_id": 7,
+      "true": 1.0,
+      "rubric_aware": 4.0,
+      "no_description": 4.0,
+      "words": 13
+    },
+    {
+      "essay_id": 8,
+      "true": 5.0,
+      "rubric_aware": 4.0,
+      "no_description": 5.0,
+      "words": 25
+    }
+  ],
+  "a_vs_b": {
+    "mae": {
+      "a_minus_b": -0.25,
+      "ci": [
+        -0.75,
+        0.25
+      ],
+      "distinguishable": false
+    },
+    "qwk": {
+      "a_minus_b": -0.056122448979591844,
+      "ci": [
+        -0.3452380952380951,
+        0.046918767507002856
+      ],
+      "distinguishable": false
+    },
+    "within_one": {
+      "a_minus_b": 0.0,
+      "ci": [
+        0.0,
+        0.0
+      ],
+      "distinguishable": false
+    },
+    "exact": {
+      "a_minus_b": -0.25,
+      "ci": [
+        -0.75,
+        0.25
+      ],
+      "distinguishable": false
+    }
+  },
+  "sensitivity_without_essay_5": {
+    "rubric-aware": {
+      "mae": 1.2857142857142858,
+      "exact": 0.0,
+      "within_one": 0.8571428571428571,
+      "qwk": 0.4559585492227979
+    },
+    "no-description": {
+      "mae": 0.8571428571428571,
+      "exact": 0.42857142857142855,
+      "within_one": 0.8571428571428571,
+      "qwk": 0.6379310344827587
+    },
+    "midpoint baseline": {
+      "mae": 1.8571428571428572,
+      "exact": 0.14285714285714285,
+      "within_one": 0.42857142857142855,
+      "qwk": 0.0
+    }
+  },
+  "seen_criteria_dev": {
+    "rubric-aware": {
+      "mae_points": 1.0384615384615385,
+      "within_one": 0.7692307692307693
+    },
+    "no-description": {
+      "mae_points": 1.0384615384615385,
+      "within_one": 0.7692307692307693
+    }
+  },
+  "run_at": "2026-10-05T12:57:16+00:00"
+}
