@@ -2,11 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
+import { submissionsApi } from "../api/submissions";
+import DashboardStats from "../components/DashboardStats";
 import RubricForm from "../components/RubricForm";
 import RubricList from "../components/RubricList";
+import { computeDashboardStats } from "../grading/dashboardStats";
 
 export default function TeacherDashboard() {
   const [rubrics, setRubrics] = useState(null); // null = not loaded yet
+  const [stats, setStats] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [editing, setEditing] = useState(null); // null = closed, "new" = create, object = edit
@@ -15,7 +19,17 @@ export default function TeacherDashboard() {
 
   const load = useCallback(async (signal) => {
     try {
-      setRubrics(await rubricsApi.list({ signal }));
+      // Three calls, not one: the stats row needs the full submission list
+      // (for the 7-day count and the AI-acceptance rate) and the review
+      // queue (for the pending count), neither of which the rubric list
+      // alone carries. All three already scope to this teacher server-side.
+      const [rubricList, submissions, pending] = await Promise.all([
+        rubricsApi.list({ signal }),
+        submissionsApi.list({ signal }),
+        submissionsApi.pending({ signal }),
+      ]);
+      setRubrics(rubricList);
+      setStats(computeDashboardStats({ rubrics: rubricList, submissions, pending }));
       setLoadError(null);
     } catch (cause) {
       if (cause?.name === "AbortError") return;
@@ -85,6 +99,8 @@ export default function TeacherDashboard() {
           </button>
         )}
       </div>
+
+      {stats && <DashboardStats stats={stats} />}
 
       {actionError && (
         <p className="alert" role="alert">

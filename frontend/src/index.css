@@ -242,6 +242,57 @@ a:hover {
   margin-top: 0;
 }
 
+/* --------------------------------------------------------- dashboard stats */
+
+/* A quiet preview of a fuller analytics page, not that page: four numbers,
+   no charts, nothing to click. Same card materials as everything else --
+   a sheet lifted off the paper -- just smaller, so the row reads as context
+   for the rubric list below it rather than competing with it. */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-tile__value {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-tile__label {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+/* Pending review is the one number a teacher opens this page to act on, so
+   it gets the same amber "something is waiting" treatment as a status badge
+   -- without implying anything went wrong, which is why it isn't red. */
+.stat-tile--emphasis {
+  border-color: var(--pending-line);
+  background: var(--pending-bg);
+}
+
+.stat-tile--emphasis .stat-tile__value,
+.stat-tile--emphasis .stat-tile__label {
+  color: var(--pending-fg);
+}
+
 .row {
   display: flex;
   align-items: center;
