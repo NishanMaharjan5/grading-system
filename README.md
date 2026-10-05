@@ -68,7 +68,7 @@ was built:
 | More training data for the shipped model | a held-out set locked before retraining | **no measurable change** |
 | The shipped features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
 | **Fine-tuned DistilBERT** | the same 268 essays | **QWK 0.841**: distinguishably better, and **statistically indistinguishable from a second human rater** |
-| The shipped pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis transferred** (MAE 0.88 vs 1.62 baseline); **Evidence did not** (gain 0.12, CI [−1.88, +1.62]) |
+| The shipped pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis generalised** (QWK 0.79); **Evidence did not** (gain over baseline 0.12, CI [−1.88, +1.62] — not distinguishable from zero) |
 
 The first three rows use answers the team wrote and scored itself; that
 write-up is `backend/training_data/holdout_results.md`. The last two use
@@ -137,20 +137,31 @@ scored once. The two rubrics' models are genuinely separate — the engine keys
 them by criterion row id, so retraining on the combined file left Essay 1's
 models **byte-identical**.
 
-| Essay 2 holdout (8 essays) | MAE | baseline | QWK |
-|---|---|---|---|
-| Thesis | **0.88** | 1.62 | 0.79 |
-| Evidence | 2.50 | 2.62 | 0.55 |
+| Essay 2 holdout (8 essays) | MAE | baseline | gain over baseline | QWK |
+|---|---|---|---|---|
+| Thesis | **0.88** | 1.62 | **0.75** [−0.25, +1.38] | **0.79** |
+| Evidence | 2.50 | 2.62 | 0.12 [−1.88, +1.62] | 0.55 |
 
-**Thesis transferred to the new topic; Evidence did not.** On Evidence the
-gain over guessing the mean is 0.12 with an interval of [−1.88, +1.62] — not
-distinguishable from no gain at all. And the documented Evidence weakness
-reappeared on a subject it was never trained on: a personal anecdote with no
-evidence scored 6/10, and three facts listed with no argument scored 9/10.
+**Thesis generalised to the new topic. Evidence did not.** State it that way
+round, per criterion, and not as "the method generalises":
 
-That is the useful finding. The weakness is a property of the method, not of
-the social-media training set, and two topics is real evidence either way —
-for the Thesis criterion, and against the Evidence one.
+- **Thesis reached QWK 0.79** on a subject it had never been trained on, with
+  seven of eight essays within one point, from models fit on 15 examples.
+- **Evidence's gain over guessing the mean is 0.12, interval [−1.88, +1.62]** —
+  not distinguishable from zero. On this topic it is no better than predicting
+  a constant.
+
+**The Evidence failure mode reproduced on a topic the model never trained on**,
+which is the more important half of the result. Every Evidence error was an
+over-score, and the worst were the documented weakness exactly: a personal
+anecdote with no evidence at all scored **6/10** against a true 0, and three
+real facts listed with no argument connecting them scored **9/10** against a
+true 5.
+
+A weakness that survives a change of subject is a limitation of the method,
+not a quirk of the social-media training set. That is stronger evidence than
+anything the Essay 1 holdouts could give, because there the training and test
+essays shared a topic.
 
 ### What this means for the shipped engine
 

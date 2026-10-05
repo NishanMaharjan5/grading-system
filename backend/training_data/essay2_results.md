@@ -112,17 +112,21 @@ subject the model was never trained on:
 
 ## What this does and does not establish
 
-**Does:** the approach is not an artefact of one topic. A Thesis model fit on
-15 fresh examples, on a subject with no overlap with the original training
-data, scored a held-out set it had never seen at MAE 0.88 against a 1.62
-baseline. The feedback templates, review flow and UI carried over with no code
-change.
+**Does, for Thesis only:** the Thesis criterion generalised to a new topic.
+A model fit on 15 fresh examples, on a subject with no overlap with the
+original training data, reached **QWK 0.79** and MAE 0.88 against a 1.62
+baseline on a holdout it had never seen. The feedback templates, review flow
+and UI carried over with no code change.
+
+This does **not** license the claim that "the method generalises". One of the
+two criteria did; the other did not, on the same essays, in the same run.
 
 **Does not:**
 
-- **Evidence did not generalise.** On this topic it is indistinguishable from
-  guessing the mean. Reporting Essay 2 as a success for "the grading approach"
-  without that qualifier would be wrong.
+- **Evidence did not generalise.** Its gain over guessing the mean is 0.12
+  with an interval of [-1.88, +1.62] — not distinguishable from zero. On this
+  topic it is no better than predicting a constant, and reporting Essay 2 as a
+  success for "the grading approach" without that qualifier would be wrong.
 - **8 essays is very small.** Every interval here is wide, and one essay's
   label moving by a point would visibly shift the numbers.
 - **15 training examples per criterion** is a quarter of what Essay 1 has (44
