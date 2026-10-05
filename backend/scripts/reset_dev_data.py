@@ -12,7 +12,7 @@ Two guards, because this is unrecoverable:
     --force is also given.
 
 Tables are truncated with RESTART IDENTITY, so ids begin at 1 again and the
-re-seeded rubric's criteria land on the same ids the trained models in
+re-seeded rubrics' criteria land on the same ids the trained models in
 ml_models/ were saved under. Retrain anyway if in doubt -- the script prints
 the command.
 """
@@ -69,9 +69,10 @@ def main():
         db.session.commit()
         print("\nAll rows deleted, ids reset.")
 
-        teacher, rubric = seed()
-        print(f"\nSeeded: {teacher.email} / password1, rubric {rubric.title!r} "
-              f"(criteria {[(c.id, c.name) for c in rubric.criteria]})")
+        teacher, rubrics = seed()
+        print(f"\nSeeded: {teacher.email} / password1")
+        for rubric in rubrics:
+            print(f"  rubric {rubric.title!r} (criteria {[(c.id, c.name) for c in rubric.criteria]})")
         print("\nRetrain the graders so they match these criterion ids:\n"
               "    make train")
 
