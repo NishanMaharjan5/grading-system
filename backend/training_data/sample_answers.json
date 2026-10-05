@@ -608,5 +608,185 @@
     "text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them responsible and ordinary people are the ones who suffer, so laws must be introduced soon.",
     "score": 2,
     "essay_id": "C2"
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Students should be allowed to use AI tools for brainstorming and editing, but using them to generate entire essays undermines the specific skill schools are meant to teach.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Banning AI tools outright is unenforceable and shortsighted; schools should instead redesign assignments so AI assistance doesn't replace the thinking the assignment is meant to assess.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "AI tools should be permitted in coursework because withholding access widens the gap between students who can afford private tutoring and those who cannot.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Schools should allow AI tools for research and citation help, but not for writing the actual argument, because that is the part students are supposed to practice.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Because AI-generated text is becoming harder to detect reliably, schools should shift toward in-class writing assessments rather than trying to police AI use at home.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Students should be taught to use AI tools responsibly, similar to how calculators were once treated, rather than banning them.",
+    "score": 4
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "AI tools can be helpful but also risky, so schools need some kind of policy about them.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "There should probably be limits on how much students can rely on AI since it might hurt their learning.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Using AI for schoolwork is becoming common and teachers need to figure out what to do about it.",
+    "score": 3
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "AI tools are everywhere now and students use them a lot for different things.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Technology in schools keeps changing and AI is just the newest example.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "ChatGPT and other AI tools are popular with students.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Many schools have different rules about technology.",
+    "score": 1
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "AI was developed by several major technology companies over the past decade.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Students use many different apps and websites for homework.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "A 2023 Stanford study found that students who used AI writing tools without restriction scored measurably lower on a follow-up unassisted writing test than students who used the same tools only for outlining, suggesting over-reliance directly weakens the skill being taught.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Turnitin's AI-detection data, released in 2023, flagged a meaningful share of submissions as likely AI-generated within months of ChatGPT's release, showing schools faced the problem almost immediately rather than gradually.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Several universities, including Sciences Po in France, banned ChatGPT for assignments in early 2023 specifically citing concerns about verifying authentic student work, showing institutions moved quickly once the risk became clear.",
+    "score": 10
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Surveys conducted shortly after ChatGPT's release found a large share of university students admitted to using it on at least one assignment, indicating the practice became widespread very quickly.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Some school districts have piloted AI-detection software, though reports suggest these tools produce a meaningful rate of false positives, complicating enforcement.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Teachers in several reported cases have redesigned assignments to include in-class drafting specifically to reduce opportunities for undisclosed AI use.",
+    "score": 8
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Many teachers have expressed concern that AI tools make it harder to assess what a student actually understands.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "There have been reports of students being accused of using AI when they did not, showing detection is not reliable.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Studies suggest AI tools can both help and hurt learning depending on how they're used.",
+    "score": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "A lot of schools have had to make new rules because of AI.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "People have different opinions about whether AI helps or hurts students.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "This is a topic that comes up often in education news.",
+    "score": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "AI chatbots can answer many different kinds of questions.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Technology changes quickly and schools often have to adapt.",
+    "score": 0
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Many students have smartphones and laptops for schoolwork.",
+    "score": 0
   }
 ]
