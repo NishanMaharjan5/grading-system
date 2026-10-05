@@ -68,6 +68,7 @@ was built:
 | More training data for the shipped model | a held-out set locked before retraining | **no measurable change** |
 | The shipped features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
 | **Fine-tuned DistilBERT** | the same 268 essays | **QWK 0.841**: distinguishably better, and **statistically indistinguishable from a second human rater** |
+| The shipped pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis transferred** (MAE 0.88 vs 1.62 baseline); **Evidence did not** (gain 0.12, CI [−1.88, +1.62]) |
 
 The first three rows use answers the team wrote and scored itself; that
 write-up is `backend/training_data/holdout_results.md`. The last two use
@@ -121,6 +122,35 @@ task: predict what rater 1 said.
 statistically indistinguishable from a second human rater.** That is not the
 same as matching one. The human is still ahead on the point estimate, and
 with 268 essays a human advantage of up to 0.09 can't be ruled out.
+
+### Does it work on a second topic?
+
+Every result above comes from one subject: social-media regulation. A grader
+can look like it judges argument quality when it has only learned one debate's
+vocabulary. **Essay 2** is the control — a different prompt (*should students
+be allowed to use AI tools like ChatGPT for schoolwork?*), the same pipeline,
+no code changed. Full write-up:
+**[backend/training_data/essay2_results.md](backend/training_data/essay2_results.md)**.
+
+The holdout was committed before a single Essay 2 training row existed, and
+scored once. The two rubrics' models are genuinely separate — the engine keys
+them by criterion row id, so retraining on the combined file left Essay 1's
+models **byte-identical**.
+
+| Essay 2 holdout (8 essays) | MAE | baseline | QWK |
+|---|---|---|---|
+| Thesis | **0.88** | 1.62 | 0.79 |
+| Evidence | 2.50 | 2.62 | 0.55 |
+
+**Thesis transferred to the new topic; Evidence did not.** On Evidence the
+gain over guessing the mean is 0.12 with an interval of [−1.88, +1.62] — not
+distinguishable from no gain at all. And the documented Evidence weakness
+reappeared on a subject it was never trained on: a personal anecdote with no
+evidence scored 6/10, and three facts listed with no argument scored 9/10.
+
+That is the useful finding. The weakness is a property of the method, not of
+the social-media training set, and two topics is real evidence either way —
+for the Thesis criterion, and against the Evidence one.
 
 ### What this means for the shipped engine
 
@@ -231,8 +261,8 @@ backend/
                  the fine-tune runs on Colab via asap_finetune_colab.ipynb)
   tests/         pytest suite
   training_data/ labeled sample answers, the two holdout sets,
-                 holdout_results.md, asap_results.md + asap_split.json,
-                 and results/ (saved evaluation runs)
+                 holdout_results.md, essay2_results.md, asap_results.md
+                 + asap_split.json, and results/ (saved evaluation runs)
   data/          benchmark corpora -- gitignored, never committed
   ml_experiments/ fine-tuning outputs and weights -- gitignored
 frontend/        React + Vite
@@ -259,10 +289,12 @@ frontend/        React + Vite
   truncation is not worth ~2.6x the embedding cost when the embedding
   contributes almost nothing to begin with. The hand-crafted features do read
   the whole text, which is part of why this never showed up.
-- **The grader is trained on 98 labeled examples** (44 Thesis, 54 Evidence).
-  Leave-one-out MAE is 1.11 for Thesis (baseline 1.48) and 1.52 for Evidence
-  (baseline 3.07). With this few examples the numbers move noticeably if a
-  single example changes.
+- **The grader is trained on 128 labeled examples across two rubrics** —
+  Essay 1 has 98 (44 Thesis, 54 Evidence) and Essay 2 has 30 (15 each).
+  Leave-one-out MAE on Essay 1 is 1.11 for Thesis (baseline 1.48) and 1.52 for
+  Evidence (baseline 3.07); on Essay 2, 0.73 and 2.40. With this few examples
+  the numbers move noticeably if a single example changes, and Essay 2's 15
+  per criterion is a quarter of Essay 1's.
 - **Adding training data did not improve the held-out result.** Two sets of 12
   paragraph-length essays were built (`backend/training_data/`, full write-up
   in `holdout_results.md`, run with `scripts/evaluate_holdout.py`). Set 1 was
@@ -289,7 +321,10 @@ frontend/        React + Vite
   a tied and an untied statistic narrowed (1.33 → 0.67 points). What the
   retrain mostly did was make the grader more pessimistic — it fixed the
   over-scoring of weak essays and started under-scoring strong ones, dropping
-  six of set 2's strongest essays by two points each. The review step is the
+  six of set 2's strongest essays by two points each. **This is now confirmed
+  on a second, unrelated topic:** on the Essay 2 holdout every Evidence error
+  was an over-score, a personal anecdote with no evidence scored 6/10, and
+  three facts listed without an argument scored 9/10. The review step is the
   backstop: no AI score reaches a student unapproved.
 - **Both holdout sets were written by the project team**, essays and scores
   alike, and every essay in the training data and both holdout sets answers
