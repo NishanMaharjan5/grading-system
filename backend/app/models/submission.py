@@ -36,6 +36,10 @@ class Submission(db.Model):
     rubric = db.relationship("Rubric", back_populates="submissions")
     student = db.relationship("User", back_populates="submissions", foreign_keys=[student_id])
     grades = db.relationship("Grade", back_populates="submission", cascade="all, delete-orphan")
+    revisions = db.relationship(
+        "GradeRevision", back_populates="submission",
+        cascade="all, delete-orphan", order_by="GradeRevision.revised_at",
+    )
 
     @property
     def ai_total(self):

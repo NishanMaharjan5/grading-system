@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from app.extensions import db
 from app.grading import feedback as feedback_templates
 from app.grading.engine import GradingError, grade_submission
-from app.models import Grade, Rubric, Submission
+from app.models import Grade, GradeRevision, Rubric, Submission
 from app.security import login_required, require_role
 from app.deadlines import check_deadline
 from app.word_limits import check_submission_length
@@ -60,6 +60,21 @@ def _grade_to_dict(grade, include_ai):
     return d
 
 
+def _revision_to_dict(rev):
+    return {
+        "id": rev.id,
+        "criterion_id": rev.criterion_id,
+        "criterion_name": rev.criterion.name if rev.criterion else None,
+        "old_final_score": float(rev.old_final_score) if rev.old_final_score is not None else None,
+        "new_final_score": float(rev.new_final_score),
+        "old_final_feedback": rev.old_final_feedback,
+        "new_final_feedback": rev.new_final_feedback,
+        "revised_by": rev.revised_by,
+        "revised_by_name": rev.reviser.name if rev.reviser else None,
+        "revised_at": rev.revised_at.isoformat() if rev.revised_at else None,
+    }
+
+
 def _submission_to_dict(sub, *, for_teacher):
     """Teachers see the AI's suggestion alongside the final grade; students only
     ever see the approved final grade -- never an unapproved AI score."""
@@ -82,6 +97,9 @@ def _submission_to_dict(sub, *, for_teacher):
         # because names aren't unique.
         base["student_name"] = sub.student.name
         base["student_email"] = sub.student.email
+        # Teacher-only. A student is shown the grade that stands, not a list of
+        # the teacher's corrections to it.
+        base["revisions"] = [_revision_to_dict(rev) for rev in sub.revisions]
     return base
 
 
@@ -323,6 +341,90 @@ def review_submission(submission_id):
     submission.status = "approved"
     db.session.commit()
     return jsonify(_submission_to_dict(submission, for_teacher=True)), 200
+
+
+@submissions_bp.put("/<int:submission_id>/revise")
+@require_role("teacher")
+def revise_submission(submission_id):
+    """Correct a grade that has already been released to the student.
+
+    Approval used to be terminal, so a mistake stood for good. This changes
+    the live scores and writes a GradeRevision row per criterion that actually
+    moved, recording what it was, what it became, who changed it and when.
+
+    Validation is the override path's, unchanged: every criterion scored, each
+    within its own maximum. Only an approved submission can be revised -- one
+    that has not been released yet is still the review endpoint's business.
+    """
+    submission = db.session.get(Submission, submission_id)
+    if not submission:
+        return jsonify(detail="Submission not found"), 404
+
+    teacher_id = int(g.current_user["sub"])
+    if submission.rubric.created_by != teacher_id:
+        return jsonify(detail="You can only revise submissions for rubrics you created"), 403
+    if submission.status != "approved":
+        return jsonify(detail="Only a released grade can be revised; review this submission instead"), 409
+
+    criteria = list(submission.rubric.criteria)
+    body = request.get_json(silent=True) or {}
+    parsed, error = _parse_review_scores(body.get("criterion_scores"), criteria)
+    if error:
+        return jsonify(detail=error), 422
+
+    criteria_by_id = {c.id: c for c in criteria}
+    grades_by_criterion = {gr.criterion_id: gr for gr in submission.grades}
+    revised_at = datetime.now(timezone.utc)
+    changed = 0
+
+    for criterion in criteria:
+        score, teacher_feedback = parsed[criterion.id]
+        grade = grades_by_criterion.get(criterion.id)
+        if grade is None:  # defensive: an approved submission always has grades
+            grade = Grade(submission_id=submission.id, criterion_id=criterion.id)
+            db.session.add(grade)
+            db.session.flush()
+
+        text = teacher_feedback if teacher_feedback is not None else \
+            feedback_templates.for_criterion(criteria_by_id[criterion.id], score)
+
+        old_score = float(grade.final_score) if grade.final_score is not None else None
+        if old_score == score and grade.final_feedback == text:
+            continue  # nothing moved, so nothing to record
+
+        # Written before the live grade changes: a failure part-way leaves a
+        # record that something was attempted rather than a silently altered
+        # score with no trace.
+        db.session.add(GradeRevision(
+            submission_id=submission.id,
+            criterion_id=criterion.id,
+            old_final_score=grade.final_score,
+            old_final_feedback=grade.final_feedback,
+            new_final_score=score,
+            new_final_feedback=text,
+            revised_by=teacher_id,
+            revised_at=revised_at,
+        ))
+        grade.final_score = score
+        grade.final_feedback = text
+        grade.approved_by = teacher_id
+        grade.approved_at = revised_at
+        # The AI's suggestion was accepted or not at approval time; a later
+        # correction by hand is the teacher's own, so that flag no longer
+        # describes this score.
+        grade.ai_accepted = None
+        changed += 1
+
+    teacher_summary = body.get("summary")
+    if teacher_summary is not None and not isinstance(teacher_summary, str):
+        return jsonify(detail="summary must be a string"), 422
+    submission.final_summary = teacher_summary if teacher_summary is not None else \
+        feedback_templates.summary(criteria, {cid: score for cid, (score, _) in parsed.items()})
+
+    db.session.commit()
+    body = _submission_to_dict(submission, for_teacher=True)
+    body["revised_criteria"] = changed
+    return jsonify(body), 200
 
 
 @submissions_bp.get("/<int:submission_id>")

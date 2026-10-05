@@ -9,6 +9,9 @@ export const submissionsApi = {
   pending: (options) => api.get("/api/submissions/pending", options),
   /** Empty body approves the AI's suggestion untouched; a payload overrides it. */
   review: (id, payload) => api.put(`/api/submissions/${id}/review`, payload ?? {}),
+  // Correcting a grade that was already released. Same validation as review;
+  // each change is recorded in the submission's revision history.
+  revise: (id, payload) => api.put(`/api/submissions/${id}/revise`, payload ?? {}),
 };
 
 /**

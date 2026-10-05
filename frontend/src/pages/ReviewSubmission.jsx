@@ -47,6 +47,9 @@ export default function ReviewSubmission() {
   const [scores, setScores] = useState({});     // criterion_id -> string
   const [feedback, setFeedback] = useState({}); // criterion_id -> string
   const [summary, setSummary] = useState("");
+  // Set once, when an already-released grade is loaded: a correction starts
+  // from what the student currently sees rather than from an empty form.
+  const [prefilled, setPrefilled] = useState(false);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
 
@@ -80,6 +83,24 @@ export default function ReviewSubmission() {
     });
   }, [scores, state]);
 
+  // Prefill from the released grade so a correction edits what the student
+  // currently sees. Runs once; after that the teacher's own edits stand.
+  useEffect(() => {
+    if (state.status !== "ok" || prefilled) return;
+    if (state.submission.status !== "approved") return;
+    const nextScores = {}, nextFeedback = {};
+    for (const grade of state.submission.grades) {
+      if (grade.final_score !== null && grade.final_score !== undefined) {
+        nextScores[grade.criterion_id] = String(grade.final_score);
+      }
+      if (grade.final_feedback) nextFeedback[grade.criterion_id] = grade.final_feedback;
+    }
+    setScores(nextScores);
+    setFeedback(nextFeedback);
+    setSummary(state.submission.final_summary ?? "");
+    setPrefilled(true);
+  }, [state, prefilled]);
+
   if (state.status === "loading") return <p className="page muted">Loading…</p>;
   if (state.status === "error") return <p className="page alert">{state.message}</p>;
 
@@ -89,6 +110,7 @@ export default function ReviewSubmission() {
   const hasAiScore = (criterionId) => (aiFor(criterionId)?.ai_score ?? null) !== null;
   const everyCriterionHasAi = criteria.length > 0 && criteria.every((c) => hasAiScore(c.id));
   const alreadyApproved = submission.status === "approved";
+  const revisions = submission.revisions ?? [];
   const isCode = rubric.type === "code";
 
   function onStale(cause) {
@@ -133,7 +155,8 @@ export default function ReviewSubmission() {
     // Order matters: the backend reports errors by index into this array.
     const order = criteria.map((c) => c.id);
     try {
-      await submissionsApi.review(id, {
+      const send = alreadyApproved ? submissionsApi.revise : submissionsApi.review;
+      await send(id, {
         criterion_scores: criteria.map((criterion) => {
           const row = { criterion_id: criterion.id, final_score: Number(scores[criterion.id]) };
           const text = (feedback[criterion.id] ?? "").trim();
@@ -148,7 +171,8 @@ export default function ReviewSubmission() {
         setErrors(
           cause instanceof ApiError && cause.status === 422
             ? reviewErrorsFromDetail(cause.detail, order)
-            : { form: cause instanceof ApiError ? cause.message : "Could not save this grade." },
+            : { form: cause instanceof ApiError ? cause.message
+                  : (alreadyApproved ? "Could not revise this grade." : "Could not save this grade.") },
         );
       }
     } finally {
@@ -172,8 +196,9 @@ export default function ReviewSubmission() {
       </p>
 
       {alreadyApproved && (
-        <p className="alert" role="alert">
-          This submission has already been approved and cannot be changed.
+        <p className="notice" role="status">
+          This grade has been released to the student. You can still correct it — every change is
+          recorded below with what it was, what it became and who made it.
         </p>
       )}
 
@@ -203,8 +228,34 @@ export default function ReviewSubmission() {
         </div>
       )}
 
+      {revisions.length > 0 && (
+        <div className="card">
+          <h2>Revision history</h2>
+          <p className="muted">
+            Every correction made after this grade was released, oldest first.
+          </p>
+          <ol className="revisions">
+            {revisions.map((rev) => (
+              <li key={rev.id}>
+                <strong>{rev.criterion_name ?? `Criterion ${rev.criterion_id}`}</strong>{" "}
+                <span className="revisions__change">
+                  {rev.old_final_score ?? "—"} → {rev.new_final_score}
+                </span>
+                <div className="muted">
+                  {rev.revised_by_name ?? `Teacher ${rev.revised_by}`} ·{" "}
+                  {new Date(rev.revised_at).toLocaleString()}
+                </div>
+                {rev.new_final_feedback && rev.new_final_feedback !== rev.old_final_feedback && (
+                  <div className="feedback muted">{rev.new_final_feedback}</div>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} noValidate>
-        <h2>Scores and feedback</h2>
+        <h2>{alreadyApproved ? "Revise the released grade" : "Scores and feedback"}</h2>
         {criteria.map((criterion) => {
           const ai = aiFor(criterion.id);
           const showsAi = hasAiScore(criterion.id);
@@ -290,8 +341,12 @@ export default function ReviewSubmission() {
         </p>
 
         <div className="row">
-          <button type="submit" disabled={busy || alreadyApproved}>
-            {busy ? "Saving…" : "Approve and release grade"}
+          <button type="submit" disabled={busy}>
+            {busy
+              ? "Saving…"
+              : alreadyApproved
+                ? "Save correction"
+                : "Approve and release grade"}
           </button>
           <Link to="/teacher/review" className="button button--secondary">Cancel</Link>
         </div>

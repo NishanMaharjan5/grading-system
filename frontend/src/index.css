@@ -845,6 +845,28 @@ h1 + .student-line {
   overflow-x: auto;
 }
 
+/* -------------------------------------------------- revision history */
+
+.revisions {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.revisions li {
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--line-strong);
+}
+
+.revisions__change {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 /* ---------------------------------------------------------- deadlines */
 
 /* A due date is ordinary information until it passes, at which point it is the
