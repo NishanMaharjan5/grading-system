@@ -845,6 +845,37 @@ h1 + .student-line {
   overflow-x: auto;
 }
 
+/* ---------------------------------------------------------- deadlines */
+
+/* A due date is ordinary information until it passes, at which point it is the
+   most important thing on the card. Overdue is amber rather than red: the work
+   being late is a state, not an error the student can still fix. */
+.due {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-base);
+}
+
+.due__relative {
+  color: var(--ink-muted);
+}
+
+.due--overdue {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--pending-line);
+  border-radius: var(--radius-sm);
+  background: var(--pending-bg);
+  color: var(--pending-fg);
+  font-weight: 600;
+}
+
+.due--overdue .due__relative {
+  color: inherit;
+  font-weight: 400;
+}
+
 /* ------------------------------------------------------- word limits */
 
 /* The live counter on the submission box. Colour is a reinforcement, not the

@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from app.extensions import db
 from app.models import Rubric, RubricCriterion, Submission, TestCase
 from app.security import login_required, require_role
+from app.deadlines import parse_due_date
 from app.word_limits import validate_limits
 
 rubrics_bp = Blueprint("rubrics", __name__)
@@ -181,10 +182,12 @@ def create_rubric():
     title = (body.get("title") or "").strip()
     rtype = body.get("type", "text")
     description = (body.get("description") or "").strip()
-    due_date = body.get("due_date")  # ISO string or None; stored as-is via SQLAlchemy's DateTime coercion
+    due_date, due_err = parse_due_date(body.get("due_date"))
 
     if not title or len(title) > 200:
         return jsonify(detail="title is required (max 200 characters)"), 422
+    if due_err:
+        return jsonify(detail=due_err), 422
     if rtype not in VALID_TYPES:
         return jsonify(detail="type must be 'text' or 'code'"), 422
 
@@ -261,7 +264,10 @@ def update_rubric(rubric_id):
     if "description" in body:
         rubric.description = (body.get("description") or "").strip()
     if "due_date" in body:
-        rubric.due_date = body.get("due_date")
+        due_date, due_err = parse_due_date(body.get("due_date"))
+        if due_err:
+            return jsonify(detail=due_err), 422
+        rubric.due_date = due_date
     if "type" in body:
         if body["type"] not in VALID_TYPES:
             return jsonify(detail="type must be 'text' or 'code'"), 422

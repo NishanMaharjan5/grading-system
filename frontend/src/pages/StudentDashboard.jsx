@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { statusCopy, submissionsApi } from "../api/submissions";
+import { formatDue, hasDeadline, isPastDue, relativeToDeadline } from "../grading/deadlines";
 
 /**
  * Assignments a student can submit against.
@@ -67,6 +68,13 @@ export default function StudentDashboard() {
 
                 {rubric.description && <p className="muted">{rubric.description}</p>}
 
+                {hasDeadline(rubric) && (
+                  <p className={`due${isPastDue(rubric) ? " due--overdue" : ""}`}>
+                    {isPastDue(rubric) ? "Closed" : "Due"} {formatDue(rubric)}{" "}
+                    <span className="due__relative">({relativeToDeadline(rubric)})</span>
+                  </p>
+                )}
+
                 <p className="muted">
                   {rubric.criteria.length} {rubric.criteria.length === 1 ? "criterion" : "criteria"} ·{" "}
                   {rubric.total_points} points
@@ -83,6 +91,8 @@ export default function StudentDashboard() {
                 <div className="row">
                   {submission ? (
                     <Link to={`/student/submissions/${submission.id}`} className="button button--secondary">View your submission</Link>
+                  ) : isPastDue(rubric) ? (
+                    <span className="muted">This assignment closed before you submitted anything.</span>
                   ) : (
                     <Link to={`/student/submit/${rubric.id}`} className="button">Submit work</Link>
                   )}

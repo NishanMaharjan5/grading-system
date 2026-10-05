@@ -9,6 +9,7 @@ from app.grading import feedback as feedback_templates
 from app.grading.engine import GradingError, grade_submission
 from app.models import Grade, Rubric, Submission
 from app.security import login_required, require_role
+from app.deadlines import check_deadline
 from app.word_limits import check_submission_length
 
 submissions_bp = Blueprint("submissions", __name__)
@@ -101,6 +102,12 @@ def create_submission():
     rubric = db.session.get(Rubric, rubric_id)
     if not rubric:
         return jsonify(detail="Rubric not found"), 404
+
+    # The server is the authority on both of these; the form mirrors them so a
+    # student sees the problem before pressing the button, not after.
+    closed = check_deadline(rubric)
+    if closed:
+        return jsonify(detail=closed), 422
 
     # The server is the authority on the word range; the form mirrors this
     # check so a student sees it before pressing the button, not after.

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ApiError } from "../api/client";
 import { fieldErrorsFromDetail, rubricsApi } from "../api/rubrics";
 import { refreshShownErrors, sameErrors } from "../forms/errors";
+import { fromDateTimeLocal, toDateTimeLocal } from "../grading/deadlines";
 
 // The embedder reads ~226 words and silently drops the rest, so a cap at or
 // under this keeps the grader reading the whole essay. Mirrors
@@ -30,6 +31,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
   const [type, setType] = useState(initial?.type ?? "text");
   // A new text rubric is capped by default; an existing one keeps whatever it
   // has, including no limit at all.
+  const [dueDate, setDueDate] = useState(toDateTimeLocal(initial?.due_date));
   const [minWords, setMinWords] = useState(
     initial?.min_words != null ? String(initial.min_words) : "",
   );
@@ -142,6 +144,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
         description: description.trim(),
         type,
         // null clears a limit; the server refuses limits on a code rubric
+        due_date: fromDateTimeLocal(dueDate),
         min_words: type === "text" && minWords.trim() !== "" ? Number(minWords) : null,
         max_words: type === "text" && maxWords.trim() !== "" ? Number(maxWords) : null,
         criteria: criteria.map((row) => ({
@@ -210,6 +213,19 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+
+      <label htmlFor="rubric-due-date">Due date (optional)</label>
+      <input
+        id="rubric-due-date"
+        type="datetime-local"
+        value={dueDate}
+        onChange={(e) => setDueDate(e.target.value)}
+      />
+      <p className="hint">
+        {dueDate
+          ? "After this moment the assignment stops accepting submissions, including resubmissions."
+          : "Leave blank for no deadline — students can submit at any time."}
+      </p>
 
       {type === "text" && (
         <fieldset className="word-limits">

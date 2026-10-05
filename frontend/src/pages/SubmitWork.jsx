@@ -5,6 +5,7 @@ import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { MAX_CONTENT_LENGTH, submissionsApi } from "../api/submissions";
 import { checkLength, describeRange, hasWordLimit } from "../grading/wordCount";
+import { CLOSED_MESSAGE, formatDue, hasDeadline, isPastDue, relativeToDeadline } from "../grading/deadlines";
 
 export default function SubmitWork() {
   const { rubricId } = useParams();
@@ -55,6 +56,10 @@ export default function SubmitWork() {
       setContentError(`Your answer is ${content.length.toLocaleString()} characters; the limit is ${MAX_CONTENT_LENGTH.toLocaleString()}.`);
       return;
     }
+    if (isPastDue(rubric)) {
+      setFormError(CLOSED_MESSAGE);
+      return;
+    }
     // Same rule the server enforces, so the answer arrives before the request.
     const { message } = checkLength(content, rubric);
     if (message) {
@@ -87,11 +92,13 @@ export default function SubmitWork() {
   if (!rubric) return <p className="page muted">Loading…</p>;
 
   const isCode = rubric.type === "code";
+  const closed = isPastDue(rubric);
   const limited = hasWordLimit(rubric);
   const length = checkLength(content, rubric);
   // Only complain about "too short" once they have started writing: an empty
   // box is not a mistake yet.
   const outOfRange = length.state === "long" || (length.state === "short" && content.trim() !== "");
+  const blocked = closed || outOfRange;
 
   return (
     <div className="page">
@@ -102,6 +109,12 @@ export default function SubmitWork() {
       {rubric.description && <p>{rubric.description}</p>}
 
       <div className="card">
+        {hasDeadline(rubric) && (
+          <p className={`due${closed ? " due--overdue" : ""}`}>
+            <strong>{closed ? "Closed" : "Due"}:</strong> {formatDue(rubric)}{" "}
+            <span className="due__relative">({relativeToDeadline(rubric)})</span>
+          </p>
+        )}
         {limited && (
           <p className="submission-range">
             <strong>Length:</strong> {describeRange(rubric.min_words, rubric.max_words)}.
@@ -183,10 +196,14 @@ export default function SubmitWork() {
         <p className="hint">You can only submit once for this assignment.</p>
 
         <div className="row">
-          <button type="submit" disabled={busy || outOfRange}>
+          <button type="submit" disabled={busy || blocked}>
             {busy ? "Submitting…" : "Submit work"}
           </button>
-          {outOfRange && <span className="muted">{length.message}</span>}
+          {closed ? (
+            <span className="muted">{CLOSED_MESSAGE}</span>
+          ) : outOfRange ? (
+            <span className="muted">{length.message}</span>
+          ) : null}
         </div>
       </form>
     </div>
