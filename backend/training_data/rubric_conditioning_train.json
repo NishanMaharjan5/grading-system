@@ -1,0 +1,1154 @@
+[
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "This essay argues that remote work increases employee productivity because it removes commute-related fatigue, gives workers control over their environment, and reduces office distractions, and each of these points is developed in the sections that follow.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Remote work is a thing that happens now and there are many opinions about it that people have.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A 2023 Stanford study of 16,000 workers found a 13% productivity gain among remote employees, and a separate Gallup survey reported a 24% drop in reported burnout, both of which directly support the claim that remote work improves output.",
+    "score": 9.0,
+    "normalised_score": 0.9
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Everyone knows remote work is better because people say so all the time and it just makes sense if you think about it.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Governments should regulate social media platforms because unchecked algorithmic amplification of harmful content poses a measurable risk to public health and democratic discourse.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "While free expression matters, social media companies' size and influence over public opinion now rival that of traditional media, and they should face comparable regulatory oversight.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Government regulation of social media is necessary specifically to address data privacy violations, even though content moderation should remain largely self-governed by platforms.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media should be regulated because it can be harmful to society.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "There are many pros and cons to government regulation of social media, but overall it seems like a good idea.",
+    "score": 2.0,
+    "normalised_score": 0.4
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media companies have too much power and something needs to change.",
+    "score": 2.0,
+    "normalised_score": 0.4
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media is a big part of modern life and governments have been discussing what to do about it.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "This essay will discuss social media regulation and look at different viewpoints.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media started in the early 2000s with platforms like Myspace and Friendster.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "There are many different social media platforms that people use every day for different purposes.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media should be regulated to prevent misinformation, though the exact methods are unclear.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "The government should step in because platforms have shown they can't moderate themselves effectively.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Some form of regulation is probably necessary, mainly to protect children from harmful content online.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Because social media companies profit from engagement-driven algorithms that spread misinformation, governments should regulate how those algorithms operate.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Data privacy abuses by social media platforms are widespread enough that stronger government regulation is justified.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Governments should regulate social media to curb the spread of harmful content aimed at minors.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A 2021 Facebook whistleblower report revealed the company's own research showed Instagram worsened body image issues in 32% of teen girls surveyed, and the platform continued running the algorithm anyway.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Studies from the Pew Research Center found that 64% of extremist recruitment contacts documented by researchers originated on unmoderated social platforms, directly linking lax oversight to real-world radicalization.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "The EU's Digital Services Act, enacted in 2022, cut documented instances of illegal content on major platforms by a measurable margin within its first year, showing regulation can work in practice.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Research has shown that unregulated algorithmic feeds increase user engagement with divisive content, citing internal studies from major platforms themselves.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Several documented cases exist of foreign governments using social media ads to interfere in elections, which regulation could help prevent.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A study found that teens who spend more than three hours a day on social media report higher rates of anxiety and depression.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Studies show that social media can be harmful to mental health.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Many experts agree that regulation would help reduce the spread of misinformation online.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Research has found a connection between social media use and various social problems.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Everyone knows social media causes problems in society today.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "It's obvious that these platforms need more oversight given everything that's happened.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "People have been talking about this issue for a long time now.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Social media is used by billions of people around the world every single day.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "I think social media regulation is an interesting topic to write about.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Twitter was founded in 2006 and has changed a lot each year.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Because social media platforms function as de facto public squares, governments should regulate them under the same speech-access principles applied to traditional utilities.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Platforms' business model depends on maximizing engagement even when that means amplifying self-harm content to vulnerable teenagers, which justifies binding safety regulation rather than voluntary guidelines.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Regulation should target market concentration specifically: a handful of companies controlling public discourse infrastructure is a competition problem as much as a speech problem.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media companies should face stricter privacy regulation because they collect far more personal data than users realize.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Because algorithmic recommendation systems can radicalize users toward extremism, governments have a legitimate interest in regulating how those systems are designed.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Election interference conducted through social media ad targeting justifies new government oversight of political advertising on these platforms.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Kids are spending too much time on social media and parents can't really do anything about it, so maybe the government should.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Privacy on social media is a real problem and companies should be held responsible somehow.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "There's a strong case for regulating how these platforms target ads at users.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Elections and social media are connected in ways that concern a lot of people.",
+    "score": 2.0,
+    "normalised_score": 0.4
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Kids' mental health and social media use come up a lot in the news lately.",
+    "score": 2.0,
+    "normalised_score": 0.4
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Privacy is important and companies collect a lot of data these days.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media has changed how elections work in some ways.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Instagram has over a billion users worldwide as of recent counts.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Many parents worry about how much time their children spend online.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A 2023 Stanford Internet Observatory report traced over 200 coordinated inauthentic accounts to a single influence operation targeting the 2022 midterms, demonstrating the scale platforms fail to catch without external pressure.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "The FTC's 2019 settlement required Facebook to pay $5 billion specifically over data practices that violated a prior consent decree, showing existing self-regulation had already failed once.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Common Sense Media's 2023 survey of 1,300 teens found 41% who described themselves as heavy social media users rated their own mental health as poor or very poor, compared to 23% of light users.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Reports have documented that political ad targeting on these platforms allowed messages tailored to exploit specific demographic anxieties during past election cycles.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Internal company documents leaked to journalists showed executives were aware of mental health impacts on teen users well before public disclosure.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A number of antitrust cases have been filed against major platforms over the past several years citing anticompetitive acquisition patterns.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Many people feel their privacy is violated by how much data these companies collect.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "There have been several news stories about election interference linked to social media.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Reports suggest that heavy social media use is linked to worse mental health outcomes.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "It's well known that these companies collect a lot of data.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Everyone has read about problems with social media and elections at some point.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Parents and experts alike express concern about this issue regularly.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Data privacy is a topic that comes up in the news frequently.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Elections happen every few years in most democracies.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Many people use social media to keep up with friends and family.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Facebook, Instagram, Twitter, TikTok, YouTube, LinkedIn, Snapchat, Reddit, and Pinterest are all major platforms used across North America, Europe, Asia, and Africa by billions of people in over 190 countries.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "In 2010, 2015, and 2020, social media usage statistics changed significantly across countries like the United States, Brazil, India, Germany, and Japan, with numbers ranging from millions to billions of users.",
+    "score": 1.0,
+    "normalised_score": 0.1
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Meta, Alphabet, ByteDance, and X Corp are four of the largest technology companies, operating in dozens of countries with thousands of employees and billions of dollars in revenue each year.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Studies, reports, surveys, and articles from sources like universities, government agencies, and news organizations in the US, UK, Canada, and Australia have discussed this topic at length over the past 5, 10, and 15 years.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "According to various numbers and statistics from multiple countries and organizations over the last several years, this is a topic that affects millions of people worldwide in significant ways.",
+    "score": 1.0,
+    "normalised_score": 0.1
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A 2021 study found that 64% of surveyed teens reported feeling worse about their body image after using image-heavy platforms, which directly supports the case that these platforms cause measurable psychological harm.",
+    "score": 9.0,
+    "normalised_score": 0.9
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "64% of teens surveyed in 2021. Body image. Image-heavy platforms.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "The FTC's $5 billion settlement in 2019 shows that financial penalties alone haven't been enough to change platform behavior, since violations continued afterward.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "FTC. $5 billion. 2019. Settlement.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Stanford researchers identified over 200 coordinated accounts tied to a single influence campaign in 2022, illustrating how easily platforms can be exploited at scale despite existing safeguards.",
+    "score": 9.0,
+    "normalised_score": 0.9
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Stanford. 200 accounts. 2022. Influence campaign.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Social media regulation is a complicated issue with good points on both sides. Supporters of rules say they would protect people, while opponents worry about freedom. It depends on how you look at it, and different people will reach different conclusions. I can see why people disagree.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Social media regulation is a complicated issue with good points on both sides. Supporters of rules say they would protect people, while opponents worry about freedom. It depends on how you look at it, and different people will reach different conclusions. I can see why people disagree.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for companies and limit what users can say. Some countries have tried regulation and others have not, so it is difficult to say which approach is best.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for companies and limit what users can say. Some countries have tried regulation and others have not, so it is difficult to say which approach is best.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Germany's NetzDG law, in force since 2017, requires large platforms to remove clearly illegal content within 24 hours. The United Kingdom passed its Online Safety Act in 2023. The United States still relies on Section 230, passed in 1996, which protects platforms from liability for what users post. Different countries have chosen different approaches.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Germany's NetzDG law, in force since 2017, requires large platforms to remove clearly illegal content within 24 hours. The United Kingdom passed its Online Safety Act in 2023. The United States still relies on Section 230, passed in 1996, which protects platforms from liability for what users post. Different countries have chosen different approaches.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Frances Haugen, a former Facebook employee, gave internal documents to journalists and regulators in 2021 and testified before the United States Senate that October. The documents included internal research about Instagram and teenage users. Facebook's parent company was renamed Meta in the same year.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Frances Haugen, a former Facebook employee, gave internal documents to journalists and regulators in 2021 and testified before the United States Senate that October. The documents included internal research about Instagram and teenage users. Facebook's parent company was renamed Meta in the same year.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Many news stories about social media have appeared over the years, and politicians have made statements about it at various hearings. Companies have released reports and issued apologies at different times. People have strong feelings about all of this.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Many news stories about social media have appeared over the years, and politicians have made statements about it at various hearings. Companies have released reports and issued apologies at different times. People have strong feelings about all of this.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "In May 2023 Ireland's data protection regulator fined Meta 1.2 billion euros over transfers of European users' data to the United States. The GDPR took effect in 2018. Meta said it would appeal the decision.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "In May 2023 Ireland's data protection regulator fined Meta 1.2 billion euros over transfers of European users' data to the United States. The GDPR took effect in 2018. Meta said it would appeal the decision.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Governments should require large platforms to open their recommendation systems to independent auditors, because self-reporting has repeatedly failed. When Frances Haugen released internal Facebook research in 2021, it showed the company knew Instagram worsened body-image problems for some teenage girls, yet the public learned this only through a leak. Mandatory audits, like the risk assessments required under the EU's Digital Services Act, would surface such findings before a whistleblower has to.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Governments should require large platforms to open their recommendation systems to independent auditors, because self-reporting has repeatedly failed. When Frances Haugen released internal Facebook research in 2021, it showed the company knew Instagram worsened body-image problems for some teenage girls, yet the public learned this only through a leak. Mandatory audits, like the risk assessments required under the EU's Digital Services Act, would surface such findings before a whistleblower has to.",
+    "score": 9.0,
+    "normalised_score": 0.9
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Governments should not force platforms to remove lawful but offensive speech, because the power to define harmful content is easily abused. Germany's NetzDG law, which requires removal of clearly illegal content within 24 hours, has been criticised because platforms facing heavy fines tend to delete borderline posts to be safe. Rules should target transparency and clearly illegal content, not opinions.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Governments should not force platforms to remove lawful but offensive speech, because the power to define harmful content is easily abused. Germany's NetzDG law, which requires removal of clearly illegal content within 24 hours, has been criticised because platforms facing heavy fines tend to delete borderline posts to be safe. Rules should target transparency and clearly illegal content, not opinions.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Stricter enforcement of privacy law is the most realistic way to regulate social media. In May 2023, Ireland's data protection regulator fined Meta 1.2 billion euros for moving European users' data to the United States, the largest fine issued under the GDPR at that time, which shows existing law can bite when it is enforced.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Stricter enforcement of privacy law is the most realistic way to regulate social media. In May 2023, Ireland's data protection regulator fined Meta 1.2 billion euros for moving European users' data to the United States, the largest fine issued under the GDPR at that time, which shows existing law can bite when it is enforced.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Platforms need stricter age checks because children can easily lie about their age when they sign up. Reports have shown that many young children have accounts despite minimum-age rules, which exposes them to content meant for adults. Governments should require platforms to verify ages.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Platforms need stricter age checks because children can easily lie about their age when they sign up. Reports have shown that many young children have accounts despite minimum-age rules, which exposes them to content meant for adults. Governments should require platforms to verify ages.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them responsible and ordinary people are the ones who suffer, so laws must be introduced soon.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 1",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them responsible and ordinary people are the ones who suffer, so laws must be introduced soon.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Students should be allowed to use AI tools for brainstorming and editing, but using them to generate entire essays undermines the specific skill schools are meant to teach.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Banning AI tools outright is unenforceable and shortsighted; schools should instead redesign assignments so AI assistance doesn't replace the thinking the assignment is meant to assess.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "AI tools should be permitted in coursework because withholding access widens the gap between students who can afford private tutoring and those who cannot.",
+    "score": 5.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Schools should allow AI tools for research and citation help, but not for writing the actual argument, because that is the part students are supposed to practice.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Because AI-generated text is becoming harder to detect reliably, schools should shift toward in-class writing assessments rather than trying to police AI use at home.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Students should be taught to use AI tools responsibly, similar to how calculators were once treated, rather than banning them.",
+    "score": 4.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "AI tools can be helpful but also risky, so schools need some kind of policy about them.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "There should probably be limits on how much students can rely on AI since it might hurt their learning.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Using AI for schoolwork is becoming common and teachers need to figure out what to do about it.",
+    "score": 3.0,
+    "normalised_score": 0.6
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "AI tools are everywhere now and students use them a lot for different things.",
+    "score": 2.0,
+    "normalised_score": 0.4
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Technology in schools keeps changing and AI is just the newest example.",
+    "score": 2.0,
+    "normalised_score": 0.4
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "ChatGPT and other AI tools are popular with students.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Many schools have different rules about technology.",
+    "score": 1.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "AI was developed by several major technology companies over the past decade.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Thesis",
+    "criterion_description": "Does the essay take a clear, specific, arguable position?",
+    "max_points": 5,
+    "text": "Students use many different apps and websites for homework.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A 2023 Stanford study found that students who used AI writing tools without restriction scored measurably lower on a follow-up unassisted writing test than students who used the same tools only for outlining, suggesting over-reliance directly weakens the skill being taught.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Turnitin's AI-detection data, released in 2023, flagged a meaningful share of submissions as likely AI-generated within months of ChatGPT's release, showing schools faced the problem almost immediately rather than gradually.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Several universities, including Sciences Po in France, banned ChatGPT for assignments in early 2023 specifically citing concerns about verifying authentic student work, showing institutions moved quickly once the risk became clear.",
+    "score": 10.0,
+    "normalised_score": 1.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Surveys conducted shortly after ChatGPT's release found a large share of university students admitted to using it on at least one assignment, indicating the practice became widespread very quickly.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Some school districts have piloted AI-detection software, though reports suggest these tools produce a meaningful rate of false positives, complicating enforcement.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Teachers in several reported cases have redesigned assignments to include in-class drafting specifically to reduce opportunities for undisclosed AI use.",
+    "score": 8.0,
+    "normalised_score": 0.8
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Many teachers have expressed concern that AI tools make it harder to assess what a student actually understands.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "There have been reports of students being accused of using AI when they did not, showing detection is not reliable.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Studies suggest AI tools can both help and hurt learning depending on how they're used.",
+    "score": 5.0,
+    "normalised_score": 0.5
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "A lot of schools have had to make new rules because of AI.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "People have different opinions about whether AI helps or hurts students.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "This is a topic that comes up often in education news.",
+    "score": 2.0,
+    "normalised_score": 0.2
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "AI chatbots can answer many different kinds of questions.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Technology changes quickly and schools often have to adapt.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  },
+  {
+    "source_rubric": "Essay 2",
+    "criterion": "Evidence",
+    "criterion_description": "Does the essay support its position with specific, relevant evidence tied to the argument?",
+    "max_points": 10,
+    "text": "Many students have smartphones and laptops for schoolwork.",
+    "score": 0.0,
+    "normalised_score": 0.0
+  }
+]
