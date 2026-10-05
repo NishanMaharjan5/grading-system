@@ -80,9 +80,10 @@ def _criterion_to_dict(c, for_owner=True):
 
 def _rubric_to_dict(r, submission_count=None, for_owner=True):
     """`locked` is the rule, not a hint: once work has been submitted against a
-    rubric, editing or deleting it is refused (409). Naming it here means the
-    frontend disables those actions from the server's answer instead of
-    re-deriving the rule and drifting out of step with it.
+    rubric, its *scoring* is frozen (criteria, points, type) and deleting it is
+    refused (409). Naming it here means the frontend disables those actions from
+    the server's answer instead of re-deriving the rule and drifting out of step
+    with it.
 
     Both counts are the author's business, not a classmate's, so they are left
     out unless the caller owns the rubric.
@@ -92,6 +93,10 @@ def _rubric_to_dict(r, submission_count=None, for_owner=True):
     if submission_count is None:
         submission_count = len(r.submissions)
 
+    # `locked` means the scoring is frozen: criteria, points and type cannot
+    # change, and the rubric cannot be deleted, because work has been submitted
+    # against it. The title, description, due date and word limits stay
+    # editable -- so this no longer means "cannot be edited at all".
     owner_fields = {"submission_count": submission_count, "locked": submission_count > 0} if for_owner else {}
 
     return {
@@ -180,6 +185,41 @@ def _build_criterion(spec):
     return criterion
 
 
+def _scoring_signature(criteria_specs, rubric_type):
+    """What a rubric's scoring actually consists of.
+
+    Two rubrics with the same signature award the same marks for the same work,
+    so a recorded grade stays meaningful across the change. Everything outside
+    it -- when work is due, what the assignment is called, how it is described,
+    the word range -- can move without touching a grade that already exists.
+
+    Criterion descriptions are not in here on purpose: rewording "a clear,
+    arguable claim" does not change what five points means.
+    """
+    return (
+        rubric_type,
+        tuple(
+            (spec["name"], float(spec["max_points"]), spec["position"],
+             tuple((case["stdin"], case["expected_output"]) for case in spec.get("test_cases", [])))
+            for spec in criteria_specs
+        ),
+    )
+
+
+def _current_scoring_signature(rubric):
+    ordered = sorted(rubric.criteria, key=lambda c: c.position)
+    return _scoring_signature(
+        [{
+            "name": c.name,
+            "max_points": float(c.max_points),
+            "position": c.position,
+            "test_cases": [{"stdin": t.stdin, "expected_output": t.expected_output}
+                           for t in sorted(c.test_cases, key=lambda t: t.position)],
+        } for c in ordered],
+        rubric.type,
+    )
+
+
 @rubrics_bp.post("")
 @require_role("teacher")
 def create_rubric():
@@ -254,12 +294,43 @@ def update_rubric(rubric_id):
     if rubric.created_by != int(g.current_user["sub"]):
         return jsonify(detail="You can only edit rubrics you created"), 403
 
-    # Once a student has submitted against this rubric, changing point totals would
-    # silently invalidate any grades already recorded against it.
-    if rubric.submissions:
-        return jsonify(detail="This rubric already has submissions and can no longer be edited"), 409
-
     body = request.get_json(silent=True) or {}
+
+    # Once work has been submitted, the scoring is frozen: changing a
+    # criterion's points, renaming one, or switching the rubric's type would
+    # silently invalidate grades already recorded against it. Everything else
+    # stays editable, because none of it touches a recorded grade -- and
+    # locking the whole rubric made the one thing a teacher most often needs
+    # after work starts arriving, extending a deadline, impossible.
+    #
+    # The comparison is against what is stored, not merely which keys were
+    # sent: the edit form submits the whole rubric every time, so refusing on
+    # key presence alone would block a pure due-date change.
+    if rubric.submissions:
+        requested_type = body.get("type", rubric.type)
+        if requested_type not in VALID_TYPES:
+            return jsonify(detail="type must be 'text' or 'code'"), 422
+
+        if "criteria" in body:
+            specs, err = _parse_criteria(body.get("criteria"), requested_type)
+            if err:
+                return jsonify(detail=err), 422
+            proposed = _scoring_signature(specs, requested_type)
+        else:
+            proposed = _scoring_signature(
+                [{
+                    "name": c.name, "max_points": float(c.max_points), "position": c.position,
+                    "test_cases": [{"stdin": t.stdin, "expected_output": t.expected_output}
+                                   for t in sorted(c.test_cases, key=lambda t: t.position)],
+                } for c in sorted(rubric.criteria, key=lambda c: c.position)],
+                requested_type,
+            )
+
+        if proposed != _current_scoring_signature(rubric):
+            return jsonify(detail=(
+                "This rubric already has submissions, so its criteria, points and type can no "
+                "longer be changed -- that would invalidate grades already recorded against it. "
+                "The title, description, due date and word limits can still be edited.")), 409
 
     if "title" in body:
         title = (body.get("title") or "").strip()
@@ -287,13 +358,29 @@ def update_rubric(rubric_id):
         criteria, err = _parse_criteria(body.get("criteria"), body.get("type", rubric.type))
         if err:
             return jsonify(detail=err), 422
-        # Clear and flush before adding: assigning straight over the list makes
-        # SQLAlchemy insert the replacements before deleting the originals, and
-        # uq_criteria_rubric_name then rejects any criterion whose name is being
-        # kept -- which is most edits (retitling, changing points).
-        rubric.criteria.clear()
-        db.session.flush()
-        rubric.criteria = [_build_criterion(c) for c in criteria]
+
+        if _scoring_signature(criteria, rubric.type) == _current_scoring_signature(rubric):
+            # Nothing about the scoring moved, so the criteria rows must not be
+            # touched: recorded grades point at them by id, and replacing a row
+            # with an identical one would orphan every grade against it. Only
+            # the descriptions, which are not part of the scoring, are updated.
+            #
+            # The edit form resends the whole rubric on every save, so this is
+            # the ordinary path for any change to a title, deadline or word
+            # limit on a rubric that already has work against it.
+            by_name = {c.name: c for c in rubric.criteria}
+            for spec in criteria:
+                existing = by_name.get(spec["name"])
+                if existing is not None:
+                    existing.description = spec["description"]
+        else:
+            # Clear and flush before adding: assigning straight over the list makes
+            # SQLAlchemy insert the replacements before deleting the originals, and
+            # uq_criteria_rubric_name then rejects any criterion whose name is being
+            # kept -- which is most edits (retitling, changing points).
+            rubric.criteria.clear()
+            db.session.flush()
+            rubric.criteria = [_build_criterion(c) for c in criteria]
 
     try:
         db.session.commit()

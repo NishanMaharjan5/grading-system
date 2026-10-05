@@ -17,7 +17,8 @@ student. Around that core:
 - **Deadlines.** A rubric can carry a due date. Students see it and how far
   off it is, and it turns to a "Closed" treatment once it passes. After the
   deadline the app stops accepting work, in the form and at the API. A rubric
-  with no due date never blocks anything.
+  with no due date never blocks anything, and a deadline can be extended after
+  work has started arriving — see the edit rule below.
 - **Word limits.** Optional min/max words per text rubric, defaulting to 200
   — under the point where the embedder stops reading. The submission form
   counts as you type and refuses to send work outside the range.
@@ -32,6 +33,13 @@ student. Around that core:
   approved and whether it was later revised.
 - **Student history.** One page listing everything a student has submitted,
   with its status and grade, across every assignment.
+
+Once work has been submitted against a rubric, its **scoring freezes** —
+criteria, points and type cannot change, because a recorded grade would
+quietly start describing something else — and it can no longer be deleted. Its
+title, description, deadline and word limits stay editable, since none of them
+touch a grade already given. The teacher's edit form stays open and disables
+only the frozen fields.
 
 ## How grading works
 

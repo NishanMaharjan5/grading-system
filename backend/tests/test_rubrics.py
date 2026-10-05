@@ -148,14 +148,29 @@ class TestLockedFlag:
         assert body["locked"] is True
         assert body["submission_count"] == 1
 
-    def test_locked_matches_what_editing_actually_does(self, client, auth, teacher, student, submit, rubric):
-        """The flag has to agree with the 409, or the UI disables the wrong thing."""
+    def test_locked_matches_what_editing_actually_does(
+            self, client, auth, teacher, student, submit, rubric, criteria_payload):
+        """CHANGED when the edit lock was narrowed to scoring.
+
+        `locked` used to mean "cannot be edited at all" and this asserted a 409
+        on a title change. It now means the *scoring* is frozen: criteria,
+        points and type cannot move, and the rubric cannot be deleted. The
+        title, description, due date and word limits stay editable, so the flag
+        must agree with that narrower rule or the UI disables the wrong thing.
+        """
         assert client.get(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).get_json()["locked"] is False
         assert client.put(f"/api/rubrics/{rubric['id']}", json={"title": "ok"}, headers=auth(teacher)).status_code == 200
 
         submit(student)
         assert client.get(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).get_json()["locked"] is True
-        assert client.put(f"/api/rubrics/{rubric['id']}", json={"title": "no"}, headers=auth(teacher)).status_code == 409
+
+        # still editable: nothing here changes a recorded grade
+        assert client.put(f"/api/rubrics/{rubric['id']}", json={"title": "renamed"},
+                          headers=auth(teacher)).status_code == 200
+        # still frozen: this would
+        repriced = [dict(c, max_points=99) for c in criteria_payload]
+        assert client.put(f"/api/rubrics/{rubric['id']}", json={"criteria": repriced},
+                          headers=auth(teacher)).status_code == 409
         assert client.delete(f"/api/rubrics/{rubric['id']}", headers=auth(teacher)).status_code == 409
 
     def test_a_student_can_read_one(self, client, auth, student, rubric):
@@ -243,12 +258,25 @@ class TestUpdate:
 
 class TestLockingOnceSubmitted:
     """Changing points under a submission would invalidate grades already
-    recorded against it, so both edit and delete are refused."""
+    recorded against it, so the scoring freezes and delete is refused.
 
-    def test_edit_is_refused(self, client, auth, teacher, student, rubric, submit):
+    CHANGED when the lock was narrowed: test_edit_is_refused used to assert
+    that *any* edit returned 409, including a title change. The full
+    scoring-vs-everything-else split is covered in test_rubric_edit_lock.py.
+    """
+
+    def test_a_scoring_edit_is_refused(self, client, auth, teacher, student, rubric, submit, criteria_payload):
         submit(student)
-        response = client.put(f"/api/rubrics/{rubric['id']}", json={"title": "too late"}, headers=auth(teacher))
+        repriced = [dict(c, max_points=1) for c in criteria_payload]
+        response = client.put(f"/api/rubrics/{rubric['id']}", json={"criteria": repriced},
+                              headers=auth(teacher))
         assert response.status_code == 409
+
+    def test_a_non_scoring_edit_is_allowed(self, client, auth, teacher, student, rubric, submit):
+        submit(student)
+        response = client.put(f"/api/rubrics/{rubric['id']}", json={"title": "Renamed after submissions"},
+                              headers=auth(teacher))
+        assert response.status_code == 200
 
     def test_delete_is_refused(self, client, auth, teacher, student, rubric, submit):
         submit(student)

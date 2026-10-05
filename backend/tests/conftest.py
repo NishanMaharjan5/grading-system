@@ -136,6 +136,20 @@ def rubric(client, auth, teacher):
 
 
 @pytest.fixture
+def criteria_payload():
+    """The `rubric` fixture's criteria, in the shape a PUT body wants.
+
+    Handy for the edit-lock tests: send this unchanged and the rubric's scoring
+    is identical, so the edit is allowed; change a name or max_points and it is
+    a scoring change, so it is refused once work has been submitted.
+    """
+    return [
+        {"name": "Thesis", "max_points": 5, "description": "A clear, arguable claim."},
+        {"name": "Evidence", "max_points": 10},
+    ]
+
+
+@pytest.fixture
 def criterion_ids(rubric):
     """(thesis_id, evidence_id)"""
     return tuple(criterion["id"] for criterion in rubric["criteria"])

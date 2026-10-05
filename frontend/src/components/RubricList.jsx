@@ -2,9 +2,11 @@
  * The teacher's rubrics.
  *
  * `locked` comes from the server rather than being inferred here. Once a
- * student has submitted, the backend refuses edits and deletes with a 409, so
- * those buttons are disabled with the reason stated -- offering a button that
- * is guaranteed to fail is worse than not offering it.
+ * student has submitted, the backend freezes the *scoring* -- criteria, points
+ * and type -- and refuses deletion, both with a 409. Everything else about the
+ * rubric stays editable, so Edit stays available and only Delete is disabled,
+ * with the reason stated. Offering a button that is guaranteed to fail is
+ * worse than not offering it.
  */
 export default function RubricList({ rubrics, onEdit, onDelete, onExport, exportingId, busyId }) {
   if (rubrics.length === 0) {
@@ -45,8 +47,9 @@ export default function RubricList({ rubrics, onEdit, onDelete, onExport, export
               type="button"
               className="button--secondary"
               onClick={() => onEdit(rubric)}
-              disabled={rubric.locked}
-              title={rubric.locked ? "Cannot edit: work has already been submitted" : "Edit this rubric"}
+              title={rubric.locked
+                ? "Edit the title, description, deadline or word limits — the criteria and points are fixed now work has been submitted"
+                : "Edit this rubric"}
             >
               Edit
             </button>
@@ -71,7 +74,10 @@ export default function RubricList({ rubrics, onEdit, onDelete, onExport, export
               {busyId === rubric.id ? "Deleting…" : "Delete"}
             </button>
             {rubric.locked && (
-              <span className="muted">Editing is closed once work has been submitted.</span>
+              <span className="muted">
+                Criteria and points are fixed now work has been submitted. The deadline, title,
+                description and word limits can still be changed.
+              </span>
             )}
           </div>
         </li>

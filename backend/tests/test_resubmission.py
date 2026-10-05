@@ -188,28 +188,62 @@ class TestTeacherViewAfterResubmission:
         assert db.session.get(Submission, submission_id).status == "approved"
 
 
-class TestDeadlinesCannotBeMovedAfterSubmissions:
-    """A known limitation, recorded rather than worked around.
+class TestDeadlinesCanBeMovedAfterSubmissions:
+    """CHANGED: this class used to be TestDeadlinesCannotBeMovedAfterSubmissions
+    and recorded the opposite behaviour as a known limitation.
 
-    A rubric is edit-locked once any student has submitted, because changing
-    points would invalidate grades already recorded. That lock covers the
-    deadline too, so a teacher cannot extend one after the first submission
-    arrives -- which is exactly when they would most want to. Lifting it would
-    mean allowing some fields to change after submissions while still refusing
-    the scoring ones.
+    The rubric edit-lock was all-or-nothing, so one submission froze the whole
+    rubric including its deadline -- and a teacher could not extend one after
+    work started arriving, which is exactly when they need to. The lock now
+    covers only the scoring (criteria, points, type); see
+    tests/test_rubric_edit_lock.py for the full split.
+
+    What it protects is unchanged: a grade already recorded still cannot be
+    invalidated underneath a student.
     """
 
-    def test_moving_a_deadline_is_refused_once_work_exists(
-            self, client, auth, teacher, student):
+    def test_a_deadline_can_be_extended_once_work_exists(self, client, auth, teacher, student):
         made = client.post("/api/rubrics", headers=auth(teacher), json={
-            "title": "Locked by work", "type": "text",
+            "title": "Extendable", "type": "text",
             "due_date": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
             "criteria": [{"name": "Thesis", "max_points": 5}],
         }).get_json()
         client.post("/api/submissions", headers=auth(student),
                     json={"rubric_id": made["id"], "content": "Early work."})
 
+        extended = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
         response = client.put(f"/api/rubrics/{made['id']}", headers=auth(teacher),
-                              json={"due_date": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()})
+                              json={"due_date": extended})
+        assert response.status_code == 200
+        assert response.get_json()["due_date"] is not None
+
+    def test_extending_a_passed_deadline_reopens_submissions(self, client, auth, teacher, student):
+        """The point of allowing it: a student who missed the deadline can be
+        given more time without the rubric having to be recreated."""
+        made = client.post("/api/rubrics", headers=auth(teacher), json={
+            "title": "Reopened", "type": "text",
+            "due_date": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+            "criteria": [{"name": "Thesis", "max_points": 5}],
+        }).get_json()
+        client.post("/api/submissions", headers=auth(student),
+                    json={"rubric_id": made["id"], "content": "First attempt."})
+
+        set_due_date(made["id"], datetime.now(timezone.utc) - timedelta(minutes=1))
+        assert resubmit(client, auth, student, made["id"], "Blocked while closed.").status_code == 422
+
+        client.put(f"/api/rubrics/{made['id']}", headers=auth(teacher),
+                   json={"due_date": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()})
+        assert resubmit(client, auth, student, made["id"], "Allowed again.").status_code == 200
+
+    def test_the_scoring_is_still_frozen(self, client, auth, teacher, student):
+        """Narrowing the lock must not have opened the thing it existed for."""
+        made = client.post("/api/rubrics", headers=auth(teacher), json={
+            "title": "Still frozen", "type": "text",
+            "criteria": [{"name": "Thesis", "max_points": 5}],
+        }).get_json()
+        client.post("/api/submissions", headers=auth(student),
+                    json={"rubric_id": made["id"], "content": "Work exists now."})
+
+        response = client.put(f"/api/rubrics/{made['id']}", headers=auth(teacher),
+                              json={"criteria": [{"name": "Thesis", "max_points": 99}]})
         assert response.status_code == 409
-        assert "no longer be edited" in response.get_json()["detail"]

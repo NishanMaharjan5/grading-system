@@ -25,6 +25,10 @@ const blankTestCase = () => ({ stdin: "", expected_output: "" });
  */
 export default function RubricForm({ initial, onSaved, onCancel }) {
   const editing = Boolean(initial);
+  // Work has been submitted, so the scoring is frozen: criteria, points and
+  // type cannot change without invalidating grades already recorded. The
+  // title, description, deadline and word limits stay editable.
+  const scoringLocked = Boolean(initial?.locked);
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -206,6 +210,14 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
       </select>
       {editing && <p className="hint">A rubric's type cannot be changed after it is created.</p>}
 
+      {scoringLocked && (
+        <p className="warning" role="status">
+          <strong>Work has been submitted against this rubric.</strong> Its criteria and points are
+          fixed now, because changing them would alter what grades already given actually mean. The
+          title, description, deadline and word limits can still be edited.
+        </p>
+      )}
+
       <label htmlFor="rubric-description">Description (optional)</label>
       <textarea
         id="rubric-description"
@@ -300,6 +312,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
                 id={`criterion-name-${index}`}
                 value={row.name}
                 onChange={(e) => updateCriterion(index, "name", e.target.value)}
+                disabled={scoringLocked}
                 aria-invalid={Boolean(criterionError(index, "name"))}
               />
               {criterionError(index, "name") && (
@@ -316,6 +329,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
                 step="any"
                 value={row.max_points}
                 onChange={(e) => updateCriterion(index, "max_points", e.target.value)}
+                disabled={scoringLocked}
                 aria-invalid={Boolean(criterionError(index, "max_points"))}
               />
               {criterionError(index, "max_points") && (
@@ -327,7 +341,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
               type="button"
               className="button--plain"
               onClick={() => setCriteria(criteria.filter((_, i) => i !== index))}
-              disabled={criteria.length === 1}
+              disabled={criteria.length === 1 || scoringLocked}
               title={criteria.length === 1 ? "A rubric needs at least one criterion" : "Remove"}
             >
               Remove
@@ -386,9 +400,11 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
           </div>
         ))}
 
-        <button type="button" className="button--plain" onClick={() => setCriteria([...criteria, blankCriterion()])}>
-          + Add criterion
-        </button>
+        {!scoringLocked && (
+          <button type="button" className="button--plain" onClick={() => setCriteria([...criteria, blankCriterion()])}>
+            + Add criterion
+          </button>
+        )}
       </fieldset>
 
       <p className="muted">Total: {totalPoints} points across {criteria.length} criteria</p>
