@@ -66,18 +66,74 @@ def load_examples(path=None):
 
 
 def resolve_criterion(row, rubric_cache):
+    """Matches one training row to the criterion row it will train.
+
+    Returns (criterion, None), or (None, reason) when the row cannot be
+    resolved. Returning the reason rather than raising lets the caller collect
+    every bad row and report them together -- fixing them one run at a time is
+    tedious when a file has hundreds.
+
+    An ambiguous title is refused outright. Models are saved under a criterion
+    *row id*, so picking either of two rubrics sharing a title would train real
+    models against the wrong criteria, silently and with no error. That is not
+    hypothetical: two rubrics titled "Essay 1" existed in the dev database in
+    early October 2026.
+    """
     title = row["rubric"]
     if title not in rubric_cache:
-        rubric = db.session.query(Rubric).filter_by(title=title).first()
-        if not rubric:
-            raise SystemExit(f"No rubric titled {title!r} exists -- create it first.")
-        rubric_cache[title] = rubric
+        matches = db.session.query(Rubric).filter_by(title=title).order_by(Rubric.id).all()
+        if not matches:
+            return None, f"no rubric titled {title!r} exists -- create it first"
+        if len(matches) > 1:
+            return None, (
+                f"{len(matches)} rubrics are titled {title!r} (ids {[r.id for r in matches]}); "
+                "training data is matched to a rubric by title, so this is ambiguous -- "
+                "rename or delete the duplicates"
+            )
+        rubric_cache[title] = matches[0]
     rubric = rubric_cache[title]
 
     criterion = next((c for c in rubric.criteria if c.name == row["criterion"]), None)
     if not criterion:
-        raise SystemExit(f"Rubric {title!r} has no criterion named {row['criterion']!r}.")
-    return criterion
+        available = ", ".join(repr(c.name) for c in rubric.criteria) or "none"
+        return None, (f"rubric {title!r} has no criterion named {row['criterion']!r} "
+                      f"(it has: {available})")
+    return criterion, None
+
+
+def resolve_all(examples):
+    """Resolves every row before any training starts. Raises SystemExit listing
+    every unresolvable row, so one run surfaces all of them."""
+    rubric_cache = {}
+    grouped = defaultdict(list)  # RubricCriterion -> [(text, score), ...]
+    blocked = []  # (row number, rubric title, criterion name, reason)
+
+    for number, row in enumerate(examples, start=1):
+        criterion, reason = resolve_criterion(row, rubric_cache)
+        if reason:
+            blocked.append((number, row.get("rubric"), row.get("criterion"), reason))
+            continue
+        grouped[criterion].append((row["text"], row["score"]))
+
+    if blocked:
+        # Group by reason: one duplicate title usually blocks many rows, and a
+        # list of 50 identical messages buries the one thing to fix.
+        by_reason = defaultdict(list)
+        for number, title, name, reason in blocked:
+            by_reason[reason].append((number, title, name))
+
+        lines = [f"{len(blocked)} of {len(examples)} training rows could not be resolved. "
+                 "Nothing was trained and no model file was written.\n"]
+        for reason, rows in by_reason.items():
+            numbers = [n for n, _, _ in rows]
+            shown = ", ".join(str(n) for n in numbers[:10])
+            more = f" and {len(numbers) - 10} more" if len(numbers) > 10 else ""
+            lines.append(f"  {reason}")
+            lines.append(f"    blocked rows (1-based): {shown}{more}")
+            lines.append(f"    first one: rubric {rows[0][1]!r}, criterion {rows[0][2]!r}\n")
+        raise SystemExit("\n".join(lines))
+
+    return grouped
 
 
 def train_one(criterion, texts, scores, save=True):
@@ -146,11 +202,7 @@ def main():
     app = create_app()
     with app.app_context():
         examples = load_examples(args.data)
-        rubric_cache = {}
-        grouped = defaultdict(list)  # RubricCriterion -> [(text, score), ...]
-        for row in examples:
-            criterion = resolve_criterion(row, rubric_cache)
-            grouped[criterion].append((row["text"], row["score"]))
+        grouped = resolve_all(examples)
 
         verb = "Scoring" if args.no_save else "Training on"
         print(f"{verb} {len(examples)} examples from {args.data or DATA_PATH}\n")
