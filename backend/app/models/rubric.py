@@ -16,11 +16,29 @@ class Rubric(db.Model):
     description = db.Column(db.Text, nullable=False, default="")
     type = db.Column(db.String(10), nullable=False, default="text")
     due_date = db.Column(db.DateTime(timezone=True), nullable=True)
+    # Word range for text submissions. Null means no limit, which is what every
+    # rubric created before this existed keeps. Only meaningful for type='text':
+    # a code rubric is graded by running tests, so counting words says nothing.
+    #
+    # There is a grading reason to cap these, not just a pedagogical one. The
+    # embedder reads at most 256 tokens (~226 words) and silently drops the
+    # rest, so a longer essay is graded on a partial read. A max_words at or
+    # under ~226 keeps the grader reading the whole submission.
+    min_words = db.Column(db.Integer, nullable=True)
+    max_words = db.Column(db.Integer, nullable=True)
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         db.CheckConstraint("type in ('text', 'code')", name="ck_rubrics_type"),
+        # Enforced in the database as well as the route: a negative or inverted
+        # range would make every submission unsatisfiable.
+        db.CheckConstraint("min_words is null or min_words >= 0", name="ck_rubrics_min_words"),
+        db.CheckConstraint("max_words is null or max_words >= 1", name="ck_rubrics_max_words"),
+        db.CheckConstraint(
+            "min_words is null or max_words is null or min_words <= max_words",
+            name="ck_rubrics_word_range",
+        ),
     )
 
     creator = db.relationship("User", back_populates="rubrics_created", foreign_keys=[created_by])

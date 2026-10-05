@@ -845,6 +845,71 @@ h1 + .student-line {
   overflow-x: auto;
 }
 
+/* ------------------------------------------------------- word limits */
+
+/* The live counter on the submission box. Colour is a reinforcement, not the
+   message: the range and the reason are always spelled out in words beside
+   it, so this still reads correctly without colour vision. */
+.word-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.word-count--ok {
+  color: var(--done-fg);
+}
+
+.word-count--short,
+.word-count--long {
+  color: var(--danger-fg);
+}
+
+/* The length range, stated in the instructions before a student starts. */
+.submission-range {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--primary);
+  background: var(--primary-tint);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--text-base);
+}
+
+.word-limits {
+  margin-top: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  min-width: 0;
+}
+
+.word-limits legend {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 0 var(--space-1);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.word-limits .criterion-row {
+  gap: var(--space-4);
+}
+
+.word-limits .criterion-row__field {
+  flex: 0 1 11rem;
+}
+
+/* Not an error -- a deliberate choice with a consequence worth stating. */
+.warning {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3);
+  border: 1px solid var(--pending-line);
+  border-radius: var(--radius-sm);
+  background: var(--pending-bg);
+  color: var(--pending-fg);
+  font-size: var(--text-sm);
+}
+
 /* ----------------------------------------------------------------- code */
 
 /* submitted programs, previews and test feedback keep their line breaks and

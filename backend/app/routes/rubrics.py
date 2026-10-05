@@ -5,10 +5,49 @@ from sqlalchemy.exc import IntegrityError
 from app.extensions import db
 from app.models import Rubric, RubricCriterion, Submission, TestCase
 from app.security import login_required, require_role
+from app.word_limits import validate_limits
 
 rubrics_bp = Blueprint("rubrics", __name__)
 
 VALID_TYPES = {"text", "code"}
+
+
+def _parse_word_limits(body, rtype, current=(None, None)):
+    """Reads min_words/max_words from a request body.
+
+    Returns ((min_words, max_words), error). A key that is absent keeps its
+    current value, so a PUT that doesn't mention them leaves them alone; an
+    explicit null clears the limit. Word limits are meaningless for a code
+    rubric -- it is graded by running tests -- so they are refused there
+    rather than silently stored and never enforced.
+    """
+    def read(key, fallback):
+        if key not in body:
+            return fallback, None
+        value = body.get(key)
+        if value is None or value == "":
+            return None, None
+        if isinstance(value, str):
+            try:
+                value = int(value.strip())
+            except ValueError:
+                return None, f"{key} must be a whole number or blank"
+        return value, None
+
+    min_words, err = read("min_words", current[0])
+    if err:
+        return None, err
+    max_words, err = read("max_words", current[1])
+    if err:
+        return None, err
+
+    if rtype != "text" and (min_words is not None or max_words is not None):
+        return None, "word limits only apply to text rubrics"
+
+    err = validate_limits(min_words, max_words)
+    if err:
+        return None, err
+    return (min_words, max_words), None
 
 
 def _test_case_to_dict(t):
@@ -55,6 +94,10 @@ def _rubric_to_dict(r, submission_count=None, for_owner=True):
         "title": r.title,
         "description": r.description,
         "type": r.type,
+        # Null means no limit. Sent to students too: the submission form shows
+        # the range and blocks outside it, and needs the numbers to do either.
+        "min_words": r.min_words,
+        "max_words": r.max_words,
         "due_date": r.due_date.isoformat() if r.due_date else None,
         "created_by": r.created_by,
         "created_at": r.created_at.isoformat() if r.created_at else None,
@@ -149,8 +192,13 @@ def create_rubric():
     if err:
         return jsonify(detail=err), 422
 
+    limits, err = _parse_word_limits(body, rtype)
+    if err:
+        return jsonify(detail=err), 422
+
     rubric = Rubric(
         title=title, description=description, type=rtype,
+        min_words=limits[0], max_words=limits[1],
         due_date=due_date, created_by=int(g.current_user["sub"]),
     )
     rubric.criteria = [_build_criterion(c) for c in criteria]
@@ -218,6 +266,12 @@ def update_rubric(rubric_id):
         if body["type"] not in VALID_TYPES:
             return jsonify(detail="type must be 'text' or 'code'"), 422
         rubric.type = body["type"]
+    if "min_words" in body or "max_words" in body:
+        limits, err = _parse_word_limits(body, body.get("type", rubric.type),
+                                         (rubric.min_words, rubric.max_words))
+        if err:
+            return jsonify(detail=err), 422
+        rubric.min_words, rubric.max_words = limits
     if "criteria" in body:
         criteria, err = _parse_criteria(body.get("criteria"), body.get("type", rubric.type))
         if err:

@@ -266,6 +266,7 @@ backend/
   SANDBOX.md     what the code sandbox does and does not contain
   migrations/    Alembic; see migrations/README for the workflow
   scripts/       train_grader.py, seed_demo_rubric.py, reset_dev_data.py,
+                 backfill_word_limits.py,
                  evaluate_holdout.py + leakage_guard.py + padding_probe.py
                  (held-out evaluation; none of them train or save a model),
                  asap_benchmark.py + asap_finetune.py (public-dataset benchmark;
@@ -288,18 +289,33 @@ frontend/        React + Vite
   Evidence criteria would need far more labelled essays than the 98 available.
   Until then, teacher review is what makes the scores safe to use: no AI score
   reaches a student unapproved.
-- **The encoder silently truncates long submissions.** `all-MiniLM-L6-v2`
-  reads at most **256 tokens (~226 words)**; anything beyond is dropped
-  without warning. Two 377-word essays that differ only after that point embed
-  *identically*. Submissions accept 50,000 characters and the seeded
-  Reflection rubric asks for 200-300 words, so this is reachable in normal
-  use. On ASAP it affects **89.5% of essays**, with the median essay losing
-  40% of itself — and yet chunked embeddings (embed each ~170-word piece, then
-  mean-pool) scored **identically to the single pass on dev** (MAE 0.700 both,
-  QWK 0.781 vs 0.780). So production is deliberately left unchanged: fixing
-  truncation is not worth ~2.6x the embedding cost when the embedding
-  contributes almost nothing to begin with. The hand-crafted features do read
-  the whole text, which is part of why this never showed up.
+- **The encoder reads at most ~226 words, and word limits are how that is
+  handled.** `all-MiniLM-L6-v2` takes 256 tokens (~226 words) and drops the
+  rest without warning: two 377-word essays differing only after that point
+  embed *identically*. On ASAP it would affect **89.5% of essays**, the median
+  losing 40% of itself.
+
+  **The mitigation is a word limit on the rubric, not chunked embeddings in
+  production.** Text rubrics carry optional `min_words`/`max_words`; a new one
+  defaults to **max 200**, chosen to sit under the ~226-word read so the
+  grader sees the whole essay. Submissions outside the range are refused — in
+  the form as you type, and again at the API, which is the authority. Essay 1
+  and Essay 2 are backfilled to 20-200 (`scripts/backfill_word_limits.py`).
+
+  Chunked embeddings were the obvious alternative and were measured: embedding
+  each ~170-word piece and mean-pooling scored **identically to the single
+  pass on dev** (MAE 0.700 both, QWK 0.781 vs 0.780) for ~2.6x the cost. There
+  is nothing to recover by reading further when the embedding contributes
+  almost nothing to begin with, so capping the input is the cheaper and more
+  honest fix: it keeps the grader's view complete instead of hiding that it
+  was partial.
+
+  The limits are a default, not a cage. A teacher can set a higher cap, and
+  the rubric form says plainly what it costs — past 226 words the grader stops
+  reading and the end of those essays is scored by the teacher alone. Rubrics
+  created before this feature keep null limits and stay unrestricted, and no
+  submission already recorded is re-checked. The hand-crafted features always
+  read the whole text, which is part of why this went unnoticed for so long.
 - **The grader is trained on 128 labeled examples across two rubrics** —
   Essay 1 has 98 (44 Thesis, 54 Evidence) and Essay 2 has 30 (15 each).
   Leave-one-out MAE on Essay 1 is 1.11 for Thesis (baseline 1.48) and 1.52 for

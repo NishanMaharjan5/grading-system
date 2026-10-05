@@ -4,6 +4,12 @@ import { ApiError } from "../api/client";
 import { fieldErrorsFromDetail, rubricsApi } from "../api/rubrics";
 import { refreshShownErrors, sameErrors } from "../forms/errors";
 
+// The embedder reads ~226 words and silently drops the rest, so a cap at or
+// under this keeps the grader reading the whole essay. Mirrors
+// GRADER_WORD_LIMIT in backend/app/word_limits.py.
+const GRADER_WORD_LIMIT = 226;
+const DEFAULT_MAX_WORDS = 200;
+
 const blankCriterion = () => ({ name: "", max_points: "", test_cases: [] });
 const blankTestCase = () => ({ stdin: "", expected_output: "" });
 
@@ -22,6 +28,14 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [type, setType] = useState(initial?.type ?? "text");
+  // A new text rubric is capped by default; an existing one keeps whatever it
+  // has, including no limit at all.
+  const [minWords, setMinWords] = useState(
+    initial?.min_words != null ? String(initial.min_words) : "",
+  );
+  const [maxWords, setMaxWords] = useState(
+    initial ? (initial.max_words != null ? String(initial.max_words) : "") : String(DEFAULT_MAX_WORDS),
+  );
   const [criteria, setCriteria] = useState(
     initial?.criteria?.map((c) => ({
       name: c.name,
@@ -33,6 +47,7 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
   const [busy, setBusy] = useState(false);
 
   const criterionError = (index, field) => errors.criteria?.[index]?.[field];
+  const overGraderLimit = type === "text" && Number(maxWords) > GRADER_WORD_LIMIT;
 
   function updateCriterion(index, field, value) {
     setCriteria(criteria.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
@@ -56,6 +71,20 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
     else if (title.trim().length > 200) found.title = "Title must be 200 characters or fewer.";
 
     if (criteria.length === 0) found.criteriaForm = "Add at least one criterion.";
+
+    if (type === "text") {
+      const min = minWords.trim() === "" ? null : Number(minWords);
+      const max = maxWords.trim() === "" ? null : Number(maxWords);
+      if (min !== null && (!Number.isInteger(min) || min < 0)) {
+        found.min_words = "Enter a whole number of words, or leave blank for no limit.";
+      }
+      if (max !== null && (!Number.isInteger(max) || max < 1)) {
+        found.max_words = "Enter a whole number of words, or leave blank for no limit.";
+      }
+      if (!found.min_words && !found.max_words && min !== null && max !== null && min > max) {
+        found.max_words = `Max words must be at least the minimum (${min}).`;
+      }
+    }
 
     const seen = new Map();
     criteria.forEach((row, index) => {
@@ -92,9 +121,9 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
       const next = refreshShownErrors(shown, validate());
       return sameErrors(shown, next) ? shown : next;
     });
-    // validate() reads exactly these three values
+    // validate() reads exactly these values
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, criteria, type]);
+  }, [title, criteria, type, minWords, maxWords]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -112,6 +141,9 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
         title: title.trim(),
         description: description.trim(),
         type,
+        // null clears a limit; the server refuses limits on a code rubric
+        min_words: type === "text" && minWords.trim() !== "" ? Number(minWords) : null,
+        max_words: type === "text" && maxWords.trim() !== "" ? Number(maxWords) : null,
         criteria: criteria.map((row) => ({
           name: row.name.trim(),
           max_points: Number(row.max_points),
@@ -178,6 +210,62 @@ export default function RubricForm({ initial, onSaved, onCancel }) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+
+      {type === "text" && (
+        <fieldset className="word-limits">
+          <legend>Length (optional)</legend>
+          <p className="hint">
+            Leave either blank for no limit. Students see the range before they submit, and a
+            submission outside it is refused.
+          </p>
+          <div className="criterion-row">
+            <div className="criterion-row__field">
+              <label htmlFor="rubric-min-words">Min words</label>
+              <input
+                id="rubric-min-words"
+                type="number"
+                min="0"
+                step="1"
+                value={minWords}
+                onChange={(e) => setMinWords(e.target.value)}
+                aria-invalid={Boolean(errors.min_words)}
+                aria-describedby={errors.min_words ? "rubric-min-words-error" : undefined}
+              />
+              {errors.min_words && (
+                <p className="field-error" id="rubric-min-words-error">{errors.min_words}</p>
+              )}
+            </div>
+            <div className="criterion-row__field">
+              <label htmlFor="rubric-max-words">Max words</label>
+              <input
+                id="rubric-max-words"
+                type="number"
+                min="1"
+                step="1"
+                value={maxWords}
+                onChange={(e) => setMaxWords(e.target.value)}
+                aria-invalid={Boolean(errors.max_words)}
+                aria-describedby={
+                  [errors.max_words ? "rubric-max-words-error" : null,
+                   overGraderLimit ? "rubric-max-words-warning" : null].filter(Boolean).join(" ") || undefined
+                }
+              />
+              {errors.max_words && (
+                <p className="field-error" id="rubric-max-words-error">{errors.max_words}</p>
+              )}
+            </div>
+          </div>
+
+          {overGraderLimit && (
+            <p className="warning" id="rubric-max-words-warning" role="status">
+              <strong>Past {GRADER_WORD_LIMIT} words, the AI grader stops reading.</strong> It takes in
+              about {GRADER_WORD_LIMIT} words and ignores the rest, so anything after that point is
+              not part of the suggested score. You can still set a higher limit — you will just be
+              grading the end of these essays yourself.
+            </p>
+          )}
+        </fieldset>
+      )}
 
       <fieldset className="criteria">
         <legend>Criteria</legend>

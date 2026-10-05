@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { MAX_CONTENT_LENGTH, submissionsApi } from "../api/submissions";
+import { checkLength, describeRange, hasWordLimit } from "../grading/wordCount";
 
 export default function SubmitWork() {
   const { rubricId } = useParams();
@@ -54,6 +55,12 @@ export default function SubmitWork() {
       setContentError(`Your answer is ${content.length.toLocaleString()} characters; the limit is ${MAX_CONTENT_LENGTH.toLocaleString()}.`);
       return;
     }
+    // Same rule the server enforces, so the answer arrives before the request.
+    const { message } = checkLength(content, rubric);
+    if (message) {
+      setContentError(message);
+      return;
+    }
 
     setContentError(null);
     setBusy(true);
@@ -80,6 +87,11 @@ export default function SubmitWork() {
   if (!rubric) return <p className="page muted">Loading…</p>;
 
   const isCode = rubric.type === "code";
+  const limited = hasWordLimit(rubric);
+  const length = checkLength(content, rubric);
+  // Only complain about "too short" once they have started writing: an empty
+  // box is not a mistake yet.
+  const outOfRange = length.state === "long" || (length.state === "short" && content.trim() !== "");
 
   return (
     <div className="page">
@@ -90,6 +102,11 @@ export default function SubmitWork() {
       {rubric.description && <p>{rubric.description}</p>}
 
       <div className="card">
+        {limited && (
+          <p className="submission-range">
+            <strong>Length:</strong> {describeRange(rubric.min_words, rubric.max_words)}.
+          </p>
+        )}
         <p className="muted">You will be marked on {rubric.total_points} points across:</p>
         <ul className="criteria-summary">
           {rubric.criteria.map((criterion) => (
@@ -142,7 +159,7 @@ export default function SubmitWork() {
           autoCorrect={isCode ? "off" : undefined}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          aria-invalid={Boolean(contentError)}
+          aria-invalid={Boolean(contentError) || outOfRange}
           aria-describedby={[isCode ? "code-guide" : null, contentError ? "content-error" : null].filter(Boolean).join(" ") || undefined}
         />
         {contentError && (
@@ -151,14 +168,25 @@ export default function SubmitWork() {
           </p>
         )}
         <p className="hint">
+          {limited ? (
+            <>
+              <span className={`word-count word-count--${length.state}`}>
+                {length.words.toLocaleString()} {length.words === 1 ? "word" : "words"}
+              </span>
+              {" · "}
+              {describeRange(rubric.min_words, rubric.max_words)}
+              {" · "}
+            </>
+          ) : null}
           {content.length.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()} characters
         </p>
         <p className="hint">You can only submit once for this assignment.</p>
 
         <div className="row">
-          <button type="submit" disabled={busy}>
+          <button type="submit" disabled={busy || outOfRange}>
             {busy ? "Submitting…" : "Submit work"}
           </button>
+          {outOfRange && <span className="muted">{length.message}</span>}
         </div>
       </form>
     </div>
