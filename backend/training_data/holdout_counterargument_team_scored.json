@@ -1,0 +1,74 @@
+[
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "While some argue that regulation could be abused by those in power, requiring transparency about data practices specifically avoids that risk, since transparency rules do not give the government control over speech.",
+    "score": 5,
+    "essay_id": 1
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "Critics worry that banning AI tools is unenforceable, which is true, but a policy that only restricts final-draft writing rather than all use sidesteps that problem entirely.",
+    "score": 5,
+    "essay_id": 2
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "Some people think social media shouldn't be regulated. That's a fair point but I still think it should be regulated.",
+    "score": 3,
+    "essay_id": 3
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "There are other opinions about this topic but I believe social media should be regulated.",
+    "score": 2,
+    "essay_id": 4
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "Social media is used by millions of people every day for communication and entertainment.",
+    "score": 0,
+    "essay_id": 5
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "Opponents claim AI detection tools are unreliable, and that's true, so schools should rely on redesigned assignments rather than detection alone.",
+    "score": 4,
+    "essay_id": 6
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "Governments should regulate social media because companies don't fix problems until forced to.",
+    "score": 1,
+    "essay_id": 7
+  },
+  {
+    "rubric": "Rubric conditioning (zero-shot)",
+    "criterion": "Counterargument",
+    "criterion_description": "Does the essay acknowledge an opposing viewpoint and respond to it?",
+    "max_points": 5,
+    "text": "Some say strict regulation could stifle innovation in the tech industry, but requiring transparency about algorithms specifically targets harm without restricting what companies can build.",
+    "score": 5,
+    "essay_id": 8
+  }
+]
