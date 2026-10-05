@@ -26,8 +26,10 @@ class Submission(db.Model):
     __table_args__ = (
         db.CheckConstraint("status in ('submitted', 'ai_graded', 'grading_failed', 'approved')",
                             name="ck_submissions_status"),
-        # one submission per student per rubric -- resubmission would need this dropped
-        # plus an attempt-number column
+        # One row per student per rubric. This is the resubmission model, not a
+        # bar on it: resubmitting overwrites this row's content and re-grades
+        # it, so only the latest attempt is kept. Keeping every attempt would
+        # mean dropping this and adding an attempt number.
         db.UniqueConstraint("rubric_id", "student_id", name="uq_submission_per_student_per_rubric"),
     )
 

@@ -115,9 +115,35 @@ def create_submission():
     if too_long_or_short:
         return jsonify(detail=too_long_or_short), 422
 
+    student_id = int(g.current_user["sub"])
+    existing = (db.session.query(Submission)
+                .filter_by(rubric_id=rubric_id, student_id=student_id).first())
+
+    if existing:
+        # Resubmission overwrites in place rather than keeping every attempt:
+        # one row per student per rubric, which is what the unique constraint
+        # already says. The deadline was checked above, so the only thing that
+        # can still close this off is a teacher having released a grade.
+        if existing.status == "approved":
+            return jsonify(detail="This has already been graded by your teacher"), 409
+
+        existing.content = content
+        existing.status = "submitted"
+        # Everything derived from the old text is now wrong. Clearing it before
+        # re-grading means a failure leaves no stale score attached to text that
+        # no longer exists.
+        existing.ai_summary = None
+        existing.final_summary = None
+        for grade in list(existing.grades):
+            db.session.delete(grade)
+        db.session.commit()
+
+        _auto_grade(existing, rubric)
+        return jsonify(_submission_to_dict(existing, for_teacher=False)), 200
+
     submission = Submission(
         rubric_id=rubric_id,
-        student_id=int(g.current_user["sub"]),
+        student_id=student_id,
         content=content,
         status="submitted",
     )
@@ -125,8 +151,10 @@ def create_submission():
     try:
         db.session.commit()
     except IntegrityError:
+        # Two submissions racing: the loser re-reads and takes the overwrite
+        # path next time rather than losing the student's work to a 409.
         db.session.rollback()
-        return jsonify(detail="You have already submitted for this rubric"), 409
+        return jsonify(detail="That submission collided with another; try again"), 409
 
     _auto_grade(submission, rubric)
 

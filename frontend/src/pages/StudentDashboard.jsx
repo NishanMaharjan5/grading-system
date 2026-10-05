@@ -90,7 +90,16 @@ export default function StudentDashboard() {
 
                 <div className="row">
                   {submission ? (
-                    <Link to={`/student/submissions/${submission.id}`} className="button button--secondary">View your submission</Link>
+                    <>
+                      <Link to={`/student/submissions/${submission.id}`} className="button button--secondary">
+                        View your submission
+                      </Link>
+                      {submission.status !== "approved" && !isPastDue(rubric) && (
+                        <Link to={`/student/submit/${rubric.id}`} className="button button--secondary">
+                          Edit and resubmit
+                        </Link>
+                      )}
+                    </>
                   ) : isPastDue(rubric) ? (
                     <span className="muted">This assignment closed before you submitted anything.</span>
                   ) : (

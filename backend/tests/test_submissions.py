@@ -17,12 +17,25 @@ class TestCreate:
         )
         assert response.status_code == 403
 
-    def test_only_one_submission_per_student_per_rubric(self, client, auth, student, rubric, submit):
-        submit(student)
+    def test_submitting_again_overwrites_rather_than_adding_a_row(
+            self, client, auth, student, rubric, submit):
+        """CHANGED when resubmission was added. This used to assert 409: a
+        student had one attempt, for ever, and a typo was unfixable.
+
+        The one-row-per-student-per-rubric rule has not moved -- it is still a
+        unique constraint, and still asserted here. What changed is that a
+        second POST now overwrites that row instead of being refused, so long
+        as no teacher has released a grade (tested in test_resubmission.py).
+        """
+        first = submit(student)
         response = client.post(
             "/api/submissions", json={"rubric_id": rubric["id"], "content": "again"}, headers=auth(student)
         )
-        assert response.status_code == 409
+        assert response.status_code == 200
+        assert response.get_json()["id"] == first, "the same row, overwritten"
+
+        mine = client.get("/api/submissions", headers=auth(student)).get_json()
+        assert len(mine) == 1 and mine[0]["content"] == "again"
 
     def test_two_students_can_each_submit(self, submit, student, other_student):
         assert submit(student) != submit(other_student)

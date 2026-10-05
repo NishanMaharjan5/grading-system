@@ -18,21 +18,28 @@ export default function SubmitWork() {
   const [contentError, setContentError] = useState(null);
   const [formError, setFormError] = useState(null);
   const [busy, setBusy] = useState(false);
+  // The submission being edited, when this student has already sent one in.
+  const [previous, setPrevious] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    // If this rubric has already been submitted to, there is nothing to do here
-    // -- go to the existing submission rather than letting the form 409.
+    // An existing submission is loaded for editing rather than redirected away
+    // from: a student may resubmit until a teacher releases a grade. Only an
+    // approved one is read-only, and that goes to the view page.
     Promise.all([
       rubricsApi.get(id, { signal: controller.signal }),
       submissionsApi.list({ signal: controller.signal }),
     ])
       .then(([loaded, submissions]) => {
         const existing = submissions.find((s) => s.rubric_id === id);
-        if (existing) {
+        if (existing?.status === "approved") {
           navigate(`/student/submissions/${existing.id}`, { replace: true });
           return;
+        }
+        if (existing) {
+          setPrevious(existing);
+          setContent(existing.content);
         }
         setRubric(loaded);
       })
@@ -74,7 +81,8 @@ export default function SubmitWork() {
       navigate(`/student/submissions/${created.id}`, { replace: true, state: { justSubmitted: true } });
     } catch (cause) {
       if (cause instanceof ApiError && cause.status === 409) {
-        // Submitted from somewhere else between loading this page and now.
+        // A teacher released a grade between loading this page and submitting,
+        // so it is read-only now.
         const existing = (await submissionsApi.list().catch(() => [])).find((s) => s.rubric_id === id);
         if (existing) {
           navigate(`/student/submissions/${existing.id}`, { replace: true });
@@ -106,6 +114,12 @@ export default function SubmitWork() {
         <Link to="/student">← All assignments</Link>
       </p>
       <h1>{rubric.title}</h1>
+      {previous && !closed && (
+        <p className="notice" role="status">
+          You have already submitted this. Editing and resubmitting replaces what you sent, and it
+          will be graded again. You can keep changing it until your teacher releases a grade.
+        </p>
+      )}
       {rubric.description && <p>{rubric.description}</p>}
 
       <div className="card">
@@ -162,7 +176,9 @@ export default function SubmitWork() {
           </div>
         )}
 
-        <label htmlFor="content">{isCode ? "Your Python program" : "Your answer"}</label>
+        <label htmlFor="content">
+          {previous ? (isCode ? "Your Python program" : "Your answer") : (isCode ? "Your Python program" : "Your answer")}
+        </label>
         <textarea
           id="content"
           rows={isCode ? 18 : 14}
@@ -193,11 +209,17 @@ export default function SubmitWork() {
           ) : null}
           {content.length.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()} characters
         </p>
-        <p className="hint">You can only submit once for this assignment.</p>
+        <p className="hint">
+          {closed
+            ? "This assignment is closed."
+            : "You can keep resubmitting until your teacher releases a grade."}
+        </p>
 
         <div className="row">
           <button type="submit" disabled={busy || blocked}>
-            {busy ? "Submitting…" : "Submit work"}
+            {busy
+              ? (previous ? "Resubmitting…" : "Submitting…")
+              : (previous ? "Edit and resubmit" : "Submit work")}
           </button>
           {closed ? (
             <span className="muted">{CLOSED_MESSAGE}</span>
