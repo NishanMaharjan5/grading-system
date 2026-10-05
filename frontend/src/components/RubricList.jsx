@@ -6,7 +6,7 @@
  * those buttons are disabled with the reason stated -- offering a button that
  * is guaranteed to fail is worse than not offering it.
  */
-export default function RubricList({ rubrics, onEdit, onDelete, busyId }) {
+export default function RubricList({ rubrics, onEdit, onDelete, onExport, exportingId, busyId }) {
   if (rubrics.length === 0) {
     return <p className="muted">No rubrics yet. Create one to get started.</p>;
   }
@@ -49,6 +49,17 @@ export default function RubricList({ rubrics, onEdit, onDelete, busyId }) {
               title={rubric.locked ? "Cannot edit: work has already been submitted" : "Edit this rubric"}
             >
               Edit
+            </button>
+            <button
+              type="button"
+              className="button--secondary"
+              onClick={() => onExport(rubric)}
+              disabled={exportingId === rubric.id}
+              title={rubric.submission_count
+                ? "Download every submission's grades as a CSV"
+                : "No submissions yet — the file will have just its header row"}
+            >
+              {exportingId === rubric.id ? "Preparing…" : "Export grades"}
             </button>
             <button
               type="button"

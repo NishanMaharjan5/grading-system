@@ -1,6 +1,8 @@
-import { api } from "./client";
+import { api, download } from "./client";
 
 export const rubricsApi = {
+  // The gradebook for one rubric, downloaded as a CSV file.
+  exportCsv: (id) => download(`/api/rubrics/${id}/export`),
   list: (options) => api.get("/api/rubrics", options),
   get: (id, options) => api.get(`/api/rubrics/${id}`, options),
   create: (payload) => api.post("/api/rubrics", payload),

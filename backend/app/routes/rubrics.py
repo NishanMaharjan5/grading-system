@@ -1,9 +1,14 @@
-from flask import Blueprint, g, jsonify, request
+import csv
+import io
+from datetime import datetime, timezone
+
+from flask import Blueprint, Response, g, jsonify, request
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import Rubric, RubricCriterion, Submission, TestCase
+from app.models import GradeRevision, Rubric, RubricCriterion, Submission, TestCase
 from app.security import login_required, require_role
 from app.deadlines import parse_due_date
 from app.word_limits import validate_limits
@@ -316,3 +321,77 @@ def delete_rubric(rubric_id):
         return jsonify(detail="This rubric has submissions and cannot be deleted"), 409
 
     return "", 204
+
+
+@rubrics_bp.get("/<int:rubric_id>/export")
+@require_role("teacher")
+def export_rubric_csv(rubric_id):
+    """The gradebook for one rubric, as CSV.
+
+    One row per submission, with a score column per criterion in the rubric's
+    own order, so the file reads like a mark sheet. A rubric with no
+    submissions still returns a file with its header row -- an empty gradebook
+    is a real answer, not an error, and a teacher who downloads it should get
+    a spreadsheet they can start from rather than a 404.
+
+    Only ungraded cells are blank: a submission that has not been approved has
+    no final score to report, and saying so with an empty cell is better than
+    inventing a zero.
+    """
+    rubric = db.session.get(Rubric, rubric_id)
+    if not rubric:
+        return jsonify(detail="Rubric not found"), 404
+    if rubric.created_by != int(g.current_user["sub"]):
+        return jsonify(detail="You can only export rubrics you created"), 403
+
+    criteria = sorted(rubric.criteria, key=lambda c: c.position)
+    submissions = (db.session.query(Submission)
+                   .options(joinedload(Submission.student), joinedload(Submission.grades))
+                   .filter(Submission.rubric_id == rubric.id)
+                   .order_by(Submission.id).all())
+
+    revised_ids = {
+        row[0] for row in db.session.query(GradeRevision.submission_id)
+        .filter(GradeRevision.submission_id.in_([s.id for s in submissions] or [0])).distinct()
+    }
+
+    header = ["student_name", "student_email", "status"]
+    for criterion in criteria:
+        header += [f"{criterion.name} (/{criterion.max_points:g})", f"{criterion.name} ai_accepted"]
+    header += ["final_total", "total_possible", "approved_at", "revised"]
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(header)
+
+    for submission in submissions:
+        grades = {gr.criterion_id: gr for gr in submission.grades}
+        row = [submission.student.name, submission.student.email, submission.status]
+        approved_at = None
+        for criterion in criteria:
+            grade = grades.get(criterion.id)
+            score = grade.final_score if grade else None
+            row.append("" if score is None else f"{float(score):g}")
+            # Blank rather than False when the engine never scored it: "the
+            # teacher did not take the AI's number" and "there was no number"
+            # are different facts.
+            row.append("" if grade is None or grade.ai_accepted is None else str(grade.ai_accepted).lower())
+            if grade is not None and grade.approved_at is not None:
+                approved_at = max(approved_at or grade.approved_at, grade.approved_at)
+        total = submission.final_total
+        row += [
+            "" if total is None else f"{float(total):g}",
+            f"{float(rubric.total_points):g}",
+            approved_at.isoformat() if approved_at else "",
+            "yes" if submission.id in revised_ids else "no",
+        ]
+        writer.writerow(row)
+
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    safe_title = "".join(ch if ch.isalnum() or ch in "-_ " else "-" for ch in rubric.title).strip() or "rubric"
+    filename = f"{safe_title} gradebook {stamp}.csv"
+    return Response(
+        buffer.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

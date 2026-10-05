@@ -11,6 +11,7 @@ export default function TeacherDashboard() {
   const [actionError, setActionError] = useState(null);
   const [editing, setEditing] = useState(null); // null = closed, "new" = create, object = edit
   const [deletingId, setDeletingId] = useState(null);
+  const [exportingId, setExportingId] = useState(null);
 
   const load = useCallback(async (signal) => {
     try {
@@ -58,6 +59,22 @@ export default function TeacherDashboard() {
     }
   }
 
+  async function handleExport(rubric) {
+    setActionError(null);
+    setExportingId(rubric.id);
+    try {
+      await rubricsApi.exportCsv(rubric.id);
+    } catch (cause) {
+      setActionError(
+        cause instanceof ApiError
+          ? `Could not export ${rubric.title}: ${cause.message}`
+          : `Could not export ${rubric.title}.`,
+      );
+    } finally {
+      setExportingId(null);
+    }
+  }
+
   return (
     <div className="page">
       <div className="page__head">
@@ -88,7 +105,16 @@ export default function TeacherDashboard() {
       {rubrics === null && !loadError ? (
         <p className="muted">Loading…</p>
       ) : (
-        rubrics && <RubricList rubrics={rubrics} onEdit={setEditing} onDelete={handleDelete} busyId={deletingId} />
+        rubrics && (
+          <RubricList
+            rubrics={rubrics}
+            onEdit={setEditing}
+            onDelete={handleDelete}
+            onExport={handleExport}
+            busyId={deletingId}
+            exportingId={exportingId}
+          />
+        )
       )}
     </div>
   );
