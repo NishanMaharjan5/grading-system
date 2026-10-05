@@ -32,7 +32,10 @@ export default function Layout() {
               <NavLink to="/teacher/review">Review queue</NavLink>
             </>
           ) : (
-            <NavLink to="/student" end>Assignments</NavLink>
+            <>
+              <NavLink to="/student" end>Assignments</NavLink>
+              <NavLink to="/student/submissions">Your submissions</NavLink>
+            </>
           )}
         </nav>
         <span className="shell__spacer" />

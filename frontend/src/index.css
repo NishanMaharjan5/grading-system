@@ -845,6 +845,15 @@ h1 + .student-line {
   overflow-x: auto;
 }
 
+/* ----------------------------------------------------- student history */
+
+.history__grade {
+  font-size: var(--text-lg);
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  margin: var(--space-2) 0 0;
+}
+
 /* -------------------------------------------------- revision history */
 
 .revisions {

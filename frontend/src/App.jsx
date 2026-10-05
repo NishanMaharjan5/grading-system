@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import ReviewQueue from "./pages/ReviewQueue";
 import ReviewSubmission from "./pages/ReviewSubmission";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudentHistory from "./pages/StudentHistory";
 import SubmissionView from "./pages/SubmissionView";
 import SubmitWork from "./pages/SubmitWork";
 import TeacherDashboard from "./pages/TeacherDashboard";
@@ -54,6 +55,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute role="student">
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/submissions"
+          element={
+            <ProtectedRoute role="student">
+              <StudentHistory />
             </ProtectedRoute>
           }
         />
