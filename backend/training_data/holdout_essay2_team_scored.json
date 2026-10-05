@@ -1,0 +1,114 @@
+[
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Schools should allow AI tools for early-stage brainstorming but require all final drafts to be written independently, because the Stanford research on unassisted follow-up testing suggests unrestricted use measurably weakens writing skill over time. A policy that separates planning from execution captures the benefit without the cost.",
+    "score": 5,
+    "essay_id": 1
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Schools should allow AI tools for early-stage brainstorming but require all final drafts to be written independently, because the Stanford research on unassisted follow-up testing suggests unrestricted use measurably weakens writing skill over time. A policy that separates planning from execution captures the benefit without the cost.",
+    "score": 8,
+    "essay_id": 1
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "AI tools should not be banned, because enforcement is nearly impossible and bans tend to punish honest students while doing little to stop determined ones. Schools have tried similar bans on other technology before with mixed results.",
+    "score": 5,
+    "essay_id": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "AI tools should not be banned, because enforcement is nearly impossible and bans tend to punish honest students while doing little to stop determined ones. Schools have tried similar bans on other technology before with mixed results.",
+    "score": 5,
+    "essay_id": 2
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "There are a lot of opinions about AI in schools. Some people like it and some people don't. It's a complicated issue with no easy answer.",
+    "score": 1,
+    "essay_id": 3
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "There are a lot of opinions about AI in schools. Some people like it and some people don't. It's a complicated issue with no easy answer.",
+    "score": 0,
+    "essay_id": 3
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "I used ChatGPT to help me study for my chemistry test last week. It explained the concepts pretty well and I got a good grade. I'll probably use it again.",
+    "score": 0,
+    "essay_id": 4
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "I used ChatGPT to help me study for my chemistry test last week. It explained the concepts pretty well and I got a good grade. I'll probably use it again.",
+    "score": 0,
+    "essay_id": 4
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Schools should require AI-detection checks only as a trigger for a conversation with the student, not as automatic proof of cheating, since Turnitin's own detection data shows a real false-positive rate. Treating a flag as a starting point rather than a verdict protects honest students.",
+    "score": 4,
+    "essay_id": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Schools should require AI-detection checks only as a trigger for a conversation with the student, not as automatic proof of cheating, since Turnitin's own detection data shows a real false-positive rate. Treating a flag as a starting point rather than a verdict protects honest students.",
+    "score": 8,
+    "essay_id": 5
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "AI is a big problem in schools right now and teachers are struggling to deal with it. Something needs to change soon.",
+    "score": 3,
+    "essay_id": 6
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "AI is a big problem in schools right now and teachers are struggling to deal with it. Something needs to change soon.",
+    "score": 2,
+    "essay_id": 6
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Sciences Po banned ChatGPT in 2023. Turnitin released detection data the same year. Several surveys were conducted about student AI use around that time.",
+    "score": 1,
+    "essay_id": 7
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Sciences Po banned ChatGPT in 2023. Turnitin released detection data the same year. Several surveys were conducted about student AI use around that time.",
+    "score": 5,
+    "essay_id": 7
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Thesis",
+    "text": "Teachers should move more assessments back into the classroom, since several reported cases show in-class drafting reduces opportunities for undisclosed AI use. This shifts the solution toward assignment design rather than detection.",
+    "score": 4,
+    "essay_id": 8
+  },
+  {
+    "rubric": "Essay 2",
+    "criterion": "Evidence",
+    "text": "Teachers should move more assessments back into the classroom, since several reported cases show in-class drafting reduces opportunities for undisclosed AI use. This shifts the solution toward assignment design rather than detection.",
+    "score": 5,
+    "essay_id": 8
+  }
+]
