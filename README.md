@@ -8,6 +8,31 @@ grade.
 **Stack:** Flask + SQLAlchemy + PostgreSQL, React/Vite, JWT auth with
 student/teacher roles.
 
+## What the app does
+
+A teacher writes a rubric, students submit against it, the engine drafts a
+score per criterion, and the teacher reviews before anything reaches the
+student. Around that core:
+
+- **Deadlines.** A rubric can carry a due date. Students see it and how far
+  off it is, and it turns to a "Closed" treatment once it passes. After the
+  deadline the app stops accepting work, in the form and at the API. A rubric
+  with no due date never blocks anything.
+- **Word limits.** Optional min/max words per text rubric, defaulting to 200
+  — under the point where the embedder stops reading. The submission form
+  counts as you type and refuses to send work outside the range.
+- **Resubmission.** A student can replace their work until a teacher releases
+  a grade. Resubmitting overwrites the previous attempt and re-grades it; an
+  approved submission is read-only.
+- **Grade revision with an audit trail.** A released grade can be corrected.
+  Every change records what the score was, what it became, who made it and
+  when, and the teacher sees that history on the submission.
+- **Gradebook export.** A CSV per rubric: every student, their score per
+  criterion, the total, whether the AI's suggestion was accepted, when it was
+  approved and whether it was later revised.
+- **Student history.** One page listing everything a student has submitted,
+  with its status and grade, across every assignment.
+
 ## How grading works
 
 Text submissions are scored by a **Ridge regression per rubric criterion**,
@@ -261,7 +286,8 @@ backend/
   app/
     grading/     embedder, features, model store, engine, feedback templates,
                  code_runner + _sandbox_runner (the code path)
-    models/      User, Rubric, RubricCriterion, TestCase, Submission, Grade
+    models/      User, Rubric, RubricCriterion, TestCase, Submission, Grade,
+                 GradeRevision (the audit trail for corrected grades)
     routes/      auth, rubrics, submissions (incl. the teacher review flow)
   SANDBOX.md     what the code sandbox does and does not contain
   migrations/    Alembic; see migrations/README for the workflow
@@ -281,6 +307,12 @@ frontend/        React + Vite
 ```
 
 ## Known limitations
+
+*Resolved since the first write-up: approval used to be terminal — a released
+grade could not be corrected, and the entry here said that would need "a
+revise endpoint with an audit trail". Both now exist; see
+[Grade revision](#what-the-app-does) above and `grade_revisions`.*
+
 
 - **The shipped grader is not the best approach measured.** It uses frozen
   embeddings, and on the public benchmark it does no better than a word count
@@ -359,9 +391,6 @@ frontend/        React + Vite
   generalisation against the team's own judgment on one question, not
   agreement with real teachers, and says nothing about a different prompt.
   QWK on 12 essays is indicative at best.
-- **Approval is final.** Re-approving returns 409 and there is no correction
-  path for a mistaken approval; that would need a revise endpoint with an
-  audit trail.
 - **Code grading is macOS-only** and relies on `sandbox-exec`, an Apple API
   that is deprecated but functional. On any other platform, or if a future
   macOS removes it, submissions go to `grading_failed` for manual grading
