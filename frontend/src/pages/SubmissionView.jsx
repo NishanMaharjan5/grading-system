@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { statusCopy, submissionsApi } from "../api/submissions";
+import CodeBlock from "../components/CodeBlock";
 import { criterionFeedbackForDisplay, summaryForDisplay } from "../grading/feedbackText";
 
 /**
@@ -113,7 +114,7 @@ export default function SubmissionView() {
       <details className="card">
         <summary>What you submitted</summary>
         {isCode ? (
-          <pre className="code">{submission.content}</pre>
+          <CodeBlock code={submission.content} className="code" />
         ) : (
           <p className="submitted-content">{submission.content}</p>
         )}

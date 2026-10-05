@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { MAX_CONTENT_LENGTH, submissionsApi } from "../api/submissions";
+import CodeEditor from "../components/CodeEditor";
 import { checkLength, describeRange, hasWordLimit } from "../grading/wordCount";
 import { CLOSED_MESSAGE, formatDue, hasDeadline, isPastDue, relativeToDeadline } from "../grading/deadlines";
 
@@ -179,18 +180,26 @@ export default function SubmitWork() {
         <label htmlFor="content">
           {previous ? (isCode ? "Your Python program" : "Your answer") : (isCode ? "Your Python program" : "Your answer")}
         </label>
-        <textarea
-          id="content"
-          rows={isCode ? 18 : 14}
-          className={isCode ? "code-input" : undefined}
-          spellCheck={isCode ? false : undefined}
-          autoCapitalize={isCode ? "off" : undefined}
-          autoCorrect={isCode ? "off" : undefined}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          aria-invalid={Boolean(contentError) || outOfRange}
-          aria-describedby={[isCode ? "code-guide" : null, contentError ? "content-error" : null].filter(Boolean).join(" ") || undefined}
-        />
+        {isCode ? (
+          <CodeEditor
+            id="content"
+            rows={18}
+            className="code-input"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            aria-invalid={Boolean(contentError) || outOfRange}
+            aria-describedby={["code-guide", contentError ? "content-error" : null].filter(Boolean).join(" ") || undefined}
+          />
+        ) : (
+          <textarea
+            id="content"
+            rows={14}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            aria-invalid={Boolean(contentError) || outOfRange}
+            aria-describedby={contentError ? "content-error" : undefined}
+          />
+        )}
         {contentError && (
           <p className="field-error" id="content-error">
             {contentError}

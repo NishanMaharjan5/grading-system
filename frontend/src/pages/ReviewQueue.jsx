@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { submissionsApi } from "../api/submissions";
+import CodeBlock from "../components/CodeBlock";
 
 /**
  * Work waiting on this teacher.
@@ -99,7 +100,7 @@ export default function ReviewQueue() {
                 </p>
 
                 {rubric?.type === "code" ? (
-                  <pre className="code code--preview">{codePreview(submission.content)}</pre>
+                  <CodeBlock code={codePreview(submission.content)} className="code code--preview" />
                 ) : (
                   <p className="submitted-preview">
                     {submission.content.slice(0, 180)}

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { reviewErrorsFromDetail, submissionsApi } from "../api/submissions";
+import CodeBlock from "../components/CodeBlock";
 import { refreshShownErrors, sameErrors } from "../forms/errors";
 import { criterionFeedbackForDisplay } from "../grading/feedbackText";
 
@@ -205,7 +206,7 @@ export default function ReviewSubmission() {
       <details className="card" open>
         <summary>The student's work</summary>
         {isCode ? (
-          <pre className="code">{submission.content}</pre>
+          <CodeBlock code={submission.content} className="code" />
         ) : (
           <p className="submitted-content">{submission.content}</p>
         )}

@@ -53,6 +53,17 @@
      genuinely are errors */
   --danger-fg: #a4262c;   --danger-bg: #fdeceb;   --danger-line: #e8a9a6;
 
+  /* --- syntax highlighting. A small palette of its own, not reused from the
+         primary or semantic colours above: the design brief for --primary is
+         "actions, focus and the AI's own voice, and nowhere else", and status
+         colours have their own meaning that code shouldn't borrow. Each colour
+         is checked at >=4.5:1 against both --surface and --surface-sunken. --- */
+  --code-keyword:  #6b3fa0;  /* def, if, return, import -- muted violet */
+  --code-string:   #a8461f;  /* "quoted text" -- warm terracotta */
+  --code-comment:  #6a6355;  /* # remarks -- quiet, italic, still legible */
+  --code-number:   #1f6f6f;  /* numeric literals -- muted teal */
+  --code-function: #8a5e12;  /* function names, built-ins -- ochre */
+
   /* --- type --- */
   --font-display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -115,6 +126,12 @@
     --done-fg:    #8ed6a8;  --done-bg:    #14301f;  --done-line:    #2a5c3d;
     --neutral-fg: #b5aea5;  --neutral-bg: #2c2926;  --neutral-line: var(--line-strong);
     --danger-fg:  #f0918f;  --danger-bg:  #3a1d1d;  --danger-line:  #6b3230;
+
+    --code-keyword:  #c7a9f0;
+    --code-string:   #f0a479;
+    --code-comment:  #a39b8c;
+    --code-number:   #7fd4cf;
+    --code-function: #e0b45c;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.25);
     --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.35);
@@ -976,7 +993,7 @@ h1 + .student-line {
 
 /* submitted programs, previews and test feedback keep their line breaks and
    indentation, in a monospace face */
-.code,
+.code-block,
 .code-input,
 .feedback--code,
 code {
@@ -984,31 +1001,142 @@ code {
   font-size: var(--text-sm);
 }
 
-.code {
+/* CodeBlock: a read-only syntax-highlighted display with a line-number
+   gutter. ".code" / ".code--preview" are the classNames the component is
+   called with -- unchanged from the plain <pre> this replaced, so they still
+   carry the visual box (background, border, the preview height cap) while
+   .code-block itself only supplies structure (the gutter + scrolling pane). */
+.code-block {
+  display: flex;
+  align-items: stretch;
   margin: var(--space-2) 0 0;
-  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  overflow: hidden; /* clips the gutter and code to the rounded corners */
+}
+
+.code-block.code {
   background: var(--surface-sunken);
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  white-space: pre;
-  overflow-x: auto;
-  tab-size: 4;
-  line-height: 1.5;
 }
 
-.code--preview {
+.code-block.code--preview {
   max-height: 10rem;
+  overflow-y: auto; /* the gutter scrolls with the code: one flex container */
 }
 
-.code-input {
+.code-block__gutter {
+  flex: none;
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  color: var(--ink-muted);
+  line-height: 1.5; /* must match .code-block__code's, or the numbers drift */
+  text-align: right;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.code-block__gutter span {
+  display: block;
+}
+
+.code-block__code {
+  flex: 1;
+  min-width: 0; /* lets this flex item's own overflow-x scroll instead of
+                   the row refusing to shrink below the code's full width */
+  margin: 0;
+  padding: var(--space-3);
+  overflow-x: auto;
+  white-space: pre;
   tab-size: 4;
   line-height: 1.5;
+  color: var(--ink);
+}
+
+/* CodeEditor: a live-editing textarea with the same highlighting behind it.
+   Both layers share one box -- identical font, padding and border width --
+   stacked with position: absolute, so the glyphs in the <pre> sit exactly
+   under the invisible caret in the <textarea> on top of it. */
+.code-editor {
+  position: relative;
+}
+
+.code-editor__highlight,
+.code-editor__textarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.code-editor__highlight {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  border: 1px solid transparent; /* reserves the same 1px the real border
+                                     uses, so the two boxes stay the same size */
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.code-editor__highlight code {
+  padding: 0;
+  background: none; /* overrides the bare `code { ... }` chip styling below */
+}
+
+.code-editor__textarea {
+  position: relative; /* stays in flow -- the wrapper's height follows this
+                          element, and the <pre> above stretches to match it */
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ink);
+  resize: none; /* a resized textarea with no matching resize on the <pre>
+                   behind it would fall out of sync immediately */
+}
+
+.code-editor__textarea::selection {
+  /* Translucent, not the solid --primary-tint used elsewhere: this textarea's
+     own text is transparent, so a solid selection background would paint
+     over and completely hide the coloured glyphs in the highlighted layer
+     underneath. A tint lets them show through, selected. */
+  background: color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
 code {
   padding: 0.05rem var(--space-1);
   background: var(--surface-sunken);
   border-radius: var(--radius-sm);
+}
+
+/* Python syntax colours. Not scoped to a container class: highlight.js is
+   only ever used for the two code components above, so there is nothing
+   else on the page a bare .hljs-* selector could collide with. */
+.hljs-keyword,
+.hljs-literal {
+  color: var(--code-keyword);
+}
+
+.hljs-string {
+  color: var(--code-string);
+}
+
+.hljs-comment {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+.hljs-number {
+  color: var(--code-number);
+}
+
+.hljs-title,
+.hljs-built_in {
+  color: var(--code-function);
 }
 
 .code-guide {
