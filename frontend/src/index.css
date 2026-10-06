@@ -104,41 +104,48 @@
 }
 
 /* Dark mode is token-level only: the components above never change. Kept to
-   the same warm family so it reads as dimmed paper rather than a cold slab. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #191816;
-    --surface: #221f1d;
-    --surface-sunken: #171614;
-    --ink: #f0ece5;
-    --ink-muted: #a8a199;
-    --line: #34302b;
-    --line-strong: #47423c;
+   the same warm family so it reads as dimmed paper rather than a cold slab.
 
-    --primary: #a9a4f5;
-    --primary-hover: #bdb9f8;
-    --primary-active: #cecbfa;
-    --primary-tint: #252340;
-    --primary-on: #17151f;
+   Keyed on an attribute rather than a prefers-color-scheme query, because the
+   theme can now be chosen in the header as well as inherited from the OS. The
+   two would otherwise need two identical copies of this palette -- one in the
+   media query, one for the explicit choice that has to beat it -- and keeping
+   two copies in step is exactly what the token system exists to avoid. So the
+   OS preference is resolved to the same attribute instead: src/theme/theme.js
+   does it for the running app, and an inline script in index.html does it
+   before the first paint. */
+:root[data-theme="dark"] {
+  --paper: #191816;
+  --surface: #221f1d;
+  --surface-sunken: #171614;
+  --ink: #f0ece5;
+  --ink-muted: #a8a199;
+  --line: #34302b;
+  --line-strong: #47423c;
 
-    --pending-fg: #f0c26a;  --pending-bg: #3a2e14;  --pending-line: #6b5522;
-    --ai-fg:      #a8c0f5;  --ai-bg:      #1e2740;  --ai-line:      #35477a;
-    --done-fg:    #8ed6a8;  --done-bg:    #14301f;  --done-line:    #2a5c3d;
-    --neutral-fg: #b5aea5;  --neutral-bg: #2c2926;  --neutral-line: var(--line-strong);
-    --danger-fg:  #f0918f;  --danger-bg:  #3a1d1d;  --danger-line:  #6b3230;
+  --primary: #a9a4f5;
+  --primary-hover: #bdb9f8;
+  --primary-active: #cecbfa;
+  --primary-tint: #252340;
+  --primary-on: #17151f;
 
-    --code-keyword:  #c7a9f0;
-    --code-string:   #f0a479;
-    --code-comment:  #a39b8c;
-    --code-number:   #7fd4cf;
-    --code-function: #e0b45c;
+  --pending-fg: #f0c26a;  --pending-bg: #3a2e14;  --pending-line: #6b5522;
+  --ai-fg:      #a8c0f5;  --ai-bg:      #1e2740;  --ai-line:      #35477a;
+  --done-fg:    #8ed6a8;  --done-bg:    #14301f;  --done-line:    #2a5c3d;
+  --neutral-fg: #b5aea5;  --neutral-bg: #2c2926;  --neutral-line: var(--line-strong);
+  --danger-fg:  #f0918f;  --danger-bg:  #3a1d1d;  --danger-line:  #6b3230;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.35);
-    --ring: 0 0 0 3px rgba(169, 164, 245, 0.32);
+  --code-keyword:  #c7a9f0;
+  --code-string:   #f0a479;
+  --code-comment:  #a39b8c;
+  --code-number:   #7fd4cf;
+  --code-function: #e0b45c;
 
-    color-scheme: dark;
-  }
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --ring: 0 0 0 3px rgba(169, 164, 245, 0.32);
+
+  color-scheme: dark;
 }
 
 * {
@@ -671,7 +678,7 @@ button:disabled {
 }
 
 .shell__nav a:hover {
-  background: var(--stone-150);
+  background: var(--neutral-bg);
   color: var(--ink);
 }
 
@@ -701,6 +708,53 @@ button:disabled {
 
 .shell__signout {
   flex-shrink: 0;
+}
+
+/* light/dark switch: an icon button, square and sized to sit level with the
+   text buttons beside it. Quiet until pointed at -- it is a preference, not
+   an action the page wants anyone to take. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.theme-toggle svg {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* :not(:disabled) is here for specificity, not for the state -- the toggle is
+   never disabled. The base button:hover:not(:disabled) carries one more
+   pseudo-class than a bare .theme-toggle:hover would, so without it the button
+   fills solid indigo on hover like a primary action. :active is overridden for
+   the same reason, nudge included. */
+.theme-toggle:hover:not(:disabled) {
+  background: var(--neutral-bg);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.theme-toggle:active:not(:disabled) {
+  background: var(--neutral-bg);
+  color: var(--ink);
+  transform: none;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
 }
 
 /* header: never wider than the screen. On a phone the nav takes its own row

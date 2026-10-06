@@ -4,8 +4,26 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f7f5f1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#191816" media="(prefers-color-scheme: dark)" />
+    <!-- Kept in step with the theme by src/theme/theme.js; the value here is
+         the light one, which is also the fallback if the script below fails. -->
+    <meta name="theme-color" content="#f7f5f1" />
+    <!-- The same resolve as src/theme/theme.js, repeated here because it has to
+         happen before the first paint and a module script is too late for that:
+         without it, a dark page flashes light paper on every load. Deliberately
+         inline and classic, not deferred. theme.js takes over once it runs. -->
+    <script>
+      try {
+        var stored = localStorage.getItem("grading-system:theme");
+      } catch (e) {
+        stored = null;
+      }
+      document.documentElement.dataset.theme =
+        stored === "light" || stored === "dark"
+          ? stored
+          : matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+    </script>
     <!-- Source Serif 4 sets the headings; body text uses the system face, so
          only the display weights are fetched. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
