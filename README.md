@@ -33,6 +33,19 @@ student. Around that core:
   approved and whether it was later revised.
 - **Student history.** One page listing everything a student has submitted,
   with its status and grade, across every assignment.
+- **Summary dashboard.** The proposal calls for "a summary dashboard that
+  lists the subjects students found difficult, who needs further assistance,
+  and so on" — distinct from the review queue and rubric list, which are
+  about individual submissions, not patterns across them. The teacher
+  dashboard answers both halves: a stat row (rubrics, pending reviews,
+  submissions this week, AI-acceptance rate) for the day-to-day state, and
+  below it, every criterion across the teacher's rubrics ranked by average
+  score — the weakest first, answering "difficult" — next to every student
+  averaging below 60% across their graded work, answering "needs further
+  assistance." Both are computed from data already on hand (released grades
+  only; an ai_graded submission awaiting review isn't counted as a result
+  yet) rather than a new tracking table, and degrade to an empty state for a
+  teacher with nothing graded yet.
 
 Once work has been submitted against a rubric, its **scoring freezes** —
 criteria, points and type cannot change, because a recorded grade would

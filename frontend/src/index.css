@@ -300,6 +300,108 @@ a:hover {
   color: var(--pending-fg);
 }
 
+/* ----------------------------------------------------- dashboard insights */
+
+/* The proposal's summary dashboard: which subjects were difficult, who needs
+   help. Two cards side by side on a wide screen, stacked on a narrow one --
+   same breakpoint and treatment as everything else that does that. */
+.insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.insight-card {
+  margin-bottom: 0;
+}
+
+.insight-card__title {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+.criterion-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.criterion-bar__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  margin-bottom: var(--space-1);
+}
+
+.criterion-bar__value {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* A track and a fill, not a chart library, for one number per row. */
+.criterion-bar__track {
+  height: 0.5rem;
+  background: var(--neutral-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.criterion-bar__fill {
+  height: 100%;
+  background: var(--ink-muted);
+  border-radius: var(--radius-pill);
+}
+
+/* The same amber as the pending-review stat tile -- "worth a look", not a red
+   verdict on the criterion or the students who sat it. */
+.criterion-bar__fill--low {
+  background: var(--pending-fg);
+}
+
+.criterion-bar__count {
+  display: block;
+  font-size: var(--text-xs);
+  margin-top: var(--space-1);
+}
+
+.insight-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+
+.insight-table th {
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-muted);
+  padding: 0 var(--space-2) var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.insight-table td {
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.insight-table tr:last-child td {
+  border-bottom: none;
+}
+
+.insight-table__email {
+  display: block;
+  font-size: var(--text-sm);
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -1292,6 +1394,10 @@ code {
 
   .shell__email {
     display: none;
+  }
+
+  .insights {
+    grid-template-columns: 1fr;
   }
 
   .page__head {

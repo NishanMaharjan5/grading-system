@@ -3,14 +3,17 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "../api/client";
 import { rubricsApi } from "../api/rubrics";
 import { submissionsApi } from "../api/submissions";
+import DashboardInsights from "../components/DashboardInsights";
 import DashboardStats from "../components/DashboardStats";
 import RubricForm from "../components/RubricForm";
 import RubricList from "../components/RubricList";
 import { computeDashboardStats } from "../grading/dashboardStats";
+import { computeStruggleInsights } from "../grading/dashboardInsights";
 
 export default function TeacherDashboard() {
   const [rubrics, setRubrics] = useState(null); // null = not loaded yet
   const [stats, setStats] = useState(null);
+  const [insights, setInsights] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [editing, setEditing] = useState(null); // null = closed, "new" = create, object = edit
@@ -30,6 +33,7 @@ export default function TeacherDashboard() {
       ]);
       setRubrics(rubricList);
       setStats(computeDashboardStats({ rubrics: rubricList, submissions, pending }));
+      setInsights(computeStruggleInsights({ rubrics: rubricList, submissions }));
       setLoadError(null);
     } catch (cause) {
       if (cause?.name === "AbortError") return;
@@ -101,6 +105,7 @@ export default function TeacherDashboard() {
       </div>
 
       {stats && <DashboardStats stats={stats} />}
+      {insights && <DashboardInsights insights={insights} />}
 
       {actionError && (
         <p className="alert" role="alert">
