@@ -1,0 +1,176 @@
+{
+  "pre_declared_in": "training_data/results/own_data_finetune_results.md",
+  "smoke": false,
+  "model": "distilbert-base-uncased",
+  "max_length": 384,
+  "batch_size": 8,
+  "seed": 20261007,
+  "environment": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.18.0",
+    "numpy": "2.1.3",
+    "device": "cuda",
+    "cpu_count": 2,
+    "gpu": "Tesla T4",
+    "cuda": "13.0",
+    "script_sha256": "70ad1ab10c69ca91"
+  },
+  "data": {
+    "train_triples": 128,
+    "seen_train": 102,
+    "seen_dev": 26,
+    "holdout2": 24,
+    "essay2_holdout": 16,
+    "locked_sha": {
+      "rubric_conditioning_train.json": "c6dccc50f8223d1c",
+      "holdout2_team_scored.json": "911274b40afb4518",
+      "holdout_essay2_team_scored.json": "8c204d8a45cf184b"
+    }
+  },
+  "fit": {
+    "grid": {
+      "2e-05": {
+        "history": [
+          {"epoch": 1, "train_mse": 0.20784817120203605, "dev_mae_points": 1.8461538461538463},
+          {"epoch": 2, "train_mse": 0.10003814960901554, "dev_mae_points": 1.6923076923076923},
+          {"epoch": 3, "train_mse": 0.05178635896971592, "dev_mae_points": 1.3846153846153846},
+          {"epoch": 4, "train_mse": 0.024917116173757956, "dev_mae_points": 1.2692307692307692}
+        ],
+        "best_epoch": 4,
+        "best_dev_mae_points": 1.2692307692307692,
+        "overfit_signal": false
+      },
+      "3e-05": {
+        "history": [
+          {"epoch": 1, "train_mse": 0.18505257138839135, "dev_mae_points": 2.6153846153846154},
+          {"epoch": 2, "train_mse": 0.08981426232136212, "dev_mae_points": 1.4615384615384615},
+          {"epoch": 3, "train_mse": 0.0355253628670023, "dev_mae_points": 1.0384615384615385},
+          {"epoch": 4, "train_mse": 0.016432763292239264, "dev_mae_points": 1.1153846153846154}
+        ],
+        "best_epoch": 3,
+        "best_dev_mae_points": 1.0384615384615385,
+        "overfit_signal": false
+      }
+    },
+    "any_overfit_signal": false,
+    "chosen": {"lr": 3e-05, "epoch": 3, "dev_mae_points": 1.0384615384615385}
+  },
+  "holdout2": {
+    "Evidence": {
+      "n": 12, "max_points": 10,
+      "fine_tuned": {"mae": 1.5, "exact": 0.16666666666666666, "within_one": 0.6666666666666666, "qwk": 0.7775987107171636},
+      "shipped": {"mae": 1.75, "exact": 0.25, "within_one": 0.25, "qwk": 0.6313253012048192},
+      "comparisons": {
+        "mae": {"finetuned_minus_shipped": 0.25, "ci": [-0.8333333333333333, 1.1666666666666667], "distinguishable": false},
+        "qwk": {"finetuned_minus_shipped": 0.14627340951234435, "ci": [-0.11062104793005792, 0.4256921855134527], "distinguishable": false},
+        "within_one": {"finetuned_minus_shipped": 0.41666666666666663, "ci": [0.0, 0.75], "distinguishable": false},
+        "exact": {"finetuned_minus_shipped": -0.08333333333333334, "ci": [-0.4166666666666667, 0.25], "distinguishable": false}
+      },
+      "shipped_baseline_run_at": "2026-10-07T16:15:55+00:00",
+      "shipped_baseline_git_head": "6351d863e254b77d2703c731b785ad482c1cd271",
+      "per_essay": [
+        {"essay_id": 1, "true": 8.0, "fine_tuned_pred": 7.0, "shipped_pred": 5.0, "words": 71},
+        {"essay_id": 2, "true": 8.0, "fine_tuned_pred": 8.0, "shipped_pred": 6.0, "words": 66},
+        {"essay_id": 3, "true": 6.0, "fine_tuned_pred": 7.0, "shipped_pred": 6.0, "words": 43},
+        {"essay_id": 4, "true": 0.0, "fine_tuned_pred": 1.0, "shipped_pred": 2.0, "words": 43},
+        {"essay_id": 5, "true": 0.0, "fine_tuned_pred": 0.0, "shipped_pred": 2.0, "words": 40},
+        {"essay_id": 6, "true": 5.0, "fine_tuned_pred": 4.0, "shipped_pred": 5.0, "words": 56},
+        {"essay_id": 7, "true": 2.0, "fine_tuned_pred": 4.0, "shipped_pred": 4.0, "words": 35},
+        {"essay_id": 8, "true": 9.0, "fine_tuned_pred": 7.0, "shipped_pred": 7.0, "words": 78},
+        {"essay_id": 9, "true": 2.0, "fine_tuned_pred": 6.0, "shipped_pred": 5.0, "words": 34},
+        {"essay_id": 10, "true": 7.0, "fine_tuned_pred": 6.0, "shipped_pred": 5.0, "words": 42},
+        {"essay_id": 11, "true": 4.0, "fine_tuned_pred": 8.0, "shipped_pred": 4.0, "words": 58},
+        {"essay_id": 12, "true": 2.0, "fine_tuned_pred": 1.0, "shipped_pred": 5.0, "words": 52}
+      ]
+    },
+    "Thesis": {
+      "n": 12, "max_points": 5,
+      "fine_tuned": {"mae": 1.0, "exact": 0.08333333333333333, "within_one": 0.9166666666666666, "qwk": 0.7966101694915254},
+      "shipped": {"mae": 1.1666666666666667, "exact": 0.3333333333333333, "within_one": 0.5, "qwk": 0.6276849642004774},
+      "comparisons": {
+        "mae": {"finetuned_minus_shipped": 0.16666666666666674, "ci": [-0.33333333333333337, 0.6666666666666666], "distinguishable": false},
+        "qwk": {"finetuned_minus_shipped": 0.16892520529104804, "ci": [0.0, 0.36559897188006085], "distinguishable": false},
+        "within_one": {"finetuned_minus_shipped": 0.41666666666666663, "ci": [0.16666666666666663, 0.6666666666666667], "distinguishable": true},
+        "exact": {"finetuned_minus_shipped": -0.25, "ci": [-0.5833333333333334, 0.08333333333333334], "distinguishable": false}
+      },
+      "shipped_baseline_run_at": "2026-10-07T16:15:55+00:00",
+      "shipped_baseline_git_head": "6351d863e254b77d2703c731b785ad482c1cd271",
+      "per_essay": [
+        {"essay_id": 1, "true": 5.0, "fine_tuned_pred": 4.0, "shipped_pred": 3.0, "words": 71},
+        {"essay_id": 2, "true": 5.0, "fine_tuned_pred": 4.0, "shipped_pred": 3.0, "words": 66},
+        {"essay_id": 3, "true": 4.0, "fine_tuned_pred": 4.0, "shipped_pred": 3.0, "words": 43},
+        {"essay_id": 4, "true": 0.0, "fine_tuned_pred": 1.0, "shipped_pred": 1.0, "words": 43},
+        {"essay_id": 5, "true": 1.0, "fine_tuned_pred": 0.0, "shipped_pred": 1.0, "words": 40},
+        {"essay_id": 6, "true": 1.0, "fine_tuned_pred": 2.0, "shipped_pred": 1.0, "words": 56},
+        {"essay_id": 7, "true": 3.0, "fine_tuned_pred": 2.0, "shipped_pred": 3.0, "words": 35},
+        {"essay_id": 8, "true": 5.0, "fine_tuned_pred": 3.0, "shipped_pred": 3.0, "words": 78},
+        {"essay_id": 9, "true": 4.0, "fine_tuned_pred": 3.0, "shipped_pred": 2.0, "words": 34},
+        {"essay_id": 10, "true": 4.0, "fine_tuned_pred": 3.0, "shipped_pred": 2.0, "words": 42},
+        {"essay_id": 11, "true": 5.0, "fine_tuned_pred": 4.0, "shipped_pred": 3.0, "words": 58},
+        {"essay_id": 12, "true": 0.0, "fine_tuned_pred": 1.0, "shipped_pred": 0.0, "words": 52}
+      ]
+    }
+  },
+  "essay2_holdout": {
+    "Evidence": {
+      "n": 8, "max_points": 10,
+      "fine_tuned": {"mae": 1.75, "exact": 0.125, "within_one": 0.375, "qwk": 0.8217562254259502},
+      "shipped": {"mae": 2.5, "exact": 0.125, "within_one": 0.375, "qwk": 0.5536480686695279},
+      "comparisons": {
+        "mae": {"finetuned_minus_shipped": 0.75, "ci": [-0.5, 2.125], "distinguishable": false},
+        "qwk": {"finetuned_minus_shipped": 0.2681081567564223, "ci": [0.017611751697994005, 0.5465818868079743], "distinguishable": true},
+        "within_one": {"finetuned_minus_shipped": 0.0, "ci": [-0.5, 0.5], "distinguishable": false},
+        "exact": {"finetuned_minus_shipped": 0.0, "ci": [-0.375, 0.375], "distinguishable": false}
+      },
+      "shipped_baseline_run_at": "2026-10-07T16:16:14+00:00",
+      "shipped_baseline_git_head": "6351d863e254b77d2703c731b785ad482c1cd271",
+      "per_essay": [
+        {"essay_id": 1, "true": 8.0, "fine_tuned_pred": 10.0, "shipped_pred": 9.0, "words": 47},
+        {"essay_id": 2, "true": 5.0, "fine_tuned_pred": 7.0, "shipped_pred": 7.0, "words": 37},
+        {"essay_id": 3, "true": 0.0, "fine_tuned_pred": 1.0, "shipped_pred": 2.0, "words": 26},
+        {"essay_id": 4, "true": 0.0, "fine_tuned_pred": 2.0, "shipped_pred": 6.0, "words": 30},
+        {"essay_id": 5, "true": 8.0, "fine_tuned_pred": 10.0, "shipped_pred": 8.0, "words": 45},
+        {"essay_id": 6, "true": 2.0, "fine_tuned_pred": 2.0, "shipped_pred": 3.0, "words": 22},
+        {"essay_id": 7, "true": 5.0, "fine_tuned_pred": 4.0, "shipped_pred": 9.0, "words": 24},
+        {"essay_id": 8, "true": 5.0, "fine_tuned_pred": 9.0, "shipped_pred": 9.0, "words": 32}
+      ]
+    },
+    "Thesis": {
+      "n": 8, "max_points": 5,
+      "fine_tuned": {"mae": 1.0, "exact": 0.125, "within_one": 0.875, "qwk": 0.8268398268398268},
+      "shipped": {"mae": 0.875, "exact": 0.25, "within_one": 0.875, "qwk": 0.7906976744186046},
+      "comparisons": {
+        "mae": {"finetuned_minus_shipped": -0.125, "ci": [-0.75, 0.5], "distinguishable": false},
+        "qwk": {"finetuned_minus_shipped": 0.03614215242122221, "ci": [-0.24901837120826809, 0.4331395348837209], "distinguishable": false},
+        "within_one": {"finetuned_minus_shipped": 0.0, "ci": [-0.375, 0.375], "distinguishable": false},
+        "exact": {"finetuned_minus_shipped": -0.125, "ci": [-0.5, 0.25], "distinguishable": false}
+      },
+      "shipped_baseline_run_at": "2026-10-07T16:16:14+00:00",
+      "shipped_baseline_git_head": "6351d863e254b77d2703c731b785ad482c1cd271",
+      "per_essay": [
+        {"essay_id": 1, "true": 5.0, "fine_tuned_pred": 5.0, "shipped_pred": 4.0, "words": 47},
+        {"essay_id": 2, "true": 5.0, "fine_tuned_pred": 4.0, "shipped_pred": 4.0, "words": 37},
+        {"essay_id": 3, "true": 1.0, "fine_tuned_pred": 0.0, "shipped_pred": 3.0, "words": 26},
+        {"essay_id": 4, "true": 0.0, "fine_tuned_pred": 1.0, "shipped_pred": 0.0, "words": 30},
+        {"essay_id": 5, "true": 4.0, "fine_tuned_pred": 5.0, "shipped_pred": 3.0, "words": 45},
+        {"essay_id": 6, "true": 3.0, "fine_tuned_pred": 1.0, "shipped_pred": 3.0, "words": 22},
+        {"essay_id": 7, "true": 1.0, "fine_tuned_pred": 2.0, "shipped_pred": 2.0, "words": 24},
+        {"essay_id": 8, "true": 4.0, "fine_tuned_pred": 5.0, "shipped_pred": 5.0, "words": 32}
+      ]
+    }
+  },
+  "cost": {
+    "parameters": 66954241,
+    "device": "cuda",
+    "saved_model_mb": 268.542196,
+    "cpu_cold_load_seconds": 0.04712677001953125,
+    "cpu_threads": 1,
+    "cpu_essays_timed": 16,
+    "cpu_ms_per_submission_mean": 448.8314688205719,
+    "cpu_ms_per_submission_max": 536.1735820770264,
+    "weights_saved_to": "/content/drive/MyDrive/own_data_finetune/output/best_model"
+  },
+  "bootstrap": {"n": 10000, "seed": 0},
+  "run_at": "2026-10-07T17:12:03+00:00"
+}

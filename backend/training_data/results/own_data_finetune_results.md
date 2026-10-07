@@ -184,4 +184,141 @@ the fresh baseline above is the proof.
 
 ---
 
-*(Results appended here once the Colab run finishes.)*
+# Result: favourable everywhere, conclusive almost nowhere
+
+Run once on a Colab T4 on 2026-10-07, exactly as pre-declared above. The
+pre-flight passed before any weight moved: all three input files hashed to
+their locked values, no holdout essay appeared verbatim in training, and both
+shipped-baseline files covered the same essays with the same labels (recorded
+`shipped_baseline_git_head` `6351d86`, the commit that produced them). 102
+training triples, 26 dev, both locked holdouts scored once. Grid chose **lr
+3e-5, epoch 3, dev MAE 1.038 points**.
+
+## By the bar written down in advance, this is not a win
+
+The pre-declaration said a believable win needs the fine-tuned model ahead on
+MAE **or** QWK, **on both clean holdouts**, for at least one criterion, with
+the interval clear of zero. Nothing meets that:
+
+| criterion | metric | holdout2 | essay2 | both clear of zero? |
+|---|---|---|---|---|
+| Thesis | MAE | +0.167 | −0.125 | no |
+| Thesis | QWK | +0.169 | +0.036 | no |
+| Evidence | MAE | +0.250 | +0.750 | no |
+| Evidence | QWK | +0.146 | **+0.268\*** | no — only essay2 clears |
+
+\* interval clear of zero. Positive = fine-tuned better.
+
+**So the honest headline is: not a win by the stated bar.** Of 16 paired
+comparisons (2 holdouts × 2 criteria × 4 metrics), **two** are distinguishable
+from noise:
+
+- **Thesis within-1 on holdout2: +41.7pp [+16.7, +66.7]** — 50% → 92%.
+- **Evidence QWK on essay2: +0.268 [+0.018, +0.547]** — 0.55 → 0.82.
+
+The other fourteen contain zero.
+
+## It is also, clearly, not a loss
+
+**Distinguishable losses for the fine-tuned model: zero.** Not one of the
+sixteen comparisons shows the shipped pipeline ahead in a way this data can
+detect. And the direction of the point estimates is lopsided:
+
+- **QWK: fine-tuned ahead on all four** (+0.146, +0.169, +0.268, +0.036).
+- **MAE: fine-tuned ahead on three of four**, the exception being essay2
+  Thesis at −0.125 — an eighth of a point on 8 essays.
+- **within-1: ahead or tied on all four** (+41.7pp, +41.7pp, 0, 0).
+
+Fifteen of sixteen point estimates are favourable or neutral. That is a weak
+signal by the standard of statistical significance and a consistent one by the
+standard of direction, and at n = 12 and n = 8 those two standards were always
+going to disagree. The pre-declaration anticipated exactly this: *"The expected
+outcome is a null or a mixed result."*
+
+## One real behavioural difference: closer, but less often exact
+
+A pattern runs through every cell, and it is not noise-shaped:
+
+| | within-1 | exact |
+|---|---|---|
+| holdout2 Thesis | +41.7pp | −25.0pp |
+| holdout2 Evidence | +41.7pp | −8.3pp |
+| essay2 Thesis | 0 | −12.5pp |
+| essay2 Evidence | 0 | 0 |
+
+**The fine-tuned model lands near the right score more often and on it less
+often.** Exact-match drops in three of four cells while within-1 rises or
+holds in all four. For this application that trade is the right way round — a
+teacher reviewing a suggestion cares whether it is roughly right, and every
+score is reviewed before a student sees it — but it should be stated rather
+than buried, because "exact match got worse" is a true sentence about this
+model.
+
+## The documented Evidence weakness: better on blankness, not on padding
+
+`essay2_results.md` documented the failure mode precisely: essays with no
+evidence at all scored as though they had some. On that specific failure the
+fine-tuned model is clearly better:
+
+| essay | true | shipped | fine-tuned |
+|---|---|---|---|
+| holdout2 #5 (no evidence) | 0 | 2 | **0** |
+| holdout2 #4 (no evidence) | 0 | 2 | **1** |
+| essay2 #3 (no evidence) | 0 | 2 | **1** |
+| essay2 #4 (personal anecdote, no evidence) | 0 | 6 | **2** |
+
+essay2 #4 is the case `essay2_results.md` singled out — *"I used ChatGPT to
+help me study... I got a good grade"*, scored **6/10** by the shipped model.
+The fine-tuned model gives it 2.
+
+But the *other* half of the weakness — facts stated without being tied to an
+argument — got **worse**:
+
+| essay | true | shipped | fine-tuned |
+|---|---|---|---|
+| holdout2 #11 (facts, no argument) | 4 | 4 | **8** |
+| holdout2 #9 | 2 | 5 | **6** |
+| essay2 #8 ("several reported cases") | 5 | 9 | **9** |
+
+So: better at recognising *nothing*, no better — and on holdout2 #11, four
+points worse — at recognising *decoration*. **This is why the padding/tying
+probes have to be rerun against the new model rather than assumed settled by
+these holdout numbers.** Phase 2 does that.
+
+## Overfitting
+
+No flag tripped, but the curves deserve a sentence rather than a boolean.
+Train MSE falls monotonically at both learning rates (0.208 → 0.025 and
+0.185 → 0.016) — a 67M-parameter model fitting 102 examples, as expected.
+Dev MAE at the chosen lr 3e-5 bottoms at epoch 3 (1.038) and **ticks back up
+at epoch 4 (1.115, +0.077)**. That is a real uptick; it did not trip the flag
+only because the flag's threshold is +0.1. At lr 2e-5 dev MAE was still
+falling at epoch 4 (1.269), so that run never had the chance to turn over.
+
+Read plainly: the chosen checkpoint sits one epoch before the first sign of
+the curve turning, which is where early stopping is supposed to put it, and
+there is no evidence of damage at that point. But four epochs is as far as
+this grid looked, and "no overfitting signal" here means "not yet," not
+"won't."
+
+## Cost
+
+67.0M parameters, 269 MB on disk. On Colab's CPU (2 cores, 1 torch thread):
+cold load 0.05s, then **449 ms/submission** (max 536) one at a time, padded to
+384 tokens. Comfortably inside a 5-second budget even on that hardware, but
+that is Colab's CPU, not this app's — a real end-to-end measurement in the
+running Flask app is Phase 2's job, not something to infer from this number.
+
+## Verdict
+
+**A favourable mixed result that does not clear the bar it was measured
+against.** Two distinguishable wins, zero distinguishable losses, fifteen of
+sixteen point estimates favourable or neutral, and one clear qualitative
+improvement on the documented Evidence failure mode — against which sits a
+worsening on the other half of that same failure mode, an exact-match
+regression, and sample sizes that make most of this unprovable either way.
+
+What this licenses: trying it, with the numbers stated as they are. What it
+does not license: the sentence "fine-tuning beats the shipped pipeline." At
+n = 12 and n = 8 that sentence is not available from this data, and the
+pre-declaration said so before the data existed.
