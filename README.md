@@ -73,7 +73,7 @@ is still what the benchmark and probe scripts compare against, but the live
 engine no longer calls it.
 
 **What the swap was measured to buy, honestly:** not as much as "we replaced
-it" suggests. Against the shipped Ridge models on two locked holdouts, two of
+it" suggests. Against the Ridge models it replaced, on two locked holdouts, two of
 sixteen paired comparisons were distinguishable from noise — Thesis within-1
 on holdout2 (50% → 92%) and Evidence QWK on Essay 2 (0.55 → 0.82) — with
 **zero distinguishable regressions** and fifteen of sixteen point estimates
@@ -148,10 +148,10 @@ was built:
 |---|---|---|
 | Classifier on frozen Sentence-BERT embeddings | the first 35 labelled answers | **worse than always guessing the mean** (Thesis MAE 2.50 vs 1.39) |
 | Ridge on frozen embeddings + handcrafted features (**shipped until Phase 2**) | leave-one-out on 98 labelled answers | beats guessing (Thesis MAE 1.11 vs 1.48; Evidence 1.52 vs 3.07) |
-| More training data for the shipped model | a held-out set locked before retraining | **no measurable change** |
-| The shipped features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
+| More training data for the Ridge pipeline | a held-out set locked before retraining | **no measurable change** |
+| The Ridge features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
 | **Fine-tuned DistilBERT** | the same 268 essays | **QWK 0.841**: distinguishably better, and **statistically indistinguishable from a second human rater** |
-| The shipped pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis generalised** (QWK 0.79); **Evidence did not** (gain over baseline 0.12, CI [−1.88, +1.62] — not distinguishable from zero) |
+| The Ridge pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis generalised** (QWK 0.79); **Evidence did not** (gain over baseline 0.12, CI [−1.88, +1.62] — not distinguishable from zero) |
 | **Conditioning on the rubric text** instead of a fixed criterion id | 8 essays for a criterion never trained on | **null**: reading the description made no measurable difference (ΔQWK −0.056, CI [−0.345, +0.047]) |
 | **Fine-tuning DistilBERT on our own 128 rows** (**what ships now**) | both locked rubric holdouts, scored once | **2 of 16 comparisons distinguishable, 0 regressions**: did not clear the pre-declared bar, but nothing got measurably worse |
 
@@ -171,11 +171,11 @@ full write-up is
 | word count only | 0.675 | 0.757 |
 | handcrafted only | 0.638 | 0.776 |
 | frozen embeddings only | 0.993 | 0.621 |
-| frozen embeddings + handcrafted *(shipped)* | 0.716 | 0.765 |
+| frozen embeddings + handcrafted *(Ridge, retired)* | 0.716 | 0.765 |
 | **fine-tuned DistilBERT** | **0.552** | **0.841** |
 
-A Ridge model on word count alone can't be told apart from the shipped
-pipeline (ΔQWK 0.008). Frozen embeddings on their own do *worse* than word
+A Ridge model on word count alone can't be told apart from the then-shipped
+Ridge pipeline (ΔQWK 0.008). Frozen embeddings on their own do *worse* than word
 count. Adding them to the handcrafted features doesn't improve on those
 features alone (ΔQWK −0.011, CI [−0.055, +0.026]), and tuning the Ridge alpha
 doesn't change that. Frozen `all-MiniLM-L6-v2` vectors capture what an essay
@@ -188,7 +188,7 @@ The original proposal specified fine-tuning BERT; the build replaced it with
 frozen embeddings to fit the timeline. Fine-tuning DistilBERT end to end on
 the same ASAP training essays changes the picture. The design was
 pre-declared before training, and the model was run once on a Colab GPU. It
-beats the shipped pipeline by **+0.076 QWK [+0.041, +0.118]** and the
+beats the then-shipped Ridge pipeline by **+0.076 QWK [+0.041, +0.118]** and the
 handcrafted features by +0.065 [+0.029, +0.099]. Both intervals are clear of
 zero.
 
@@ -199,7 +199,7 @@ task: predict what rater 1 said.
 
 | predicting what rater 1 said | QWK | gap to a second human rater |
 |---|---|---|
-| shipped frozen-embedding pipeline | 0.587 | 0.152 [+0.073, +0.242]: clearly behind |
+| Ridge frozen-embedding pipeline (retired) | 0.587 | 0.152 [+0.073, +0.242]: clearly behind |
 | fine-tuned DistilBERT | 0.710 | 0.030 [−0.031, +0.093]: **not distinguishable** |
 | a second human rater | 0.739 | |
 
@@ -435,17 +435,12 @@ revise endpoint with an audit trail". Both now exist; see
   is exactly where the worst holdout errors are. Adding a third criterion to
   the lookup table would produce confident, plausible, meaningless scores —
   so an unlisted criterion falls to `grading_failed` instead, by design.
+  What this costs in practice is measured in the padding/tying probes below.
 - **It is better at "roughly right" than at "exactly right".** Against the
   Ridge models it replaced, within-1 accuracy rose or held on every
   criterion/holdout pair while exact-match *fell* on three of four. For a
   system where a teacher reviews every score that is the right trade, but it
   is a trade.
-- **The adversarial probes are not uniformly better.** Rerun against the new
-  model: padding a vague claim with names and numbers buys less on Evidence
-  than before (+1.75 → +1.00), but on Thesis a bare statistic with no
-  position at all now scores **3.67/5 where the Ridge model gave 1.33/5**.
-  Teacher review is what makes the scores safe to use: no AI score reaches a
-  student unapproved.
 - **The encoder reads at most ~226 words, and word limits are how that is
   handled.** `all-MiniLM-L6-v2` takes 256 tokens (~226 words) and drops the
   rest without warning: two 377-word essays differing only after that point
@@ -474,13 +469,16 @@ revise endpoint with an audit trail". Both now exist; see
   submission already recorded is re-checked. The hand-crafted features always
   read the whole text, which is part of why this went unnoticed for so long.
 - **The grader is trained on 128 labeled examples across two rubrics** —
-  Essay 1 has 98 (44 Thesis, 54 Evidence) and Essay 2 has 30 (15 each).
-  Leave-one-out MAE on Essay 1 is 1.11 for Thesis (baseline 1.48) and 1.52 for
-  Evidence (baseline 3.07); on Essay 2, 0.73 and 2.40. With this few examples
-  the numbers move noticeably if a single example changes, and Essay 2's 15
-  per criterion is a quarter of Essay 1's.
-- **Adding training data did not improve the held-out result.** Two sets of 12
-  paragraph-length essays were built (`backend/training_data/`, full write-up
+  Essay 1 has 98 (44 Thesis, 54 Evidence) and Essay 2 has 30 (15 each). The
+  shipped fine-tuned model saw 102 of those, with 26 held back to pick its
+  learning rate. With this few examples the numbers move noticeably if a
+  single example changes, and Essay 2's 15 per criterion is a quarter of
+  Essay 1's. (The leave-one-out figures quoted elsewhere in this README —
+  Thesis MAE 1.11, Evidence 1.52 — belong to the *retired* Ridge pipeline;
+  the shipped model's numbers are the locked-holdout ones above.)
+- **Adding training data did not improve the held-out result** (measured on
+  the retired Ridge pipeline, and the reason the locked-holdout discipline
+  below exists). Two sets of 12 paragraph-length essays were built (`backend/training_data/`, full write-up
   in `holdout_results.md`, run with `scripts/evaluate_holdout.py`). Set 1 was
   studied and its failures used to write 22 new training rows; set 2 was
   committed untouched beforehand and read only afterwards. After retraining,
@@ -495,21 +493,72 @@ revise endpoint with an audit trail". Both now exist; see
   with 12 essays none is distinguishable from noise. Set 2 is the one to
   believe, and it says the round bought nothing measurable. Keeping only set 1
   would have made this look like a clear win.
-- **The Evidence grader rewards what evidence looks like, not whether it is
-  relevant or true.** Padding a vague answer with names and numbers once
-  lifted it from 0-2 to 4-8 out of 10; adversarial and paired examples cut
-  that, and `scripts/padding_probe.py` now measures it on fresh probes: the
-  padding gain is +1.75 points on Evidence (was +2.25), and on Thesis padding
-  now costs a point rather than being free. But **a statistic stated without
-  being used in an argument still scores 5-7 out of 10**, and the gap between
-  a tied and an untied statistic narrowed (1.33 → 0.67 points). What the
-  retrain mostly did was make the grader more pessimistic — it fixed the
-  over-scoring of weak essays and started under-scoring strong ones, dropping
-  six of set 2's strongest essays by two points each. **This is now confirmed
-  on a second, unrelated topic:** on the Essay 2 holdout every Evidence error
-  was an over-score, a personal anecdote with no evidence scored 6/10, and
-  three facts listed without an argument scored 9/10. The review step is the
-  backstop: no AI score reaches a student unapproved.
+- **Both graders reward what good writing looks like rather than whether the
+  criterion is met — and the swap to the fine-tuned model improved this on
+  Evidence while making it clearly worse on Thesis.**
+
+  `scripts/padding_probe.py` measures this directly on fresh probes (checked
+  against the training data by the leakage guard, so it measures behaviour
+  and not memorisation). Two families: **padding** bolts names, numbers and
+  years that support nothing onto a vague claim; **tying** takes a statistic
+  left hanging and connects it to an argument. Run against both pipelines —
+  `--engine ridge` reproduces the retired model's published numbers exactly,
+  so the comparison is like for like:
+
+  | criterion | measure | Ridge (retired) | fine-tuned (**ships**) | |
+  |---|---|---|---|---|
+  | Evidence | padding gain (lower better) | +1.75 | **+1.00** | improved |
+  | Evidence | tying gap (higher better) | +0.67 | **+1.00** | improved |
+  | Evidence | untied statistic alone, /10 | 6.33 | 7.00 | worse |
+  | Thesis | padding gain (lower better) | **−1.25** | +0.25 | worse |
+  | Thesis | tying gap (higher better) | +0.67 | +0.33 | worse |
+  | Thesis | **untied statistic alone, /5** | **1.33** | **3.67** | **much worse** |
+
+  Read plainly: on **Evidence**, decorating a vague claim now buys one point
+  instead of 1.75, and the grader is somewhat better at noticing when a
+  statistic is actually used — but a bare statistic still scores 7/10, which
+  is the original weakness intact. On **Thesis** the swap is a regression.
+  The Ridge model *penalised* padding (−1.25: decoration cost a point); the
+  fine-tuned model mildly rewards it (+0.25). Worse, a bare statistic with no
+  position at all — *"Regulators in Sweden issued 73 formal warnings to
+  platforms during 2021"* — now scores **3.67 out of 5** on *"does the essay
+  take a clear, specific, arguable position?"*, against **1.33** before.
+
+  **The likely root cause is measured, not guessed: the model does not read
+  the criterion.** On the shipping weights, Thesis and Evidence predictions
+  correlate at **0.9997** (mean gap 1.6 points per hundred) where the human
+  labels for the same essays correlate at **0.74** (mean gap 24). A nonsense
+  criterion correlates at 0.9986. So the model computes one essay-quality
+  score and rescales it per criterion — and a fact-laden sentence that reads
+  like competent evidence therefore collects a matching Thesis score, however
+  little of a thesis it contains. This is exactly the null that
+  [rubric_conditioning_results.md](backend/training_data/results/rubric_conditioning_results.md)
+  reported before any of this shipped: with only **two distinct criterion
+  descriptions** in the training data, a model can drive its loss down by
+  judging general quality and never reading the description, so conditioning
+  never becomes necessary and is never learned. The fix is the one that
+  write-up already specified — train across five or more genuinely distinct
+  criteria — and it is not something more Thesis/Evidence data will solve.
+
+  The same mechanism explains the two worst Evidence errors on the locked
+  holdout (essays 9 and 11, both strong-thesis/weak-evidence, both dragged up
+  by four points), and it is why the criterion lookup table holds only the
+  two criteria that were actually validated.
+
+  One thing did get clearly better, and it is the failure the earlier
+  write-ups singled out: essays with **no evidence at all**. The Essay 2
+  holdout's personal anecdote — *"I used ChatGPT to help me study… I got a
+  good grade"*, true score 0 — was scored **6/10 by the Ridge model and
+  2/10 by the fine-tuned one**, and the three other true-zero essays across
+  both holdouts all moved toward zero too. The grader is better at
+  recognising *nothing* and no better at recognising *decoration*.
+
+  **Mitigation is the review step, and it is mandatory, not advisory.** No AI
+  score reaches a student unapproved: every criterion must be signed off by
+  the teacher before a grade is released, and the submission sits in
+  `ai_graded` until they do. These probes describe what a teacher is being
+  asked to catch — a confident-sounding score on an essay that states facts
+  without arguing anything — not what a student receives.
 - **Both holdout sets were written by the project team**, essays and scores
   alike, and every essay in the training data and both holdout sets answers
   the same prompt about regulating social media. So this measures
