@@ -12,9 +12,18 @@ Two guards, because this is unrecoverable:
     --force is also given.
 
 Tables are truncated with RESTART IDENTITY, so ids begin at 1 again and the
-re-seeded rubrics' criteria land on the same ids the trained models in
-ml_models/ were saved under. Retrain anyway if in doubt -- the script prints
-the command.
+re-seeded rubrics' criteria land on the same ids the retired Ridge models in
+ml_models/*.joblib were saved under.
+
+**This no longer risks orphaning the grader that students are actually
+scored by.** That model -- the fine-tuned one in ml_models/bert_rubric_scorer/
+-- is looked up by criterion *name*, not by row id, precisely so that a
+reseed cannot silently disconnect it. Re-seed as often as you like; Thesis and
+Evidence keep grading. The guarantee is tested, not assumed: see
+TestCriterionLookupIsByName in tests/test_grading.py, which recreates a rubric
+under different row ids and asserts the scores are unchanged, and separately
+runs this script's own TRUNCATE ... RESTART IDENTITY and checks grading still
+works.
 """
 
 import argparse
@@ -73,8 +82,10 @@ def main():
         print(f"\nSeeded: {teacher.email} / password1")
         for rubric in rubrics:
             print(f"  rubric {rubric.title!r} (criteria {[(c.id, c.name) for c in rubric.criteria]})")
-        print("\nRetrain the graders so they match these criterion ids:\n"
-              "    make train")
+        print("\nThe text grader needs no retraining after this: it is keyed by criterion\n"
+              "name, not by row id, so Thesis and Evidence keep working. Only the retired\n"
+              "Ridge baseline is id-keyed, and nothing grades students with it:\n"
+              "    make train   # optional, seconds, benchmark/probe baseline only")
 
 
 if __name__ == "__main__":

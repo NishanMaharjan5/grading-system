@@ -1,6 +1,19 @@
 """Trains one small regression model per rubric criterion on top of frozen
 Sentence-BERT (all-MiniLM-L6-v2) embeddings plus hand-crafted features.
 
+    *** THIS NO LONGER TRAINS WHAT GRADES STUDENTS. ***
+
+Production text grading was moved to a fine-tuned DistilBERT in
+app/grading/bert_scorer.py. The models this script writes are still used by
+the benchmark and probe scripts as the comparison baseline, and the script is
+kept for that and for the history, but app/grading/engine.py does not load
+them any more.
+
+Retraining the model that *does* grade students is no longer a seconds-long
+job: it needs a GPU and roughly 15-20 minutes on Colab, via
+scripts/own_data_finetune.py and scripts/own_data_finetune_colab.ipynb. See
+ml_models/bert_rubric_scorer/PROVENANCE.md.
+
 Usage (from backend/, with the venv active):
     ./venv/bin/python scripts/train_grader.py
 

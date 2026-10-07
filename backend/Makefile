@@ -23,7 +23,11 @@ migrate:  ## autogenerate a revision after changing a model (read it before appl
 run:  ## start the dev server
 	$(VENV)/python run.py
 
-train:  ## retrain the per-criterion models from training_data/sample_answers.json
+train:  ## retrain the RETIRED Ridge models (seconds) -- these no longer grade students
+	@echo "NOTE: production text grading uses the fine-tuned model in"
+	@echo "      ml_models/bert_rubric_scorer/, which this does NOT retrain."
+	@echo "      That one needs a GPU and ~15-20 min on Colab:"
+	@echo "      scripts/own_data_finetune_colab.ipynb. See its PROVENANCE.md."
 	$(VENV)/python scripts/train_grader.py
 
 reset-dev:  ## wipe the dev database and re-seed the demo rubric (destructive; dry-run without CONFIRM=1)

@@ -56,19 +56,56 @@ only the frozen fields.
 
 ## How grading works
 
-Text submissions are scored by a **Ridge regression per rubric criterion**,
-trained on frozen Sentence-BERT (`all-MiniLM-L6-v2`) embeddings concatenated
-with hand-crafted features (digit/percentage/year counts, hedging words,
-reasoning connectives, citation words). In the shipped engine BERT is a frozen
-feature extractor and is never fine-tuned. A fine-tuned BERT was evaluated
-separately and did much better on a public benchmark; *How the approach was
-evaluated* below explains why it still doesn't ship.
+Text submissions are scored by a **fine-tuned DistilBERT**, one shared model
+for every criterion. It reads the essay and the criterion together as a
+sentence pair — `[CLS] essay [SEP] Thesis: Does the essay take a clear,
+specific, arguable position? [SEP]` — and predicts a single number on 0–1,
+which is multiplied by that criterion's maximum, rounded and clamped. It was
+fine-tuned on this project's own 128 labelled Thesis/Evidence rows (Essay 1
+and Essay 2), on a Colab GPU. The weights live in
+`backend/ml_models/bert_rubric_scorer/` and are **not in git**; see
+[PROVENANCE.md](backend/ml_models/bert_rubric_scorer/PROVENANCE.md).
+
+This replaced a **Ridge regression per criterion** on frozen Sentence-BERT
+embeddings plus hand-crafted features. That code is still in the repo
+(`app/grading/model_store.py`, `features.py`, `scripts/train_grader.py`) and
+is still what the benchmark and probe scripts compare against, but the live
+engine no longer calls it.
+
+**What the swap was measured to buy, honestly:** not as much as "we replaced
+it" suggests. Against the shipped Ridge models on two locked holdouts, two of
+sixteen paired comparisons were distinguishable from noise — Thesis within-1
+on holdout2 (50% → 92%) and Evidence QWK on Essay 2 (0.55 → 0.82) — with
+**zero distinguishable regressions** and fifteen of sixteen point estimates
+favourable or neutral. At n = 12 and n = 8 that is a consistent direction
+without statistical proof. It did **not** clear the bar set before the run,
+which required a win on both holdouts. The full write-up, including what got
+worse, is
+**[own_data_finetune_results.md](backend/training_data/results/own_data_finetune_results.md)**.
+
+**Criteria are matched by name, not by database row id.** The Ridge models
+were keyed `criterion_<row id>.joblib`, so re-seeding the dev database
+orphaned every one of them. That cost seconds to fix when a retrain was a
+`make train` away; it would now cost a GPU and twenty minutes, so the lookup
+key is the criterion's name, which survives a reseed. A criterion the model
+was never validated on — anything other than Thesis and Evidence — is **not
+guessed at**: the submission becomes `grading_failed` and a teacher grades it
+by hand.
 
 Regression rather than classification because rubric scores are ordinal —
 predicting 0 for a true 5 should not cost the same as predicting 4. Measured on
 the first 35 labeled examples, classification on embeddings alone scored
 *worse than always guessing the mean*; see `backend/app/grading/features.py`
 for why, and the commit history for the numbers.
+
+> **Retraining this model is no longer cheap.** `make train` retrains the old
+> Ridge models in seconds and **no longer affects what students are graded
+> by**. Retraining the model that does — for a new criterion, or because the
+> weights were lost — means a **GPU and roughly 15–20 minutes on Colab**, via
+> `scripts/own_data_finetune.py` and `scripts/own_data_finetune_colab.ipynb`.
+> The weights are not in git, so a fresh clone has none and every text
+> submission falls to `grading_failed` until they are placed. That is the
+> intended failure mode, not a bug.
 
 Feedback is template-based rather than model-generated: the scores come from a
 small model trained on few examples, and fluent prose on top of an uncertain
@@ -110,12 +147,13 @@ was built:
 | approach | tested on | result |
 |---|---|---|
 | Classifier on frozen Sentence-BERT embeddings | the first 35 labelled answers | **worse than always guessing the mean** (Thesis MAE 2.50 vs 1.39) |
-| Ridge on frozen embeddings + handcrafted features (**what ships**) | leave-one-out on 98 labelled answers | beats guessing (Thesis MAE 1.11 vs 1.48; Evidence 1.52 vs 3.07) |
+| Ridge on frozen embeddings + handcrafted features (**shipped until Phase 2**) | leave-one-out on 98 labelled answers | beats guessing (Thesis MAE 1.11 vs 1.48; Evidence 1.52 vs 3.07) |
 | More training data for the shipped model | a held-out set locked before retraining | **no measurable change** |
 | The shipped features, on public data | ASAP-AES, 268 test essays scored by teachers | QWK 0.765, but **word count alone reaches 0.757** |
 | **Fine-tuned DistilBERT** | the same 268 essays | **QWK 0.841**: distinguishably better, and **statistically indistinguishable from a second human rater** |
 | The shipped pipeline on a **second topic** (Essay 2, AI tools in schoolwork) | a holdout locked before any Essay 2 training data | **Thesis generalised** (QWK 0.79); **Evidence did not** (gain over baseline 0.12, CI [−1.88, +1.62] — not distinguishable from zero) |
 | **Conditioning on the rubric text** instead of a fixed criterion id | 8 essays for a criterion never trained on | **null**: reading the description made no measurable difference (ΔQWK −0.056, CI [−0.345, +0.047]) |
+| **Fine-tuning DistilBERT on our own 128 rows** (**what ships now**) | both locked rubric holdouts, scored once | **2 of 16 comparisons distinguishable, 0 regressions**: did not clear the pre-declared bar, but nothing got measurably worse |
 
 The first three rows use answers the team wrote and scored itself; that
 write-up is `backend/training_data/holdout_results.md`. The last two use
@@ -252,26 +290,34 @@ The clean follow-up is scoped: train across five or more genuinely distinct
 criteria, so that reading the description becomes necessary rather than
 optional, and test on more than eight essays.
 
-### What this means for the shipped engine
+### What this meant for the shipped engine — and what happened next
 
-**Nothing in the shipped engine changed because of this.** It is a benchmark
-finding reported alongside the model that ships, not a late swap. The
-fine-tuned model gives one holistic 2-12 score for a single ASAP prompt. It
-learned from 1,248 teacher-scored essays by grade 7-8 students, and it
-produces no Thesis or Evidence scores. Doing the same for those criteria would
-need labelled essays on that scale (the rubric model has 44 and 54), a
-fine-tuning run, and a locked test set of their own. That hasn't been
-attempted within the project's one-to-two-week timeline.
+The ASAP result above changed nothing on its own: that model gives one
+holistic 2–12 score for a single public prompt and produces no Thesis or
+Evidence scores at all. What it established was *where the weak point was* —
+the frozen embeddings, not the idea of using BERT — and that a fine-tuned
+successor would be cheap enough to serve.
 
-What the result does establish is where the weak point was: the frozen
-embeddings, not the idea of using BERT. It also shows that a fine-tuned
-successor would be practical to serve. It takes under half a second per
-essay on a single CPU thread in the worst case, with no GPU. Its 269 MB of
-weights are kept out of the repo.
+**That successor was then built on this project's own data and now ships.**
+Same architecture as the rubric-conditioning run (essay + criterion
+description as a sentence pair), trained on all 128 Thesis/Evidence rows
+rather than on ASAP. It was pre-declared, scored once on both locked
+holdouts, and the result was a favourable direction without statistical
+proof: two distinguishable gains, zero distinguishable regressions, and a
+failure to clear the bar that had been set in advance. See
+[own_data_finetune_results.md](backend/training_data/results/own_data_finetune_results.md)
+and
+[PROVENANCE.md](backend/ml_models/bert_rubric_scorer/PROVENANCE.md).
 
-Three caveats apply. ASAP set 1 differs from the Essay 1 rubric in prompt,
-age group and scoring scheme. Its test split has now been used for seven
-systems. And the fine-tuned result comes from one training run with one seed.
+Serving cost, measured in the running Flask app on CPU with no GPU: **136 ms
+per submission warm**, 3.6 s for the first request after a restart because it
+loads 269 MB (the server warms the model at startup so a student doesn't pay
+that). Comfortably inside the 5-second target.
+
+Three caveats on the ASAP numbers specifically. ASAP set 1 differs from the
+Essay 1 rubric in prompt, age group and scoring scheme. Its test split has now
+been used for seven systems. And the fine-tuned ASAP result comes from one
+training run with one seed.
 
 ## Setup
 
@@ -378,13 +424,28 @@ revise endpoint with an audit trail". Both now exist; see
 [Grade revision](#what-the-app-does) above and `grade_revisions`.*
 
 
-- **The shipped grader is not the best approach measured.** It uses frozen
-  embeddings, and on the public benchmark it does no better than a word count
-  and clearly trails a human rater. A fine-tuned model did distinguishably
-  better (see *How the approach was evaluated*). Fine-tuning the Thesis and
-  Evidence criteria would need far more labelled essays than the 98 available.
-  Until then, teacher review is what makes the scores safe to use: no AI score
-  reaches a student unapproved.
+- **The shipped grader does not read the criterion.** It is fine-tuned on
+  only two distinct criterion descriptions, and measurement on the shipping
+  weights shows it never learned to use them: Thesis and Evidence predictions
+  correlate at **0.9997**, and a nonsense criterion ("Banana: Is the essay
+  about fruit?") correlates at 0.9986, where the human labels for the same
+  essays correlate at 0.74. It computes one essay-quality score and rescales
+  it by each criterion's maximum. That works for Thesis and Evidence because
+  their labels are themselves correlated; it fails where they diverge, which
+  is exactly where the worst holdout errors are. Adding a third criterion to
+  the lookup table would produce confident, plausible, meaningless scores —
+  so an unlisted criterion falls to `grading_failed` instead, by design.
+- **It is better at "roughly right" than at "exactly right".** Against the
+  Ridge models it replaced, within-1 accuracy rose or held on every
+  criterion/holdout pair while exact-match *fell* on three of four. For a
+  system where a teacher reviews every score that is the right trade, but it
+  is a trade.
+- **The adversarial probes are not uniformly better.** Rerun against the new
+  model: padding a vague claim with names and numbers buys less on Evidence
+  than before (+1.75 → +1.00), but on Thesis a bare statistic with no
+  position at all now scores **3.67/5 where the Ridge model gave 1.33/5**.
+  Teacher review is what makes the scores safe to use: no AI score reaches a
+  student unapproved.
 - **The encoder reads at most ~226 words, and word limits are how that is
   handled.** `all-MiniLM-L6-v2` takes 256 tokens (~226 words) and drops the
   rest without warning: two 377-word essays differing only after that point
