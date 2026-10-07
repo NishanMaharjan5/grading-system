@@ -1,0 +1,417 @@
+{
+  "label": "holdout1 (burned dev set) -- fresh baseline, Phase 1",
+  "holdout_file": "holdout_team_scored.json",
+  "training_file": "sample_answers.json",
+  "training_rows": 128,
+  "models": {
+    "Thesis": {
+      "n_examples": 44,
+      "md5": "25bfd58417cbbd14379c7326507b6cc5"
+    },
+    "Evidence": {
+      "n_examples": 54,
+      "md5": "d0db591c5068c58893f14e084e493854"
+    }
+  },
+  "git_head": "6351d863e254b77d2703c731b785ad482c1cd271",
+  "run_at": "2026-10-07T16:14:56+00:00",
+  "bootstrap": {
+    "resamples": 10000,
+    "seed": 0
+  },
+  "leakage": {
+    "duplicates": 0,
+    "notable_overlaps": [
+      {
+        "essay_id": 3,
+        "criterion": "Thesis",
+        "cosine": 0.833,
+        "closest_training_text": "Kids are spending too much time on social media and parents can't really do anything about it, so maybe the government should."
+      },
+      {
+        "essay_id": 10,
+        "criterion": "Thesis",
+        "cosine": 0.822,
+        "closest_training_text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them respon"
+      },
+      {
+        "essay_id": 10,
+        "criterion": "Evidence",
+        "cosine": 0.822,
+        "closest_training_text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them respon"
+      },
+      {
+        "essay_id": 2,
+        "criterion": "Thesis",
+        "cosine": 0.81,
+        "closest_training_text": "Governments should regulate social media platforms because unchecked algorithmic amplification of harmful content poses a measurable risk to"
+      },
+      {
+        "essay_id": 2,
+        "criterion": "Evidence",
+        "cosine": 0.806,
+        "closest_training_text": "There are benefits and drawbacks to regulating social media. Rules might reduce harmful content, but they could also be expensive for compan"
+      },
+      {
+        "essay_id": 6,
+        "criterion": "Evidence",
+        "cosine": 0.788,
+        "closest_training_text": "The EU's Digital Services Act, enacted in 2022, cut documented instances of illegal content on major platforms by a measurable margin within"
+      },
+      {
+        "essay_id": 1,
+        "criterion": "Thesis",
+        "cosine": 0.768,
+        "closest_training_text": "Government regulation of social media is necessary specifically to address data privacy violations, even though content moderation should re"
+      },
+      {
+        "essay_id": 12,
+        "criterion": "Thesis",
+        "cosine": 0.745,
+        "closest_training_text": "Governments should regulate social media platforms because unchecked algorithmic amplification of harmful content poses a measurable risk to"
+      },
+      {
+        "essay_id": 4,
+        "criterion": "Evidence",
+        "cosine": 0.741,
+        "closest_training_text": "Facebook, Instagram, Twitter, TikTok, YouTube, LinkedIn, Snapchat, Reddit, and Pinterest are all major platforms used across North America, "
+      },
+      {
+        "essay_id": 7,
+        "criterion": "Thesis",
+        "cosine": 0.735,
+        "closest_training_text": "Social media regulation is a complicated issue with good points on both sides. Supporters of rules say they would protect people, while oppo"
+      },
+      {
+        "essay_id": 7,
+        "criterion": "Evidence",
+        "cosine": 0.735,
+        "closest_training_text": "Social media regulation is a complicated issue with good points on both sides. Supporters of rules say they would protect people, while oppo"
+      },
+      {
+        "essay_id": 1,
+        "criterion": "Evidence",
+        "cosine": 0.732,
+        "closest_training_text": "Stricter enforcement of privacy law is the most realistic way to regulate social media. In May 2023, Ireland's data protection regulator fin"
+      },
+      {
+        "essay_id": 8,
+        "criterion": "Thesis",
+        "cosine": 0.726,
+        "closest_training_text": "Platforms need stricter age checks because children can easily lie about their age when they sign up. Reports have shown that many young chi"
+      },
+      {
+        "essay_id": 8,
+        "criterion": "Evidence",
+        "cosine": 0.726,
+        "closest_training_text": "Platforms need stricter age checks because children can easily lie about their age when they sign up. Reports have shown that many young chi"
+      },
+      {
+        "essay_id": 5,
+        "criterion": "Thesis",
+        "cosine": 0.714,
+        "closest_training_text": "There are many different social media platforms that people use every day for different purposes."
+      },
+      {
+        "essay_id": 5,
+        "criterion": "Evidence",
+        "cosine": 0.708,
+        "closest_training_text": "Social media is used by billions of people around the world every single day."
+      },
+      {
+        "essay_id": 3,
+        "criterion": "Evidence",
+        "cosine": 0.686,
+        "closest_training_text": "Studies show that social media can be harmful to mental health."
+      },
+      {
+        "essay_id": 12,
+        "criterion": "Evidence",
+        "cosine": 0.667,
+        "closest_training_text": "It is time for governments to regulate social media. The companies are too big and they do whatever they want. Nobody is holding them respon"
+      },
+      {
+        "essay_id": 6,
+        "criterion": "Thesis",
+        "cosine": 0.657,
+        "closest_training_text": "Germany's NetzDG law, in force since 2017, requires large platforms to remove clearly illegal content within 24 hours. The United Kingdom pa"
+      },
+      {
+        "essay_id": 11,
+        "criterion": "Evidence",
+        "cosine": 0.651,
+        "closest_training_text": "The FTC's 2019 settlement required Facebook to pay $5 billion specifically over data practices that violated a prior consent decree, showing"
+      },
+      {
+        "essay_id": 11,
+        "criterion": "Thesis",
+        "cosine": 0.605,
+        "closest_training_text": "Stricter enforcement of privacy law is the most realistic way to regulate social media. In May 2023, Ireland's data protection regulator fin"
+      }
+    ]
+  },
+  "criteria": {
+    "Thesis": {
+      "max_points": 5.0,
+      "n": 12,
+      "model": {
+        "mae": 0.75,
+        "within_one": 0.9166666666666666,
+        "exact": 0.3333333333333333,
+        "qwk": 0.8647540983606558
+      },
+      "baseline": {
+        "mae": 1.8333333333333333,
+        "within_one": 0.25,
+        "exact": 0.08333333333333333,
+        "qwk": 0.0,
+        "constant": 3.0
+      },
+      "ci": {
+        "model": {
+          "mae": [
+            0.4166666666666667,
+            1.0833333333333333
+          ],
+          "within_one": [
+            0.75,
+            1.0
+          ],
+          "exact": [
+            0.08333333333333333,
+            0.5833333333333334
+          ],
+          "qwk": [
+            0.6470588235294117,
+            0.94375
+          ]
+        },
+        "baseline_mae": [
+          1.0,
+          2.1666666666666665
+        ],
+        "mae_improvement_over_baseline": [
+          0.25,
+          1.5833333333333335
+        ]
+      },
+      "essays": [
+        {
+          "essay_id": 1,
+          "true": 5.0,
+          "raw": 3.76,
+          "pred": 4.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 2,
+          "true": 5.0,
+          "raw": 3.777,
+          "pred": 4.0,
+          "word_count": 55
+        },
+        {
+          "essay_id": 3,
+          "true": 3.0,
+          "raw": 2.309,
+          "pred": 2.0,
+          "word_count": 35
+        },
+        {
+          "essay_id": 4,
+          "true": 1.0,
+          "raw": -0.478,
+          "pred": 0.0,
+          "word_count": 44
+        },
+        {
+          "essay_id": 5,
+          "true": 0.0,
+          "raw": -0.425,
+          "pred": 0.0,
+          "word_count": 17
+        },
+        {
+          "essay_id": 6,
+          "true": 5.0,
+          "raw": 3.735,
+          "pred": 4.0,
+          "word_count": 62
+        },
+        {
+          "essay_id": 7,
+          "true": 1.0,
+          "raw": 2.197,
+          "pred": 2.0,
+          "word_count": 31
+        },
+        {
+          "essay_id": 8,
+          "true": 5.0,
+          "raw": 3.79,
+          "pred": 4.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 9,
+          "true": 0.0,
+          "raw": 0.47,
+          "pred": 0.0,
+          "word_count": 36
+        },
+        {
+          "essay_id": 10,
+          "true": 4.0,
+          "raw": 3.955,
+          "pred": 4.0,
+          "word_count": 51
+        },
+        {
+          "essay_id": 11,
+          "true": 1.0,
+          "raw": 2.988,
+          "pred": 3.0,
+          "word_count": 47
+        },
+        {
+          "essay_id": 12,
+          "true": 4.0,
+          "raw": 4.055,
+          "pred": 4.0,
+          "word_count": 51
+        }
+      ]
+    },
+    "Evidence": {
+      "max_points": 10.0,
+      "n": 12,
+      "model": {
+        "mae": 1.4166666666666667,
+        "within_one": 0.5833333333333334,
+        "exact": 0.25,
+        "qwk": 0.809052333804809
+      },
+      "baseline": {
+        "mae": 2.75,
+        "within_one": 0.3333333333333333,
+        "exact": 0.0,
+        "qwk": 0.0,
+        "constant": 4.0
+      },
+      "ci": {
+        "model": {
+          "mae": [
+            0.75,
+            2.25
+          ],
+          "within_one": [
+            0.3333333333333333,
+            0.8333333333333334
+          ],
+          "exact": [
+            0.0,
+            0.5
+          ],
+          "qwk": [
+            0.5536273389995633,
+            0.9407924641148325
+          ]
+        },
+        "baseline_mae": [
+          1.5833333333333333,
+          3.3333333333333335
+        ],
+        "mae_improvement_over_baseline": [
+          -0.33333333333333326,
+          2.3333333333333335
+        ]
+      },
+      "essays": [
+        {
+          "essay_id": 1,
+          "true": 8.0,
+          "raw": 7.858,
+          "pred": 8.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 2,
+          "true": 5.0,
+          "raw": 4.588,
+          "pred": 5.0,
+          "word_count": 55
+        },
+        {
+          "essay_id": 3,
+          "true": 5.0,
+          "raw": 3.141,
+          "pred": 3.0,
+          "word_count": 35
+        },
+        {
+          "essay_id": 4,
+          "true": 1.0,
+          "raw": 0.163,
+          "pred": 0.0,
+          "word_count": 44
+        },
+        {
+          "essay_id": 5,
+          "true": 0.0,
+          "raw": -0.14,
+          "pred": 0.0,
+          "word_count": 17
+        },
+        {
+          "essay_id": 6,
+          "true": 8.0,
+          "raw": 7.425,
+          "pred": 7.0,
+          "word_count": 62
+        },
+        {
+          "essay_id": 7,
+          "true": 0.0,
+          "raw": 0.67,
+          "pred": 1.0,
+          "word_count": 31
+        },
+        {
+          "essay_id": 8,
+          "true": 8.0,
+          "raw": 5.554,
+          "pred": 6.0,
+          "word_count": 64
+        },
+        {
+          "essay_id": 9,
+          "true": 0.0,
+          "raw": 1.953,
+          "pred": 2.0,
+          "word_count": 36
+        },
+        {
+          "essay_id": 10,
+          "true": 2.0,
+          "raw": 2.514,
+          "pred": 3.0,
+          "word_count": 51
+        },
+        {
+          "essay_id": 11,
+          "true": 5.0,
+          "raw": 9.929,
+          "pred": 10.0,
+          "word_count": 47
+        },
+        {
+          "essay_id": 12,
+          "true": 5.0,
+          "raw": 7.38,
+          "pred": 7.0,
+          "word_count": 51
+        }
+      ]
+    }
+  }
+}
