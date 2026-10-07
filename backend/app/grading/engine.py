@@ -1,22 +1,29 @@
-"""Scores a submission against each rubric criterion using the per-criterion
-models trained by scripts/train_grader.py.
+"""Scores a submission against each rubric criterion.
 
-Text-only -- code submissions are graded by a separate sandboxed test runner
-that doesn't exist yet.
+Text is scored by the fine-tuned DistilBERT in bert_scorer.py -- one shared
+model reading the essay and the criterion's description as a sentence pair.
+Code is scored by running the criterion's test cases in a sandbox, which this
+change does not touch at all.
 
-The models are Ridge *regressions*, not classifiers: rubric scores are ordinal,
-and classification throws that ordering away (predicting 0 for a true 5 costs
-exactly as much as predicting 4). See features.py for why the embedding alone
-isn't enough.
+Criteria are matched to the text model **by name**, not by database row id.
+The Ridge models this replaced were keyed by row id, so re-seeding the dev
+database orphaned every one of them; that cost seconds to fix then and would
+cost a GPU and ~20 minutes now. A criterion whose name the model has not been
+validated on is not guessed at -- it raises GradingError and the submission
+becomes grading_failed for a teacher to grade by hand.
+
+The Ridge path (build_matrix, model_store, features.py, scripts/train_grader.py)
+is left intact but is no longer reached from here. See
+ml_models/bert_rubric_scorer/PROVENANCE.md for what the swap was measured to
+buy, and what it was measured not to.
 """
 
 import numpy as np
 
-from app.grading import feedback
+from app.grading import bert_scorer, feedback
 from app.grading.code_runner import run_test_cases
 from app.grading.embedder import embed
 from app.grading.features import extract as extract_features
-from app.grading.model_store import load_model
 
 
 class GradingError(Exception):
@@ -26,9 +33,14 @@ class GradingError(Exception):
 
 
 def build_matrix(texts):
-    """Embedding + hand-crafted features, in the one order every model is
-    trained on. The training script imports this too, so the two paths can't
-    silently drift apart."""
+    """Embedding + hand-crafted features, in the one order every Ridge model
+    was trained on.
+
+    No longer on the live grading path -- bert_scorer.py replaced it -- but
+    kept, along with model_store and scripts/train_grader.py, because the
+    benchmark and probe scripts still compare against that pipeline and
+    deleting it would throw away the thing the new model is measured against.
+    """
     return np.hstack([embed(texts), extract_features(texts)])
 
 
@@ -40,22 +52,24 @@ def grade_text_submission(content, criteria):
              "feedback": {criterion_id: text},
              "summary": str}
 
-    The submission is featurised once and reused across every criterion's
-    model, since it's the same text being scored against each rubric line.
+    Scored by the fine-tuned model in bert_scorer.py, which matches criteria by
+    name. A criterion the model was never validated on raises rather than
+    getting a plausible-looking guess: the caller turns that into
+    grading_failed, and a teacher grades it by hand. The scores are returned
+    keyed by criterion id, as every caller already expects.
     """
-    missing = [c.name for c in criteria if load_model(c.id) is None]
-    if missing:
-        raise GradingError(f"No trained model for: {', '.join(missing)}")
+    criteria = list(criteria)
+    unvalidated = [c.name for c in criteria if bert_scorer.describes(c.name) is None]
+    if unvalidated:
+        raise GradingError(
+            f"The text grader has not been validated on: {', '.join(sorted(unvalidated))}")
+    if not bert_scorer.is_available():
+        raise GradingError(
+            "The fine-tuned text grader is not installed "
+            "(see ml_models/bert_rubric_scorer/PROVENANCE.md)")
 
-    X = build_matrix([content])
-
-    scores = {}
-    for criterion in criteria:
-        payload = load_model(criterion.id)
-        raw = float(payload["model"].predict(X)[0])
-        # Ridge predicts a continuous value; clamp it into the criterion's range
-        # and round to whole points, which is how rubric scores are expressed.
-        scores[criterion.id] = float(np.clip(round(raw), 0, payload["max_points"]))
+    by_name = bert_scorer.score(content, criteria)
+    scores = {c.id: by_name[c.name] for c in criteria}
 
     return {
         "scores": scores,
