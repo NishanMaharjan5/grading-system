@@ -100,6 +100,25 @@ def load():
     return _model, _tokenizer
 
 
+def warm_up():
+    """Load the model now rather than on the first student's submission.
+
+    Measured in the running app: a cold first request takes ~3.6s because it
+    pays the 269 MB load, against ~140ms once warm. Still inside the 5s
+    budget, but it is the first student after every restart who pays it, so
+    the server entry point calls this at startup.
+
+    Deliberately not called from create_app(): the test suite, `flask db
+    upgrade` and every CLI command build an app too, and none of them should
+    spend three seconds loading a transformer they will not use. Returns
+    whether the model is now loaded.
+    """
+    if not is_available():
+        return False
+    load()
+    return True
+
+
 def score(text, criteria):
     """Scores one submission against several criteria in a single batch.
 

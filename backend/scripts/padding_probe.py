@@ -36,6 +36,7 @@ BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BACKEND_DIR)
 
 from app import create_app
+from app.grading import bert_scorer
 from app.grading.engine import build_matrix
 from app.grading.model_store import load_model
 from app.models import Rubric
@@ -85,9 +86,10 @@ PROBES = [
 ]
 
 
-def score_all(rubric, texts):
-    """Every criterion's model applied to every probe text, exactly as
-    engine.grade_text_submission does it (one featurisation, reused)."""
+def score_all_ridge(rubric, texts):
+    """The retired Ridge pipeline: every criterion's joblib model applied to
+    every probe text. Kept so a probe run can still be pointed at the old
+    engine for comparison, even though production no longer uses it."""
     X = build_matrix(texts)
     out = {}
     for criterion in rubric.criteria:
@@ -102,6 +104,29 @@ def score_all(rubric, texts):
             "pred": np.where(pred == 0, 0.0, pred),
         }
     return out
+
+
+def score_all_bert(rubric, texts):
+    """The shipped fine-tuned scorer, called exactly as engine.py calls it.
+
+    One forward pass per probe text against the whole rubric, so this measures
+    what a student's submission would actually receive."""
+    criteria = [c for c in rubric.criteria if bert_scorer.describes(c.name) is not None]
+    if not criteria:
+        raise SystemExit("None of this rubric's criteria are ones the text model was validated on.")
+    out = {c.name: {"max_points": float(c.max_points), "n_examples": None, "pred": []}
+           for c in criteria}
+    for text in texts:
+        scores = bert_scorer.score(text, criteria)
+        for name, value in scores.items():
+            out[name]["pred"].append(value)
+    for block in out.values():
+        block["pred"] = np.asarray(block["pred"], dtype=float)
+    return out
+
+
+def score_all(rubric, texts, engine="bert"):
+    return score_all_bert(rubric, texts) if engine == "bert" else score_all_ridge(rubric, texts)
 
 
 def check_probes_are_fresh(rubric_title):
@@ -127,6 +152,8 @@ def main():
     parser.add_argument("--json-out", default=None)
     parser.add_argument("--compare", default=None, help="a saved --json-out file to diff against")
     parser.add_argument("--rubric", default="Essay 1")
+    parser.add_argument("--engine", choices=("bert", "ridge"), default="bert",
+                        help="bert (shipped since Phase 2) or ridge (the retired pipeline)")
     args = parser.parse_args()
 
     app = create_app()
@@ -142,9 +169,13 @@ def main():
             index[probe_id] = (kind, len(texts), len(texts) + 1)
             texts += [weak, strong]
 
-        scored = score_all(rubric, texts)
-        models = {name: block["n_examples"] for name, block in scored.items()}
-        print(f"Models trained on: " + ", ".join(f"{n} n={v}" for n, v in models.items()) + "\n")
+        scored = score_all(rubric, texts, engine=args.engine)
+        if args.engine == "ridge":
+            models = {name: block["n_examples"] for name, block in scored.items()}
+            print("Engine: ridge (retired). Models trained on: "
+                  + ", ".join(f"{n} n={v}" for n, v in models.items()) + "\n")
+        else:
+            print(f"Engine: bert (shipped) -- {bert_scorer.MODEL_DIR}\n")
 
         results = {}
         for name, block in scored.items():
@@ -205,7 +236,8 @@ def main():
             # Provenance is the *models*, not the file on disk: the file can be
             # appended to before a run, which would label a before-run with the
             # after-run's count. n_examples per criterion comes from the model.
-            payload = {"models_trained_on": {n: b["n_examples"] for n, b in results.items()},
+            payload = {"engine": args.engine,
+                       "models_trained_on": {n: b["n_examples"] for n, b in results.items()},
                        "criteria": results}
             with open(args.json_out, "w") as f:
                 json.dump(payload, f, indent=2)

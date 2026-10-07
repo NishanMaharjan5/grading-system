@@ -157,13 +157,17 @@ class TestModelStore:
         assert os.path.abspath(model_store.MODEL_DIR) != real
 
 
-class TestEngineWithoutModels:
-    def test_raises_when_a_criterion_has_no_model(self, criteria):
+class TestEngineWithoutTheModel:
+    """The weights are not in git, so "not installed" is a state a real clone
+    is in, not a hypothetical. It must degrade to grading_failed, never to a
+    guess."""
+
+    def test_raises_when_the_scorer_is_not_installed(self, criteria):
         from app.grading.engine import GradingError, grade_text_submission
 
         with pytest.raises(GradingError) as excinfo:
             grade_text_submission("some text", criteria)
-        assert "Thesis" in str(excinfo.value)
+        assert "not installed" in str(excinfo.value)
 
     def test_submission_is_marked_failed_and_gets_no_grades(self, client, auth, student, rubric, submit):
         submission_id = submit(student)
@@ -179,37 +183,125 @@ class TestEngineWithoutModels:
         assert response.status_code == 201
 
 
-@pytest.fixture
-def trained_models(criteria):
-    """Train a real model per criterion so the auto-grade path runs for real
-    instead of being stubbed. Lands in the isolated model directory."""
-    from sklearn.linear_model import Ridge
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
+class TestCriterionLookupIsByName:
+    """The point of the Phase 2 rewrite: the text model is found by criterion
+    *name*, so re-seeding the database cannot orphan it."""
 
-    from app.grading.engine import build_matrix
-    from app.grading.model_store import save_model
+    def test_an_unvalidated_criterion_name_is_refused_not_guessed(self, bert_model):
+        from app.grading.bert_scorer import describes
 
-    texts = [
-        "A 2021 study of 16000 people found a 13% improvement, which directly supports the claim.",
-        "Research from Pew found that 64% of documented cases originated there, showing a clear link.",
-        "Everyone knows this is true because it just makes sense if you think about it.",
-        "There are many things people say about this topic and some of them seem interesting.",
-    ]
-    matrix = build_matrix(texts)
-    for criterion in criteria:
-        top = float(criterion.max_points)
-        model = make_pipeline(StandardScaler(), Ridge(alpha=1.0)).fit(matrix, np.array([top, top, 0.0, 0.0]))
-        save_model(criterion.id, {"model": model, "max_points": top, "n_examples": 4})
-    return criteria
+        assert describes("Thesis") is not None
+        assert describes("Evidence") is not None
+        # The criterion the rubric-conditioning experiment showed this
+        # architecture scores by general essay quality rather than by the
+        # criterion itself. It must not be silently scored.
+        assert describes("Counterargument") is None
+
+    def test_engine_refuses_a_rubric_it_was_never_validated_on(self, app, bert_model):
+        from app.extensions import db
+        from app.grading.engine import GradingError, grade_text_submission
+        from app.models import Rubric, RubricCriterion, User
+        from app.security import hash_password
+
+        teacher = User(name="T", email="lookup@example.com",
+                       password_hash=hash_password("password1"), role="teacher")
+        db.session.add(teacher)
+        db.session.flush()
+        rubric = Rubric(title="New rubric", type="text", created_by=teacher.id)
+        rubric.criteria.append(RubricCriterion(name="Counterargument", max_points=5, position=0))
+        db.session.add(rubric)
+        db.session.commit()
+
+        with pytest.raises(GradingError) as excinfo:
+            grade_text_submission("An essay.", list(rubric.criteria))
+        assert "Counterargument" in str(excinfo.value)
+
+    def test_the_same_criterion_scores_the_same_under_different_row_ids(self, app, bert_model):
+        """The reset-dev orphaning bug, directly.
+
+        An identical rubric recreated under *different* criterion row ids must
+        score identically. The old store was keyed `criterion_<id>.joblib`, so
+        new ids meant no model file and everything fell to grading_failed. The
+        ids have to actually differ for this to prove anything, so the second
+        rubric is created after the first rather than after a truncate (which
+        restarts the sequence and would hand back the same ids).
+        """
+        from app.extensions import db
+        from app.grading.engine import grade_text_submission
+        from app.models import Rubric, RubricCriterion, User
+        from app.security import hash_password
+
+        essay = ("Governments should require platforms to open their recommendation systems to "
+                 "independent audit, because a 2021 disclosure showed internal research being "
+                 "withheld, which means self-reporting cannot be relied on.")
+
+        def build_and_score(email, title):
+            teacher = User(name="T", email=email,
+                           password_hash=hash_password("password1"), role="teacher")
+            db.session.add(teacher)
+            db.session.flush()
+            rubric = Rubric(title=title, type="text", created_by=teacher.id)
+            rubric.criteria.append(RubricCriterion(name="Thesis", max_points=5, position=0))
+            rubric.criteria.append(RubricCriterion(name="Evidence", max_points=10, position=1))
+            db.session.add(rubric)
+            db.session.commit()
+            criteria = list(rubric.criteria)
+            result = grade_text_submission(essay, criteria)
+            return {c.name: result["scores"][c.id] for c in criteria}, sorted(c.id for c in criteria)
+
+        before, before_ids = build_and_score("reseed.a@example.com", "Essay 1")
+        after, after_ids = build_and_score("reseed.b@example.com", "Essay 1 again")
+
+        assert before_ids != after_ids, (
+            "the two rubrics got the same criterion ids, so this test proved nothing")
+        assert before == after, (
+            f"the same essay scored differently under new row ids {before_ids} -> {after_ids}: "
+            f"{before} -> {after}")
+        assert set(before) == {"Thesis", "Evidence"}
+
+    def test_a_truncate_and_reseed_still_grades(self, app, bert_model):
+        """`make reset-dev` truncates with RESTART IDENTITY and re-seeds. The
+        rubric comes back with fresh rows; grading must still work rather than
+        silently falling to grading_failed as it did when models were
+        id-keyed."""
+        from app.extensions import db
+        from app.grading.engine import grade_text_submission
+        from app.models import Rubric, RubricCriterion, User
+        from app.security import hash_password
+        from sqlalchemy import text as sql_text
+
+        tables = ", ".join(t.name for t in db.metadata.sorted_tables)
+        db.session.execute(sql_text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+        db.session.commit()
+
+        teacher = User(name="T", email="afterreset@example.com",
+                       password_hash=hash_password("password1"), role="teacher")
+        db.session.add(teacher)
+        db.session.flush()
+        rubric = Rubric(title="Essay 1", type="text", created_by=teacher.id)
+        rubric.criteria.append(RubricCriterion(name="Thesis", max_points=5, position=0))
+        rubric.criteria.append(RubricCriterion(name="Evidence", max_points=10, position=1))
+        db.session.add(rubric)
+        db.session.commit()
+
+        criteria = list(rubric.criteria)
+        result = grade_text_submission("A clear claim, supported by a 2021 study of 16,000 people.", criteria)
+        assert set(result["scores"]) == {c.id for c in criteria}
+        for criterion in criteria:
+            assert 0 <= result["scores"][criterion.id] <= float(criterion.max_points)
 
 
 class TestAutoGradeEndToEnd:
-    """Exercises the real engine: SBERT embedding, the fitted models, the score
-    clamp and the generated feedback, all through the submission endpoint."""
+    """Exercises the real engine through the submission endpoint: the
+    fine-tuned model, the score clamp and the generated feedback.
+
+    The Ridge models these tests used to train first are gone from this path --
+    the text scorer no longer consults them -- so the only thing that has to be
+    present is the fine-tuned model, via the `bert_model` fixture.
+    """
 
     def test_a_submission_is_scored_and_commented_on(
-        self, client, auth, teacher, student, rubric, trained_models, criterion_ids
+        self, client, auth, teacher, student, rubric, bert_model, criterion_ids
     ):
         response = client.post(
             "/api/submissions",
@@ -227,7 +319,7 @@ class TestAutoGradeEndToEnd:
             assert grade["ai_feedback"]
 
     def test_scores_stay_inside_each_criterions_range(
-        self, client, auth, teacher, student, rubric, trained_models, criterion_ids
+        self, client, auth, teacher, student, rubric, bert_model, criterion_ids
     ):
         thesis, evidence = criterion_ids
         submission_id = client.post(
@@ -240,7 +332,7 @@ class TestAutoGradeEndToEnd:
         assert 0 <= by_criterion[evidence] <= 10
 
     def test_stronger_writing_scores_at_least_as_well_as_weaker(
-        self, client, auth, teacher, student, other_student, rubric, trained_models
+        self, client, auth, teacher, student, other_student, rubric, bert_model
     ):
         strong = ("A 2021 study of 16000 people found a 13% improvement, which directly supports "
                   "the claim that the intervention works.")
@@ -256,3 +348,70 @@ class TestAutoGradeEndToEnd:
             ).get_json()["ai_total"]
 
         assert totals["strong"] >= totals["weak"]
+
+
+class TestBertScorer:
+    """The scoring module itself, below the engine."""
+
+    def test_loads_once_and_is_reused(self, bert_model):
+        model_a, tokenizer_a = bert_model.load()
+        model_b, tokenizer_b = bert_model.load()
+        assert model_a is model_b and tokenizer_a is tokenizer_b
+
+    def test_is_in_eval_mode(self, bert_model):
+        """Dropout at inference would make the same essay score differently on
+        two submissions, which a student would experience as the grader
+        changing its mind."""
+        model, _ = bert_model.load()
+        assert model.training is False
+
+    def test_the_same_text_scores_identically_twice(self, bert_model):
+        class C:
+            def __init__(self, name, max_points):
+                self.name, self.max_points = name, max_points
+
+        criteria = [C("Thesis", 5), C("Evidence", 10)]
+        text = "A clear claim supported by a 2021 study of 16,000 people, which shows the effect."
+        assert bert_model.score(text, criteria) == bert_model.score(text, criteria)
+
+    def test_scores_are_whole_numbers_inside_each_range(self, bert_model):
+        class C:
+            def __init__(self, name, max_points):
+                self.name, self.max_points = name, max_points
+
+        for text in ("", "x", "A clear claim supported by a 2021 study.", "word " * 600):
+            scores = bert_model.score(text, [C("Thesis", 5), C("Evidence", 10)])
+            assert scores["Thesis"] == int(scores["Thesis"]) and 0 <= scores["Thesis"] <= 5
+            assert scores["Evidence"] == int(scores["Evidence"]) and 0 <= scores["Evidence"] <= 10
+
+    def test_an_essay_longer_than_the_window_still_scores(self, bert_model):
+        """Truncation is only_first, so a long essay is cut and the criterion
+        segment survives -- the alternative silently scores against a
+        half-eaten criterion description."""
+        class C:
+            def __init__(self, name, max_points):
+                self.name, self.max_points = name, max_points
+
+        scores = bert_model.score("regulation " * 2000, [C("Thesis", 5)])
+        assert 0 <= scores["Thesis"] <= 5
+
+    def test_refuses_an_unvalidated_criterion(self, bert_model):
+        class C:
+            def __init__(self, name, max_points):
+                self.name, self.max_points = name, max_points
+
+        with pytest.raises(KeyError):
+            bert_model.score("An essay.", [C("Counterargument", 5)])
+
+    def test_descriptions_match_what_the_model_was_trained_on(self, bert_model):
+        """The descriptions are part of the model's input. If they drift from
+        the ones in the training file, the model is being asked a question it
+        was never trained on, silently."""
+        import json
+        import os
+
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "training_data", "rubric_conditioning_train.json")
+        trained_on = {row["criterion"]: row["criterion_description"] for row in json.load(open(path))}
+        for name, description in bert_model.CRITERION_DESCRIPTIONS.items():
+            assert trained_on[name] == description, f"{name}'s description has drifted from training"

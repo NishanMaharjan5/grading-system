@@ -55,6 +55,54 @@ def _isolate_model_store(app, tmp_path_factory):
     model_store._cache.clear()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _isolate_bert_scorer(app, tmp_path_factory):
+    """Point the fine-tuned text scorer at an empty directory for the whole
+    session, so by default it is *not* available and text grading falls to
+    grading_failed.
+
+    Three reasons, all of which the alternative gets wrong:
+
+    * the weights are 269 MB and not in git, so a fresh clone has none — the
+      suite has to pass without them;
+    * loading and running a transformer on every submission in the suite would
+      cost seconds per test for no assertion's benefit;
+    * most tests want a *known* score, which they get from seed_ai_grade, not
+      from whatever the model happens to predict.
+
+    Tests that genuinely need the real model take the `bert_model` fixture,
+    which puts the real directory back and skips if the weights aren't there.
+    """
+    from app.grading import bert_scorer
+
+    original = bert_scorer.MODEL_DIR
+    bert_scorer.MODEL_DIR = str(tmp_path_factory.mktemp("bert_rubric_scorer_absent"))
+    bert_scorer._model = bert_scorer._tokenizer = None
+    yield original
+    bert_scorer.MODEL_DIR = original
+    bert_scorer._model = bert_scorer._tokenizer = None
+
+
+@pytest.fixture
+def bert_model(_isolate_bert_scorer):
+    """The real fine-tuned scorer, for the tests that exercise it. Skips when
+    the weights have not been placed (see ml_models/bert_rubric_scorer/
+    PROVENANCE.md) rather than failing a clone that never had them."""
+    import os
+
+    from app.grading import bert_scorer
+
+    real_dir = _isolate_bert_scorer
+    if not os.path.exists(os.path.join(real_dir, "config.json")):
+        pytest.skip(f"no fine-tuned scorer at {real_dir}; see PROVENANCE.md")
+
+    absent = bert_scorer.MODEL_DIR
+    bert_scorer.MODEL_DIR = real_dir
+    yield bert_scorer
+    bert_scorer.MODEL_DIR = absent
+    bert_scorer._model = bert_scorer._tokenizer = None
+
+
 @pytest.fixture(autouse=True)
 def clean_db(app):
     """Every test starts from an empty database with ids restarting at 1, so no
